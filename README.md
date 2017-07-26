@@ -19,3 +19,6 @@ Info about Kotlin & cool Kotlin libs: [Awesome Kotlin](https://kotlin.link/)
 
 # Recommended IDE
 [IntellyJ Idea Community Edition](https://www.jetbrains.com/idea/download/) (Free & OSS)
+
+# Import project to IDEA
+Import project as a Gradle project.

@@ -17,6 +17,17 @@ Info about Kotlin & cool Kotlin libs: [Awesome Kotlin](https://kotlin.link/)
 ./gradlew test
 ```
 
+## Library
+### Compile
+```
+./gradlew jar
+```
+
+### Run
+```
+java build/libs/icfp2017.jar
+```
+
 # Recommended IDE
 [IntellyJ Idea Community Edition](https://www.jetbrains.com/idea/download/) (Free & OSS)
 

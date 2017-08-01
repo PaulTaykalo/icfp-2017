@@ -20,3 +20,6 @@ gradle-app.setting
 
 # Removed idea settings
 .idea/
+
+# macOS
+.DS_Store

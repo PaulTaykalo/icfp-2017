@@ -41,3 +41,10 @@ compileTestKotlin {
 mainClassName = 'org.icfp2017.MainKt'
 
 defaultTasks 'run'
+
+jar {
+  manifest {
+    attributes 'Main-Class': 'org.icfp2017.Main'
+  }
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}

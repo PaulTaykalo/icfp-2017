@@ -17,15 +17,31 @@ Info about Kotlin & cool Kotlin libs: [Awesome Kotlin](https://kotlin.link/)
 ./gradlew test
 ```
 
-## Library
-### Compile
+## Distribution
+You can build distribution `zip` with all dependencies and start script in this way:
 ```
-./gradlew jar
+./gradlew distZip
 ```
 
-### Run
+Output you can find in `./build/distribution/icfp2017.zip`
+
+Inside this `zip`:
 ```
-java build/libs/icfp2017.jar
+icfp2017
+├── bin
+│   ├── icfp2017
+│   └── icfp2017.bat
+└── lib
+    ├── annotations-13.0.jar
+    ├── icfp2017.jar
+    ├── kotlin-stdlib-1.1.3-2.jar
+    ├── kotlin-stdlib-jre7-1.1.3-2.jar
+    └── kotlin-stdlib-jre8-1.1.3-2.jar
+```
+
+To run just unzip the package and execute:
+```
+icfp2017/bin/icfp2017 [parameters list]
 ```
 
 # Recommended IDE

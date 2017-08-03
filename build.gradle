@@ -37,7 +37,7 @@ compileTestKotlin {
   kotlinOptions.jvmTarget = "1.8"
 }
 
-mainClassName = 'org.icfp2017.MainKt'
+mainClassName = 'org.icfp2017.Main'
 
 defaultTasks 'run'
 

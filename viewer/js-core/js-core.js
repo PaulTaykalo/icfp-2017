@@ -69,7 +69,35 @@ const graphStyle = [
       }
   },
 
+  { "selector": ".punter0",
+    "style": {
+      "min-zoomed-font-size": 1,
+      "font-size": 4,
+      "color": "#fff",
+      "line-color": "red",
+      "width": 35
+      }
+  },
+   { "selector": ".punter1",
+    "style": {
+      "min-zoomed-font-size": 1,
+      "font-size": 4,
+      "color": "#fff",
+      "line-color": "green",
+      "width": 35
+      }
+  },
 
+   { "selector": ".punter2",
+    "style": {
+      "min-zoomed-font-size": 1,
+      "font-size": 4,
+      "color": "#fff",
+      "line-color": "yellow",
+      "width": 35
+      }
+  },
+ 
   {"selector": "core",
     "style": {
     "active-bg-color": "#fff",

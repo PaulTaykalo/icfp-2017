@@ -12,7 +12,7 @@ object Arguments {
     var server: String = "punter.inf.ed.ac.uk"
     var port: Int = 9024
     var strategy: Strategy = RandomFree
-    var log: String = "./log.txt"
+    var log: String = "./log-${System.currentTimeMillis()}.txt"
 }
 
 fun main(args: Array<String>) {

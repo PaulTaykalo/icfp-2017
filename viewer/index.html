@@ -1,41 +1,61 @@
 <!DOCTYPE html>
-<!-- saved from url=(0040)http://punter.inf.ed.ac.uk/graph-viewer/ -->
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <style id="__________cytoscape_stylesheet">.__________cytoscape_container { position: relative; }</style>
+<html>
+  <head>
+    <meta charset="utf-8">
     <title>Map Viewer</title>
-    <link rel="stylesheet" href="./Map Viewer_files/bootstrap.min.css">
-    <link rel="stylesheet" href="./Map Viewer_files/viewer.css">
+    <link rel="stylesheet" href="../js-core/bootstrap.min.css">
+    <link rel="stylesheet" href="viewer.css">
   </head>
 
   <body>
     <div class="container-fluid">
-      <h1>λ Map Viewer</h1>
+      <h1>&#955; Map Viewer</h1>
       <fieldset>
-        <legend>Game Information</legend>
-        <div id="dropdown">
-          <select id="maps-select" class="form-control">
-          <option value="maps/sample.json">Sample from the Task Description (8 sites and 12 rivers )</option><option value="maps/lambda.json">Lambda (37 sites and 60 rivers )</option><option value="maps/Sierpinski-triangle.json">Sierpinski triangle (42 sites and 81 rivers )</option><option value="maps/circle.json">Circle (27 sites and 65 rivers )</option><option value="maps/randomMedium.json">Random1 (97 sites and 187 rivers )</option><option value="maps/randomSparse.json">Random2 (86 sites and 123 rivers )</option><option value="maps/tube.json">London Tube (301 sites and 386 rivers )</option><option value="maps/oxford-center-sparse.json">Oxford City Centre (1425 sites and 2020 rivers )</option><option value="maps/oxford2-sparse-2.json">Oxford (2389 sites and 3632 rivers )</option><option value="maps/edinburgh-sparse.json">Edinburgh (961 sites and 1751 rivers )</option><option value="maps/boston-sparse.json">Boston (488 sites and 945 rivers )</option><option value="maps/nara-sparse.json">Nara (1560 sites and 2197 rivers )</option><option value="maps/van-city-sparse.json">Vancouver (1986 sites and 3601 rivers )</option><option value="maps/gothenburg-sparse.json">Gothenburg (1175 sites and 2234 rivers )</option></select>
-
-        </div>
+        <input type="file" id="myFile" multiple size="50"/>
       </fieldset>
     </div>
     <div class="container-fluid">
       <fieldset>
         <legend>Canvas</legend>
-        <div class="container-fluid __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container __________cytoscape_container" id="cy" style="-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);-webkit-tap-highlight-color: rgba(0,0,0,0);"><div style="-webkit-tap-highlight-color: rgba(0, 0, 0, 0); position: relative; z-index: 0; overflow: hidden; width: 970px; height: 700px;"><canvas style="user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); outline-style: none; position: absolute; z-index: 3; width: 970px; height: 700px;" data-id="layer0-selectbox" width="1940" height="1400"></canvas><canvas style="user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); outline-style: none; position: absolute; z-index: 2; width: 970px; height: 700px;" data-id="layer1-drag" width="1940" height="1400"></canvas><canvas style="user-select: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); outline-style: none; position: absolute; z-index: 1; width: 970px; height: 700px;" data-id="layer2-node" width="1940" height="1400"></canvas></div></div>
-        <div id="loading" class="loaded">
+        <div class="container-fluid" id="cy"></div>
+        <div id="loading">
           <span class="fa fa-refresh fa-spin"></span>
         </div>
       </fieldset>
     </div>
     <!--- load scripts -->
-    <script src="./Map Viewer_files/jquery.min.js"></script>
-    <script src="./Map Viewer_files/bootstrap.min.js"></script>
-    <script src="./Map Viewer_files/fastclick.min.js"></script>
-    <script src="./Map Viewer_files/cytoscape.min.js"></script>
-    <script src="./Map Viewer_files/bluebird.min.js"></script>
-    <script src="./Map Viewer_files/js-core.js"></script>
-    <script src="./Map Viewer_files/viewer.js"></script>
+    <script src="../js-core/jquery.min.js"></script>
+    <script src="../js-core/bootstrap.min.js"></script>
+    <script src="../js-core/fastclick.min.js"></script>
+    <script src="../js-core/cytoscape.min.js"></script>
+    <script src="../js-core/bluebird.min.js"></script>
+    <script src="../js-core/js-core.js"></script>
+    <script src="viewer.js"></script>
+    <script>
+(function(){
     
+    function onChange(event) {
+        var reader = new FileReader();
+        reader.onload = onReaderLoad;
+        reader.readAsText(event.target.files[0]);
+    }
 
-<div style="font-family: &quot;Helvetica Neue&quot;, Helvetica, sans-serif; font-style: normal; font-size: 72px; font-weight: bold; position: absolute; left: -9999px; top: -9999px; z-index: -1; visibility: hidden; pointer-events: none; padding: 0px; line-height: 1; white-space: normal;">λ</div></body></html>
+    function onReaderLoad(event){
+        console.log(event.target.result);
+        var lines = event.target.result.split("\n")
+        var commands = []
+        lines.forEach((line) => {
+          if (line != "") {
+            commands.push(JSON.parse(line));
+          }
+        });
+
+        loadCommands(commands)
+    }
+    
+    document.getElementById('myFile').addEventListener('change', onChange);
+
+}());
+</script>
+    </body>
+</html>

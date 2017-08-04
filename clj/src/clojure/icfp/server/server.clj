@@ -1,10 +1,8 @@
 (ns icfp.server.server
   (:require [cheshire.core :as json]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [icfp.util :refer [river]])
   (:import java.util.function.Function))
-
-(defn river [from to]
-  (if (> to from) [from to] [to from]))
 
 (defn json-map->internal-map [json-map]
   (-> json-map

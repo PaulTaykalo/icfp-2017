@@ -4,7 +4,8 @@
                           [boot/core "2.7.1" :scope "provided"]
                           [fudje "0.9.7" :scope "test"]
                           [adzerk/boot-test "1.2.0" :scope "test"]
-                          [cheshire "5.7.1"]]
+                          [cheshire "5.7.1"]
+                          [aysylu/loom "1.0.0"]]
           :source-paths #{"src/clojure" "src/java"}
           :test-paths #{"test/"}
           :resource-paths #{"res/"})

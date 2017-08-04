@@ -2,8 +2,7 @@
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
             [icfp.util :refer [river]]
-            [icfp.scorer :refer [score]])
-  (:import java.util.function.Function))
+            [icfp.scorer :refer [score]]))
 
 (defn json-map->internal-map [json-map]
   (-> json-map
@@ -12,6 +11,7 @@
 
 (defn make-world [internal-map init-json-map punter-count]
   (assoc internal-map
+         :punter-count punter-count
          :initial-json-map init-json-map
          :claimed {}
          :moves-history (reverse
@@ -97,46 +97,6 @@
 
   (prompt-punter-for-move (random-punter 0) 0 2)
   (prompt-punter-for-move (random-punter 1) 1 2)
-
-
-  (def alice
-    (let [move-id (atom -1)]
-      (reify Function
-        (apply [_ in]
-          (swap! move-id inc)
-          (json/encode
-           (cond (= @move-id 0) {:ready 0}
-                 (<= 1 @move-id 6) (let [[src tgt :as move] (case @move-id
-                                                              1 [0 1]
-                                                              2 [2 3]
-                                                              3 [4 5]
-                                                              4 [6 7]
-                                                              5 [1 3]
-                                                              6 [5 7])]
-                                     (println (format "[P%s] Making move %s" 0 move))
-                                     {:claim {:punter 0, :source src, :target tgt}}
-                                     )
-                 :else (do (println (format "[P%s] Stop! Hammertime!" 0))
-                           {})))))))
-
-  (def bob
-    (let [move-id (atom -1)]
-     (reify Function
-       (apply [_ in]
-         (swap! move-id inc)
-         (json/encode
-          (cond (= @move-id 0) {:ready 1}
-                (<= 1 @move-id 6) (let [[src tgt :as move] (case @move-id
-                                                             1 [1 2]
-                                                             2 [3 4]
-                                                             3 [5 6]
-                                                             4 [7 0]
-                                                             5 [3 5]
-                                                             6 [7 1])]
-                                    (println (format "[P%s] Making move %s" 1 move))
-                                    {:claim {:punter 1, :source src, :target tgt}})
-                :else (do (println (format "[P%s] Stop! Hammertime!" 1))
-                          {})))))))
 
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 

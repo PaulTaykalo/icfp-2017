@@ -17,15 +17,16 @@
                                  0
                                  (dec (count (ga/shortest-path graph f t))))]))
 
-        claimed (:claimed world)]
-    (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
-      [id (let [connected (ga/connected-components (apply g/graph owned))]
-            (reduce + 0
-                    (for [conn connected]
-                      (reduce + 0
-                              (for [from (filter mines conn)
-                                    to conn]
-                                (square (shortest-path (util/river from to))))))))])))
-
-
-
+        claimed (:claimed world)
+        final-score (into {}
+                          (for [punter (range (:punter-count world))]
+                            [punter 0]))]
+    (into final-score
+          (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
+            [id (let [connected (ga/connected-components (apply g/graph owned))]
+                  (reduce + 0
+                          (for [conn connected]
+                            (reduce + 0
+                                    (for [from (filter mines conn)
+                                          to conn]
+                                      (square (shortest-path (util/river from to))))))))]))))

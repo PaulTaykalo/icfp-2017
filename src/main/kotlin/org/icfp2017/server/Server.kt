@@ -23,7 +23,7 @@ interface Server {
   fun me(me: PunterName, callback: (PunterName) -> Unit)
 
   // Send setup and wait for the callback
-  fun setup(callback: (Game) -> Void)
+  fun setup(callback: (Game) -> Unit)
 
   // Send after setup completed
   fun ready(punterID: PunterID)
@@ -31,10 +31,10 @@ interface Server {
   fun onMove(observer: (Array<Move>) -> Move)
 
   // Subscribe if you want to stop any calcution
-  fun onInterruption(callback: (String) -> Void)
+  fun onInterruption(callback: (String) -> Unit)
 
   ///
-  fun onEnd(callback: (StopCommand) -> Void)
+  fun onEnd(callback: (StopCommand) -> Unit)
 
 }
 

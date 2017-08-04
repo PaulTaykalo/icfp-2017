@@ -35,8 +35,12 @@ object SpanningTree : Strategy{
         val rivers = game.map.rivers.unclaimed
         if (rivers.isEmpty()) return game.pass()
         val mostConnected = mostConnectedRivers(rivers, game.map)
-        if(mostConnected.isEmpty()) return  game.pass()
-        return game.claim(mostConnected.first())
+        if(mostConnected.isNotEmpty()){
+            return game.claim(mostConnected.first())
+        }
+        // if minimal spanning tree is captured, do whatever is left
+        return  game.claim(rivers.first())
+
     }
 }
 
@@ -65,8 +69,12 @@ object AllYourBaseAreBelongToUs : Strategy{
         }
         // if all base rivers are captures, do most connected things
         val mostConnected = mostConnectedRivers(rivers, game.map)
-        if(mostConnected.isEmpty()) return  game.pass()
-        return game.claim(mostConnected.first())
+        if(mostConnected.isNotEmpty()) {
+            return game.claim(mostConnected.first())
+        }
+
+        // if minimal spanning tree is captured, do whatever is left
+        return  game.claim(rivers.first())
     }
 }
 

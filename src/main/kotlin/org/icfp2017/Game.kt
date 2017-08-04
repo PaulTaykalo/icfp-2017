@@ -11,7 +11,7 @@ data class Game(
 
 data class Site(@SerializedName("id") val id: SiteID)
 data class River(@SerializedName("source") val source: SiteID, @SerializedName("target") val target: SiteID, @SerializedName("owner") var owner: PunterID?)
-data class Map(@SerializedName("punters") val sites: Array<Site>, @SerializedName("rivers") val rivers: Array<River>, @SerializedName("mines") val mines: Array<Int>)
+data class Map(@SerializedName("sites") val sites: Array<Site>, @SerializedName("rivers") val rivers: Array<River>, @SerializedName("mines") val mines: Array<Int>)
 
 
 

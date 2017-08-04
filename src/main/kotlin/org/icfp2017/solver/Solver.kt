@@ -29,7 +29,7 @@ object RandomFree: Strategy {
 object SpanningTree : Strategy{
     fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
         val edge = findMostAdjacentEdgeInSpanningTree(map)
-        return rivers.filter { (it.source == edge.v && it.target == edge.w)|| ((it.source == edge.w && it.target == edge.v)) }
+        return rivers.filter { (it.source == edge.source && it.target == edge.target)|| ((it.source == edge.target && it.target == edge.source)) }
     }
 
     override fun move(game: Game): Move {
@@ -50,7 +50,7 @@ object AllYourBaseAreBelongToUs : Strategy{
 
     fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
         val edge = findMostAdjacentEdgeInSpanningTree(map)
-        return rivers.filter { (it.source == edge.v && it.target == edge.w)|| ((it.source == edge.w && it.target == edge.v)) }
+        return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
     }
 
     fun riversCloseToBases(rivers:List<River>, map:Map, graph: UWGraph):List<River> {

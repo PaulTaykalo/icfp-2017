@@ -26,6 +26,9 @@ import io.uuddlrlrba.ktalgs.datastructures.Queue
 import io.uuddlrlrba.ktalgs.graphs.Graph
 
 class UWGraph(public override val V: Int): Graph {
+
+    public var SiteToVertex:HashMap<Int, Int> = hashMapOf()
+    public var VertexToSite:HashMap<Int, Int> = hashMapOf()
     public override var E: Int = 0
     private val adj: Array<Queue<Edge>> = Array(V) { Queue<Edge>() }
 
@@ -39,6 +42,12 @@ class UWGraph(public override val V: Int): Graph {
             if (s == w) return v
             throw IllegalArgumentException()
         }
+
+        override fun toString(): String {
+            return "Edge(v=$v, w=$w, weight=$weight)"
+        }
+
+
     }
 
     public fun addEdge(v: Int, w: Int, weight: Double) {
@@ -63,4 +72,5 @@ class UWGraph(public override val V: Int): Graph {
     public fun edges(): Collection<Edge> {
         return adj.flatMap { it }
     }
+
 }

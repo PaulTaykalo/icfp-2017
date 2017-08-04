@@ -87,10 +87,9 @@
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 
   (tcp/start-tcp-server 13000 2
-                        #(game-loop (slurp (io/resource "london-tube.json")) %))
-
-  (tcp/start-tcp-server 13000 2
-                        #(game-loop (slurp (io/file "res/london-tube.json")) %)))
+                        #(game-loop (slurp (io/file "res/london-tube.json")) %)
+                        (io/file "/tmp/hist.json"))
+  )
 
 (defn -main [& args]
   (cfg/define {:map-file {:description "path to JSON with map"
@@ -102,13 +101,17 @@
                       :default 13000}
                :punters {:description "number of players to wait for"
                          :type :number
-                         :required true}})
+                         :required true}
+               :out-file {:description "path to file where to print game sequence"
+                          :type :file
+                          :required true}})
   (when-not (seq args)
     (cfg/populate-from-cmd ["--help"])
     (System/exit 1))
   (cfg/populate-from-cmd args)
   (cfg/verify :quit-on-error true, :silent true)
   (tcp/start-tcp-server (cfg/get :port) (cfg/get :punters)
-                        #(game-loop (slurp (cfg/get :map-file)) %)))
+                        #(game-loop (slurp (cfg/get :map-file)) %)
+                        (cfg/get :out-file)))
 
 #_(slurp (io/resource "test-map.json"))

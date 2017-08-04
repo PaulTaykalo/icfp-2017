@@ -1,27 +1,12 @@
 (ns icfp.server.server
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [icfp.util :refer [river]]
+            [icfp.util :as util]
             [icfp.scorer :as scorer]
             [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg])
   (:import java.util.function.Function)
   (:gen-class))
-
-(defn json-map->internal-map [json-map]
-  (-> json-map
-      (update :sites #(set (map :id %)))
-      (update :rivers #(set (map (fn [r] (apply river ((juxt :source :target) r))) %)))))
-
-(defn make-world [internal-map init-json-map punter-count]
-  (assoc internal-map
-         :punter-count punter-count
-         :initial-json-map init-json-map
-         :claimed {}
-         :moves-history (reverse
-                         (for [i (range punter-count)]
-                           {:pass {:punter i}}))
-         :remaining-moves (count (:rivers internal-map))))
 
 (def world (atom nil))
 
@@ -34,23 +19,12 @@
       (throw (ex-info (str "Wrong response from punter " punter-id ": " resp)
                       {})))))
 
-(defn consume-move [move world]
-  (-> (if-let [claim (and (not (:pass move)) (:claim move))]
-        (let [to-claim (river (:source claim) (:target claim))]
-          (if (and (get (:rivers world) to-claim)
-                   (not (get (:claimed world) to-claim)))
-            (assoc-in world [:claimed to-claim] (:punter claim))
-            (throw (RuntimeException. "Invalid claim"))))
-        world)
-      (update :moves-history #(cons move %))
-      (update :remaining-moves dec)))
-
 (defn prompt-punter-for-move [punter punter-id punters-count]
   (let [msg {:move {:moves (sort-by (comp #(or (:claim %) (:pass %)) :punter) (take punters-count (:moves-history @world)))}}
         resp (json/decode (punter (json/encode msg)) true)
         resp (assoc-in resp [:claim :punter] punter-id)]
     (dosync
-     (reset! world (consume-move resp @world)))))
+     (reset! world (util/consume-move resp @world)))))
 
 (defn send-stop-message-to-punter [punter punter-id punters-count]
   (let [score (scorer/score @world)
@@ -61,9 +35,9 @@
     (punter (json/encode msg) true)))
 
 (defn game-loop [json-map-string punters]
-  (reset! world (make-world (json-map->internal-map (json/parse-string json-map-string true))
-                            (json/parse-string json-map-string true)
-                            (count punters)))
+  (reset! world (util/make-world
+                 (json/parse-string json-map-string true)
+                 (count punters)))
   (let [;punters (map #(fn [in] (.apply % in)) punters)
         ]
     (dorun (map-indexed (fn [id punter]
@@ -113,10 +87,9 @@
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 
   (tcp/start-tcp-server 13000 2
-                        #(game-loop (slurp (io/resource "london-tube.json")) %))
-
-  (tcp/start-tcp-server 13000 2
-                        #(game-loop (slurp (io/file "res/london-tube.json")) %)))
+                        #(game-loop (slurp (io/file "res/london-tube.json")) %)
+                        (io/file "/tmp/hist.json"))
+  )
 
 (defn -main [& args]
   (cfg/define {:map-file {:description "path to JSON with map"
@@ -128,13 +101,17 @@
                       :default 13000}
                :punters {:description "number of players to wait for"
                          :type :number
-                         :required true}})
+                         :required true}
+               :out-file {:description "path to file where to print game sequence"
+                          :type :file
+                          :required true}})
   (when-not (seq args)
     (cfg/populate-from-cmd ["--help"])
     (System/exit 1))
   (cfg/populate-from-cmd args)
   (cfg/verify :quit-on-error true, :silent true)
   (tcp/start-tcp-server (cfg/get :port) (cfg/get :punters)
-                        #(game-loop (slurp (cfg/get :map-file)) %)))
+                        #(game-loop (slurp (cfg/get :map-file)) %)
+                        (cfg/get :out-file)))
 
 #_(slurp (io/resource "test-map.json"))

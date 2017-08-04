@@ -3,6 +3,8 @@
             [loom.alg :as ga]
             [icfp.util :as util]))
 
+(defn square [x] (* x x))
+
 (defn score [world]
   (let [graph (apply g/graph (seq (:rivers world)))
         mines (set (:mines world))
@@ -17,15 +19,13 @@
 
         claimed (:claimed world)]
     (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
-      (do (println "ID" id)
-          [id (let [connected (ga/connected-components (apply g/graph owned))]
-                (reduce + 0
-                        (for [conn connected]
-                          (reduce + 0
-                                  (for [from (filter mines conn)
-                                        to conn]
-                                    (do (println from to (shortest-path (util/river from to)))
-                                        (shortest-path (util/river from to))))))))]))))
+      [id (let [connected (ga/connected-components (apply g/graph owned))]
+            (reduce + 0
+                    (for [conn connected]
+                      (reduce + 0
+                              (for [from (filter mines conn)
+                                    to conn]
+                                (square (shortest-path (util/river from to))))))))])))
 
 
 

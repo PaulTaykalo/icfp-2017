@@ -1,7 +1,8 @@
 (ns icfp.server.server
   (:require [cheshire.core :as json]
             [clojure.java.io :as io]
-            [icfp.util :refer [river]])
+            [icfp.util :refer [river]]
+            [icfp.scorer :refer [score]])
   (:import java.util.function.Function))
 
 (defn json-map->internal-map [json-map]
@@ -137,7 +138,9 @@
                 :else (do (println (format "[P%s] Stop! Hammertime!" 1))
                           {})))))))
 
-  (game-loop (slurp (io/resource "test-map.json")) [alice bob]))
+  (game-loop (slurp (io/resource "test-map.json")) [alice bob])
+
+  (score @world))
 
 
 #_(slurp (io/resource "test-map.json"))

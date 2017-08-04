@@ -42,6 +42,7 @@ interface Server {
 class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int = 9024) : Server {
 
   private data class MeRequest(@SerializedName("me") val me: String)
+  private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)
   private data class MeResponse(@SerializedName("you") val you: String)
 
   private val client: Socket
@@ -61,20 +62,24 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
   override fun me(me: PunterName, callback: (PunterName) -> Unit) {
     send(Gson().toJson(MeRequest(me)))
     val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
+    println("Sent $response")
+
     callback(response.you)
+
   }
 
   override fun setup(callback: (Game) -> Unit) {
-
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    val response: Game = Gson().fromJson(readString(), Game::class.java)
+    println("Sent $response")
+    callback(response)
   }
 
   override fun ready(punterID: PunterID) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    send(Gson().toJson(ReadyRequest(punterID)))
   }
 
   override fun onMove(observer: (Array<Move>) -> Move) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
   }
 
   override fun onInterruption(callback: (String) -> Unit) {

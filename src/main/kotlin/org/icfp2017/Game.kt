@@ -1,8 +1,17 @@
-package org.icfp2017
+@file:Suppress("ArrayInDataClass")
 
-class Game(val punter: PunterID, val punters: Int, val map: Map)
-class Map(val sites: Array<Site>, val rivers: Array<River>, val mines: Array<Int>)
-data class River(val source: SiteID, val target: SiteID, var owner: PunterID?)
+package org.icfp2017
+import com.google.gson.annotations.SerializedName
+
+data class Game(
+    @SerializedName("punter") val punter: PunterID,
+    @SerializedName("punters") val punters: Int,
+    @SerializedName("map") val map: Map
+)
+
+data class Site(@SerializedName("id") val id: SiteID)
+data class River(@SerializedName("source") val source: SiteID, @SerializedName("target") val target: SiteID, @SerializedName("owner") var owner: PunterID?)
+data class Map(@SerializedName("punters") val sites: Array<Site>, @SerializedName("rivers") val rivers: Array<River>, @SerializedName("mines") val mines: Array<Int>)
 
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID): Move()
@@ -12,7 +21,6 @@ typealias SiteID = Int
 typealias PunterID = Int
 typealias PunterName = String
 
-data class Site(val id: SiteID)
 
 fun Map.apply(moves: Array<Move>) {
     moves.forEach { move ->
@@ -28,5 +36,3 @@ fun Map.apply(moves: Array<Move>) {
 
 val Array<River>.unclaimed: List<River>
     get() = filter { it.owner == null }
-
-

@@ -21,7 +21,7 @@ object RandomFree: Strategy {
         return game.claim(rivers[random.nextInt(rivers.size)])
     }
 }
-
+// looks for most  connected river in minimal spanning tree
 object SpanningTree : Strategy{
     fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
         val edge = findMostAdjacentEdgeInSpanningTree(map)

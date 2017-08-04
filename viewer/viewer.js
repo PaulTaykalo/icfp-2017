@@ -1,5 +1,5 @@
 var _currentCommands = []
-const colors = ["red", "green", "yellow", "orange"]
+const colors = ["magenta", "green", "yellow", "orange", "brown", "cyan", "gray", "crimson", "olive"]
 
 function runClaim(claim) {
   if (claim == undefined) return

@@ -41,14 +41,14 @@
       (update :remaining-moves dec)))
 
 (defn prompt-punter-for-move [punter punter-id punters-count]
-  (let [msg {:move {:moves (take punters-count (:moves-history @world))}}
+  (let [msg {:move {:moves (sort-by (comp #(or (:claim %) (:path %)) :punter) (take punters-count (:moves-history @world)))}}
         resp (json/decode (punter (json/encode msg)) true)
         resp (assoc-in resp [:claim :punter] punter-id)]
     (dosync
      (reset! world (consume-move resp @world)))))
 
 (defn send-stop-message-to-punter [punter punter-id punters-count]
-  (let [msg {:stop {:moves (take punters-count (:moves-history @world))
+  (let [msg {:stop {:moves (sort-by (comp #(or (:claim %) (:path %)) :punter) (take punters-count (:moves-history @world)))
                     :scores ()}}]
     (punter (json/encode msg))))
 
@@ -97,4 +97,47 @@
   (prompt-punter-for-move (random-punter 0) 0 2)
   (prompt-punter-for-move (random-punter 1) 1 2)
 
-  (slurp (io/resource "test-map.json")))
+
+  (def alice
+    (let [move-id (atom -1)]
+      (reify Function
+        (apply [_ in]
+          (swap! move-id inc)
+          (json/encode
+           (cond (= @move-id 0) {:ready 0}
+                 (<= 1 @move-id 6) (let [[src tgt :as move] (case @move-id
+                                                              1 [0 1]
+                                                              2 [2 3]
+                                                              3 [4 5]
+                                                              4 [6 7]
+                                                              5 [1 3]
+                                                              6 [5 7])]
+                                     (println (format "[P%s] Making move %s" 0 move))
+                                     {:claim {:punter 0, :source src, :target tgt}}
+                                     )
+                 :else (do (println (format "[P%s] Stop! Hammertime!" 0))
+                           {})))))))
+
+  (def bob
+    (let [move-id (atom -1)]
+     (reify Function
+       (apply [_ in]
+         (swap! move-id inc)
+         (json/encode
+          (cond (= @move-id 0) {:ready 1}
+                (<= 1 @move-id 6) (let [[src tgt :as move] (case @move-id
+                                                             1 [1 2]
+                                                             2 [3 4]
+                                                             3 [5 6]
+                                                             4 [7 0]
+                                                             5 [3 5]
+                                                             6 [7 1])]
+                                    (println (format "[P%s] Making move %s" 1 move))
+                                    {:claim {:punter 1, :source src, :target tgt}})
+                :else (do (println (format "[P%s] Stop! Hammertime!" 1))
+                          {})))))))
+
+  (game-loop (slurp (io/resource "test-map.json")) [alice bob]))
+
+
+#_(slurp (io/resource "test-map.json"))

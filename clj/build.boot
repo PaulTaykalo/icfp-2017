@@ -11,7 +11,7 @@
 
 (task-options!
  pom  {:project 'lambada/icfp
-       :version "0.1.0"})
+       :version "0.1.1"})
 
 (require '[boot.core :as core :refer [deftask]]
           '[boot.util :as util]
@@ -47,7 +47,7 @@
       fs)))
 
 (deftask build []
-  (comp (javac) (aot :namespace '#{icfp.core}) (pom) (jar)
+  (comp (javac) (aot :namespace '#{icfp.core icfp.server.server}) (pom) (jar)
         (collect-deps :collect-dir "jars" :exclude-scope #{"test" "provided"})
         (target)))
 

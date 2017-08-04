@@ -2,7 +2,7 @@
 
 package org.icfp2017
 import com.google.gson.annotations.SerializedName
-
+import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
 data class Game(
     @SerializedName("punter") val punter: PunterID,
     @SerializedName("punters") val punters: Int,
@@ -12,6 +12,8 @@ data class Game(
 data class Site(@SerializedName("id") val id: SiteID)
 data class River(@SerializedName("source") val source: SiteID, @SerializedName("target") val target: SiteID, @SerializedName("owner") var owner: PunterID?)
 data class Map(@SerializedName("punters") val sites: Array<Site>, @SerializedName("rivers") val rivers: Array<River>, @SerializedName("mines") val mines: Array<Int>)
+
+
 
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID): Move()
@@ -32,7 +34,20 @@ fun Map.apply(moves: Array<Move>) {
 
         if (river != null) river.owner = move.punter
     }
+
+
 }
 
 val Array<River>.unclaimed: List<River>
     get() = filter { it.owner == null }
+
+
+fun Game.pass(): Pass {
+    return Pass(punter)
+}
+
+fun Game.claim(river: River): Claim {
+    return Claim(punter, river.source, river.target)
+}
+
+fun Game.claim(river: River?): Move = if (river == null) pass() else claim(river)

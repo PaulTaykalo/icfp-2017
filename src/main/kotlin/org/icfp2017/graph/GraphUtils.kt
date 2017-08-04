@@ -7,19 +7,19 @@ import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
 import org.icfp2017.Map
 
 
-    private fun toGraph(map:Map): UWGraph {
+    fun toGraph(map:Map): UWGraph {
         val graph = UWGraph(map.rivers.size);
         for (d in map.rivers)
             graph.addEdge(d.source,d.target, 1.0)
         return graph;
     }
 
-    private fun mst(graph:UWGraph): MST {
+    fun mst(graph:UWGraph): MST {
         val mst =BoruvkaMST(graph)
         return mst
     }
 
-    private fun maxId(graph:UWGraph, mst:MST) : UWGraph.Edge{
+    fun maxId(graph:UWGraph, mst:MST) : UWGraph.Edge{
 
         val mostAjusted = mst.edges().sortedWith(compareBy({graph.adjacentVertices(it.v).size},{graph.adjacentVertices(it.w).size}))
         return mostAjusted.first()

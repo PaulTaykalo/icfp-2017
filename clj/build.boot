@@ -4,7 +4,9 @@
                           [boot/core "2.7.1" :scope "provided"]
                           [fudje "0.9.7" :scope "test"]
                           [adzerk/boot-test "1.2.0" :scope "test"]
-                          [cheshire "5.7.1"]]
+                          [cheshire "5.7.1"]
+                          [aysylu/loom "1.0.0"]
+                          [com.grammarly/omniconf "0.2.6"]]
           :source-paths #{"src/clojure" "src/java"}
           :test-paths #{"test/"}
           :resource-paths #{"res/"})
@@ -50,6 +52,11 @@
   (comp (javac) (aot :namespace '#{icfp.core icfp.server.server}) (pom) (jar)
         (collect-deps :collect-dir "jars" :exclude-scope #{"test" "provided"})
         (target)))
+
+(deftask build-sim-server []
+  (comp (javac) (aot :namespace '#{icfp.server.server})
+        (pom :project 'lambada/icfp-sim-server)
+        (uber) (jar :main 'icfp.server.server) (target)))
 
 (require '[boot-javac-star.core :refer [javac*]])
 

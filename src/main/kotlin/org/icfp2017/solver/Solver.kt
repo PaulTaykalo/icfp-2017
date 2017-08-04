@@ -88,6 +88,7 @@ interface Strategy {
             "SpanningTree" -> SpanningTree
             "First" -> FirstFree
             "Random" -> RandomFree
+            "AllYourBaseAreBelongToUs" -> AllYourBaseAreBelongToUs
             else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
         }
     }

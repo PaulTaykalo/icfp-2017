@@ -4,6 +4,7 @@ package org.icfp2017
 
 import com.google.gson.Gson
 import com.sun.org.apache.xpath.internal.Arg
+import org.icfp2017.server.OfflineServer
 import org.icfp2017.server.OnlineServer
 import org.icfp2017.solver.*
 
@@ -13,15 +14,23 @@ object Arguments {
     var port: Int = 9024
     var strategy: Strategy = RandomFree
     var log: String = "./log-${System.currentTimeMillis()}.txt"
+    var offline = true
 }
 
 fun main(args: Array<String>) {
+
     args.forEach {
         val (name, value) = it.split("=")
         when (name) {
             "--name" -> Arguments.name = value
-            "--server" -> Arguments.server = value
-            "--port" -> Arguments.port = value.toInt()
+            "--server" -> {
+                Arguments.server = value
+                Arguments.offline = false
+            }
+            "--port" -> {
+                Arguments.port = value.toInt()
+                Arguments.offline = false
+            }
             "--strategy" -> Arguments.strategy = Strategy.forName(value)
         }
     }
@@ -31,8 +40,9 @@ fun main(args: Array<String>) {
             "server" to Arguments.server,
             "port" to Arguments.port,
             "strategy" to Arguments.strategy.javaClass.canonicalName,
-            "log" to Arguments.log))))
+            "log" to Arguments.log,
+            "offline" to Arguments.offline))))
 
-    val server = OnlineServer()
+    val server = if (Arguments.offline) OfflineServer() else OnlineServer()
     Solver.play(server)
 }

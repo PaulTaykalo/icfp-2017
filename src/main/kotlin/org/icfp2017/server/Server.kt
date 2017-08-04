@@ -32,38 +32,11 @@ interface Server {
 
 }
 
+typealias JSONString = String
 
 class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Arguments.port) : Server {
 
-    private data class MeRequest(@SerializedName("me") val me: String)
-    private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)
-    private data class MeResponse(@SerializedName("you") val you: String)
-    private data class MoveResponse(
-            @SerializedName("claim") val claim: Claim?,
-            @SerializedName("pass") val pass: Pass?
-    )
-
-    private data class MovesArrayResponse(
-            @SerializedName("moves") val move: Array<MoveResponse>
-    )
-
-    private data class TimeoutResponse(val state: Any)
-
-    private data class MoveArrayResponse(
-            @SerializedName("move") val moves: MovesArrayResponse
-    )
-
-    private data class GeneralResponse(
-            @SerializedName("move") val moves: MovesArrayResponse?,
-            @SerializedName("stop") val stop: StopResponse?,
-            @SerializedName("timeout") val timeout: TimeoutResponse?
-    )
-
-    private data class StopResponse(
-            @SerializedName("moves") val moves: Array<MoveResponse>,
-            @SerializedName("scores") val scores: Array<Score>
-    )
-
+    private val serverBehaviour = ServerBehaviour({ json -> send(json) }, { readString() })
     private val client: Socket
     private val outputStream: OutputStream
     private val inputStream: InputStream
@@ -79,58 +52,15 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
     }
 
     override fun me(me: PunterName, callback: (PunterName) -> Unit) {
-        val me = Gson().toJson(MeRequest(me))
-        Logger.log(me)
-        send(me)
-
-        val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
-        callback(response.you)
-
+        serverBehaviour.me(me, callback)
     }
 
     override fun setup(callback: (Game) -> Unit) {
-        val response: Game = Gson().fromJson(readString(), Game::class.java)
-        callback(response)
+        serverBehaviour.setup(callback)
     }
 
-
     override fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
-        send(Gson().toJson(ReadyRequest(punterID)))
-
-        // Read potential command
-        var timeoutsLeft = 10
-        while (true) {
-            val response: GeneralResponse = Gson().fromJson(readString(), GeneralResponse::class.java)
-            val moves = response.moves
-            if (moves != null) {
-                val typedMoves: Array<Move> = moves.move.map {
-                    it.claim ?: it.pass ?: Pass(-1)
-                }.toTypedArray()
-                val move = onMove(typedMoves)
-                val moveResponse = MoveResponse(claim = move as? Claim, pass = move as? Pass)
-                send(Gson().toJson(moveResponse))
-                continue
-            }
-
-            val stop = response.stop
-            if (stop != null) {
-                val typedMoves: Array<Move> = stop.moves.map {
-                    it.claim ?: it.pass ?: Pass(-1)
-                }.toTypedArray()
-
-                onEnd(StopCommand(typedMoves, stop.scores))
-                break
-            }
-
-            val timeout = response.timeout
-            if (timeout != null) {
-                timeoutsLeft--
-                onInterruption("ALARMA!! \$timeoutsLeft")
-                continue
-            }
-
-            // Waat?
-        }
+        serverBehaviour.ready(punterID, onMove, onInterruption, onEnd)
     }
 
     private fun send(json: String) {
@@ -175,5 +105,90 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
         return string.toInt()
     }
 
+}
+
+class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString) {
+
+    private data class MeRequest(@SerializedName("me") val me: String)
+    private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)
+    private data class MeResponse(@SerializedName("you") val you: String)
+    private data class MoveResponse(
+            @SerializedName("claim") val claim: Claim?,
+            @SerializedName("pass") val pass: Pass?
+    )
+    private data class MovesArrayResponse(
+            @SerializedName("moves") val move: Array<MoveResponse>
+    )
+
+    private data class TimeoutResponse(val state: Any)
+
+    private data class MoveArrayResponse(
+            @SerializedName("move") val moves: MovesArrayResponse
+    )
+
+    private data class GeneralResponse(
+            @SerializedName("move") val moves: MovesArrayResponse?,
+            @SerializedName("stop") val stop: StopResponse?,
+            @SerializedName("timeout") val timeout: TimeoutResponse?
+    )
+
+    private data class StopResponse(
+            @SerializedName("moves") val moves: Array<MoveResponse>,
+            @SerializedName("scores") val scores: Array<Score>
+    )
+
+    fun me(me: PunterName, callback: (PunterName) -> Unit) {
+        val me = Gson().toJson(MeRequest(me))
+        Logger.log(me)
+        send(me)
+        val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
+        callback(response.you)
+    }
+
+    fun setup(callback: (Game) -> Unit) {
+        val response: Game = Gson().fromJson(readString(), Game::class.java)
+        Logger.log("Sent $response")
+        callback(response)
+    }
+
+
+    fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+        send(Gson().toJson(ReadyRequest(punterID)))
+
+        // Read potential command
+        var timeoutsLeft = 10
+        while (true) {
+            val response: GeneralResponse = Gson().fromJson(readString(), GeneralResponse::class.java)
+            val moves = response.moves
+            if (moves != null) {
+                val typedMoves: Array<Move> = moves.move.map {
+                    it.claim ?: it.pass ?: Pass(-1)
+                }.toTypedArray()
+                val move = onMove(typedMoves)
+                val moveResponse = MoveResponse(claim = move as? Claim, pass = move as? Pass)
+                send(Gson().toJson(moveResponse))
+                continue
+            }
+
+            val stop = response.stop
+            if (stop != null) {
+                val typedMoves: Array<Move> = stop.moves.map {
+                    it.claim ?: it.pass ?: Pass(-1)
+                }.toTypedArray()
+
+                onEnd(StopCommand(typedMoves, stop.scores))
+                break
+            }
+
+            val timeout = response.timeout
+            if (timeout != null) {
+                timeoutsLeft--
+                onInterruption("ALARMA!! \$timeoutsLeft")
+                continue
+            }
+
+            // Waat?
+        }
+    }
 
 }

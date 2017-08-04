@@ -1,10 +1,12 @@
 (ns icfp.server.server
   (:require [cheshire.core :as json]
-            [clojure.java.io :as io])
-  (:import java.util.function.Function))
-
-(defn river [from to]
-  (if (> to from) [from to] [to from]))
+            [clojure.java.io :as io]
+            [icfp.util :refer [river]]
+            [icfp.scorer :as scorer]
+            [icfp.server.tcp :as tcp]
+            [omniconf.core :as cfg])
+  (:import java.util.function.Function)
+  (:gen-class))
 
 (defn json-map->internal-map [json-map]
   (-> json-map
@@ -13,6 +15,7 @@
 
 (defn make-world [internal-map init-json-map punter-count]
   (assoc internal-map
+         :punter-count punter-count
          :initial-json-map init-json-map
          :claimed {}
          :moves-history (reverse
@@ -43,22 +46,26 @@
       (update :remaining-moves dec)))
 
 (defn prompt-punter-for-move [punter punter-id punters-count]
-  (let [msg {:move {:moves (take punters-count (:moves-history @world))}}
+  (let [msg {:move {:moves (sort-by (comp #(or (:claim %) (:pass %)) :punter) (take punters-count (:moves-history @world)))}}
         resp (json/decode (punter (json/encode msg)) true)
         resp (assoc-in resp [:claim :punter] punter-id)]
     (dosync
      (reset! world (consume-move resp @world)))))
 
 (defn send-stop-message-to-punter [punter punter-id punters-count]
-  (let [msg {:stop {:moves (take punters-count (:moves-history @world))
-                    :scores ()}}]
-    (punter (json/encode msg))))
+  (let [score (scorer/score @world)
+        msg {:stop {:moves (sort-by (comp #(or (:claim %) (:pass %)) :punter) (take punters-count (:moves-history @world)))
+                    :scores (map (fn [[punter score]] {:punter punter
+                                                      :score score})
+                                 score)}}]
+    (punter (json/encode msg) true)))
 
 (defn game-loop [json-map-string punters]
   (reset! world (make-world (json-map->internal-map (json/parse-string json-map-string true))
                             (json/parse-string json-map-string true)
                             (count punters)))
-  (let [punters (map #(fn [in] (.apply % in)) punters)]
+  (let [;punters (map #(fn [in] (.apply % in)) punters)
+        ]
     (dorun (map-indexed (fn [id punter]
                           (send-initial-state-to-punter punter id (count punters)))
                         punters))
@@ -97,7 +104,37 @@
   (send-initial-state-to-punter (random-punter 1) 1 2)
 
   (prompt-punter-for-move (random-punter 0) 0 2)
-  (prompt-punter-for-move (random-punter 1) 1 2))
+  (prompt-punter-for-move (random-punter 1) 1 2)
 
+  (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 
-(slurp (io/resource "test-map.json"))
+  (score @world)
+
+  (game-loop (slurp (io/resource "test-map.json")) [alice bob])
+
+  (tcp/start-tcp-server 13000 2
+                        #(game-loop (slurp (io/resource "london-tube.json")) %))
+
+  (tcp/start-tcp-server 13000 2
+                        #(game-loop (slurp (io/file "res/london-tube.json")) %)))
+
+(defn -main [& args]
+  (cfg/define {:map-file {:description "path to JSON with map"
+                          :type :file
+                          :verifier cfg/verify-file-exists
+                          :required true}
+               :port {:description "port where to start server"
+                      :type :number
+                      :default 13000}
+               :punters {:description "number of players to wait for"
+                         :type :number
+                         :required true}})
+  (when-not (seq args)
+    (cfg/populate-from-cmd ["--help"])
+    (System/exit 1))
+  (cfg/populate-from-cmd args)
+  (cfg/verify :quit-on-error true, :silent true)
+  (tcp/start-tcp-server (cfg/get :port) (cfg/get :punters)
+                        #(game-loop (slurp (cfg/get :map-file)) %)))
+
+#_(slurp (io/resource "test-map.json"))

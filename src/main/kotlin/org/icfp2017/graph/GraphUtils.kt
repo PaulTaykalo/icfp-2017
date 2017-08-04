@@ -8,7 +8,7 @@ import org.icfp2017.Map
 
 
     fun toGraph(map:Map): UWGraph {
-        val graph = UWGraph(map.rivers.size);
+        val graph = UWGraph(map.sites.size);
         for (d in map.rivers)
             graph.addEdge(d.source,d.target, 1.0)
         return graph;

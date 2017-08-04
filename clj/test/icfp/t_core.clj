@@ -1,5 +1,7 @@
 (ns icfp.t-core
-  (:require [icfp.core :as sut]))
+  (:require [icfp.core :as sut]
+            [clojure.test :refer :all]
+            [fudje.sweet :refer :all]))
 
 (deftest dummy
   (fact "it works"

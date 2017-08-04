@@ -9,8 +9,9 @@
       (update :sites #(set (map :id %)))
       (update :rivers #(set (map (fn [r] (apply river ((juxt :source :target) r))) %)))))
 
-(defn make-world [internal-map punter-count]
+(defn make-world [internal-map init-json-map punter-count]
   (assoc internal-map
+         :initial-json-map init-json-map
          :claimed {}
          :moves-history (reverse
                          (for [i (range punter-count)]
@@ -22,7 +23,7 @@
 (defn send-initial-state-to-punter [punter punter-id punters-count]
   (let [msg {:punter punter-id
              :punters punters-count
-             :map json-map}
+             :map (:initial-json-map @world)}
         resp  (json/decode (punter (json/encode msg)) true)]
     (when-not (= resp {:ready punter-id})
       (throw (ex-info (str "Wrong response from punter " punter-id ": " resp)
@@ -53,6 +54,7 @@
 
 (defn game-loop [json-map-string punters]
   (reset! world (make-world (json-map->internal-map (json/parse-string json-map-string true))
+                            (json/parse-string json-map-string true)
                             (count punters)))
   (let [punters (map #(fn [in] (.apply % in)) punters)]
     (dorun (map-indexed (fn [id punter]
@@ -93,4 +95,6 @@
   (send-initial-state-to-punter (random-punter 1) 1 2)
 
   (prompt-punter-for-move (random-punter 0) 0 2)
-  (prompt-punter-for-move (random-punter 1) 1 2))
+  (prompt-punter-for-move (random-punter 1) 1 2)
+
+  (slurp (io/resource "test-map.json")))

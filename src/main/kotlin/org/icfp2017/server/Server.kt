@@ -1,11 +1,11 @@
+@file:Suppress("ArrayInDataClass")
+
 package org.icfp2017.server
 
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import org.icfp2017.Game
-import org.icfp2017.Move
-import org.icfp2017.PunterID
-import org.icfp2017.PunterName
+import org.icfp2017.*
+import org.icfp2017.base.Score
 import org.icfp2017.base.StopCommand
 import java.io.InputStream
 import java.io.OutputStream
@@ -26,24 +26,43 @@ interface Server {
   fun setup(callback: (Game) -> Unit)
 
   // Send after setup completed
-  fun ready(punterID: PunterID)
-
-  fun onMove(observer: (Array<Move>) -> Move)
-
-  // Subscribe if you want to stop any calcution
-  fun onInterruption(callback: (String) -> Unit)
-
-  ///
-  fun onEnd(callback: (StopCommand) -> Unit)
+  fun ready(punterID: PunterID,
+            onMove: (Array<Move>) -> Move,
+            onInterruption: (String) -> Unit,
+            onEnd: (StopCommand) -> Unit
+  )
 
 }
-
 
 class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int = 9024) : Server {
 
   private data class MeRequest(@SerializedName("me") val me: String)
   private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)
   private data class MeResponse(@SerializedName("you") val you: String)
+  private data class MoveResponse(
+      @SerializedName("claim") val claim: Claim?,
+      @SerializedName("pass") val pass: Pass?
+  )
+  private data class MovesArrayResponse(
+      @SerializedName("moves") val move: Array<MoveResponse>
+  )
+
+  private data class TimeoutResponse(val state: Any)
+
+  private data class MoveArrayResponse(
+      @SerializedName("move") val moves: MovesArrayResponse
+  )
+
+  private data class GeneralResponse(
+      @SerializedName("move") val moves: MovesArrayResponse?,
+      @SerializedName("stop") val stop: StopResponse?,
+      @SerializedName("timeout") val timeout: TimeoutResponse?
+  )
+
+  private data class StopResponse(
+      @SerializedName("moves") val moves: Array<MoveResponse>,
+      @SerializedName("scores") val scores: Array<Score>
+  )
 
   private val client: Socket
   private val outputStream: OutputStream
@@ -62,8 +81,6 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
   override fun me(me: PunterName, callback: (PunterName) -> Unit) {
     send(Gson().toJson(MeRequest(me)))
     val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
-    println("Sent $response")
-
     callback(response.you)
 
   }
@@ -74,23 +91,47 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
     callback(response)
   }
 
-  override fun ready(punterID: PunterID) {
+
+  override fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
     send(Gson().toJson(ReadyRequest(punterID)))
-  }
 
-  override fun onMove(observer: (Array<Move>) -> Move) {
+    // Read potential command
+    var timeoutsLeft = 10
+    while (true) {
+      val response: GeneralResponse = Gson().fromJson(readString(), GeneralResponse::class.java)
+      val moves = response.moves
+      if (moves != null) {
+        val typedMoves: Array<Move> = moves.move.map {
+          it.claim ?: it.pass ?: Pass(-1)
+        }.toTypedArray()
+        val move = onMove(typedMoves)
+        send(Gson().toJson(move))
+        continue
+      }
 
-  }
+      val stop = response.stop
+      if (stop != null) {
+        val typedMoves: Array<Move> = stop.moves.map {
+          it.claim ?: it.pass ?: Pass(-1)
+        }.toTypedArray()
 
-  override fun onInterruption(callback: (String) -> Unit) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
+        onEnd(StopCommand(typedMoves, stop.scores))
+        break
+      }
 
-  override fun onEnd(callback: (StopCommand) -> Unit) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+      val timeout = response.timeout
+      if (timeout != null) {
+        timeoutsLeft--
+        onInterruption("ALARMA!! \$timeoutsLeft")
+        continue
+      }
+
+      // Waat?
+    }
   }
 
   private fun send(json: String) {
+    println("-> $json")
     val byteArray = json.toByteArray()
     val prefix = "${byteArray.size}:".toByteArray()
     outputStream.write(prefix)
@@ -102,6 +143,7 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
   private fun readString(): String {
     val size = readSize()
     val result = readBytes(size)
+    println("<-- $result")
     return result
   }
 
@@ -126,7 +168,7 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
         append(ch)
       }
     }
-    print("Is about to read $string")
+    println("Is about to read $string")
     return string.toInt()
   }
 

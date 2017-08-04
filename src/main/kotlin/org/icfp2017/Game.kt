@@ -1,7 +1,5 @@
 package org.icfp2017
 
-import com.sun.org.apache.xpath.internal.operations.Bool
-
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID): Move()
 data class Pass(val punter: PunterID): Move()
@@ -34,7 +32,7 @@ class Game(
 
     fun move(moves: Array<Move>): Move {
         map.apply(moves)
-        strategy.move(this)
+        return strategy.move(this)
     }
 }
 
@@ -43,8 +41,8 @@ object FirstFree: Strategy {
         val freeRivers = game.map.rivers.filter { it.owner == null }
         val river = freeRivers.firstOrNull()
 
-        if (river != null) Claim(game.punter, river.source, river.target)
-        else Pass(game.punter)
+        if (river != null) return  Claim(game.punter, river.source, river.target)
+        else return  Pass(game.punter)
     }
 }
 

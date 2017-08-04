@@ -39,8 +39,7 @@ interface Server {
 }
 
 
-class OnlineServer: Server {
-
+class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int = 9024) : Server {
 
   private data class MeRequest(@SerializedName("me") val me: String)
   private data class MeResponse(@SerializedName("you") val you: String)
@@ -50,18 +49,40 @@ class OnlineServer: Server {
   private val inputStream: InputStream
 
   init {
-    // Parameteized
-    val serverName = "punter.inf.ed.ac.uk"
-    val serverPort = 9024
-
     val inteAddress = InetAddress.getByName(serverName)
     val socketAddress = InetSocketAddress(inteAddress, serverPort)
     client = Socket()
     val timeoutInMs = 10 * 1000
     client.connect(socketAddress, timeoutInMs)
-
     outputStream = client.outputStream
     inputStream = client.inputStream
+  }
+
+  override fun me(me: PunterName, callback: (PunterName) -> Unit) {
+    send(Gson().toJson(MeRequest(me)))
+    val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
+    callback(response.you)
+  }
+
+  override fun setup(callback: (Game) -> Unit) {
+
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun ready(punterID: PunterID) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun onMove(observer: (Array<Move>) -> Move) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun onInterruption(callback: (String) -> Unit) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+  }
+
+  override fun onEnd(callback: (StopCommand) -> Unit) {
+    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
   }
 
   private fun send(json: String) {
@@ -104,35 +125,5 @@ class OnlineServer: Server {
     return string.toInt()
   }
 
-
-  override fun me(me: PunterName, callback: (PunterName) -> Unit) {
-    val request = Gson().toJson(MeRequest(me))
-    send(request)
-
-    val input = readString()
-    print("Output is $input")
-    val response: MeResponse = Gson().fromJson(input, MeResponse::class.java)
-    callback(response.you)
-  }
-
-  override fun setup(callback: (Game) -> Void) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun ready(punterID: PunterID) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun onMove(observer: (Array<Move>) -> Move) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun onInterruption(callback: (String) -> Void) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun onEnd(callback: (StopCommand) -> Void) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
 
 }

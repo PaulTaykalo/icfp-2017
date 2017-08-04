@@ -1,5 +1,6 @@
 (ns icfp.scorer
-  (:require [loom.graph :as g]
+  (:require [cheshire.core :as json]
+            [loom.graph :as g]
             [loom.alg :as ga]
             [icfp.util :as util]))
 
@@ -30,3 +31,11 @@
                                     (for [from (filter mines conn)
                                           to conn]
                                       (square (shortest-path (util/river from to))))))))]))))
+
+(defn -score [json-world punter-count json-moves]
+  (let [world (util/make-world (json/decode json-world) punter-count)
+        moves (json/decode json-moves)]
+    (json/encode
+     (map (fn [[punter score]]
+            {:punter punter :score score})
+          (score (reduce #(util/consume-move %2 %1) world moves))))))

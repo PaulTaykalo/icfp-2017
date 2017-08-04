@@ -1,3 +1,46 @@
+var _currentCommands = []
+const colors = ["red", "green", "yellow", "orange"]
+
+function runClaim(claim) {
+  if (claim == undefined) return
+  cy.elements('edge[source = "' + claim.source +'"][target = "' + claim.target +'"]')
+  .style({
+    "line-color": colors[claim.punter]
+  })
+
+}
+
+function runMove(move) {
+  if (move == undefined) return
+  move.moves.forEach( m => runClaim(m.claim))  
+
+}
+
+
+function loadCommands(commands) {
+  _currentCommands = commands
+
+  // REload map
+  commands.forEach( command => {
+    if (command.map != undefined) {
+      if (cy.elements !== undefined) {
+        cy.destroy();
+      }
+      initCy(command.map, function () {
+        cy.autolock(true)
+        cy.edges().on("select", function(evt) { cy.edges().unselect() } );
+      } ); 
+    }
+  })
+
+  commands.forEach( command => {
+    runClaim(command.claim)
+    runMove(command.move)
+  })
+
+
+}
+
 function loadMapList(showFirst) {
   fetch("maps.json", {mode: "no-cors"})
   .then(function(res) {

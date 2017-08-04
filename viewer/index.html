@@ -12,13 +12,6 @@
       <h1>&#955; Map Viewer</h1>
       <fieldset>
         <input type="file" id="myFile" multiple size="50"/>
-        <legend>Game Information</legend>
-        <div id="dropdown">
-          <select id="maps-select" class="form-control">
-          </select>
-
-          <a id="download-link" href="#">Download</a>
-        </div>
       </fieldset>
     </div>
     <div class="container-fluid">
@@ -57,19 +50,7 @@
           }
         });
 
-        commands.forEach( command => {
-          if (command.map != undefined) {
-          if (cy.elements !== undefined) {
-                cy.destroy();
-              }
-          initCy(command.map, function () {
-          cy.autolock(true)
-          cy.edges().on("select", function(evt) { cy.edges().unselect() } );
-          } ); 
-
-          }
-
-        })
+        loadCommands(commands)
     }
     
     document.getElementById('myFile').addEventListener('change', onChange);

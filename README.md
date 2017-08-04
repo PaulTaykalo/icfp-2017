@@ -44,6 +44,9 @@ To run just unzip the package and execute:
 icfp2017/bin/icfp2017 [parameters list]
 ```
 
+## Submit archive
+To build submit archive use `assembleSubmitArchive`
+
 # Recommended IDE
 [IntellyJ Idea Community Edition](https://www.jetbrains.com/idea/download/) (Free & OSS)
 

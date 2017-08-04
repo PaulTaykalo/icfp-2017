@@ -43,9 +43,22 @@ mainClassName = 'org.icfp2017.Main'
 
 defaultTasks 'run'
 
-jar {
-  manifest {
-    attributes 'Main-Class': 'org.icfp2017.Main'
+def REGISTRATION_CODE = '2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f'
+
+distributions {
+  main {
+    baseName = "icfp-$REGISTRATION_CODE"
+    contents {
+      from('dist/exec') { fileMode = 0755 }
+      from('dist/PACKAGES')
+      from('dist/README')
+      into('src', { from { 'src/main' } })
+    }
   }
-  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+task assembleSubmitArchive(type: Zip) {
+  from "${distTar.archivePath}"
+  archiveName = "icfp-${REGISTRATION_CODE}.tar.gz"
+  dependsOn distTar
 }

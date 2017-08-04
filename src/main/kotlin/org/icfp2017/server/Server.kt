@@ -106,7 +106,8 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
           it.claim ?: it.pass ?: Pass(-1)
         }.toTypedArray()
         val move = onMove(typedMoves)
-        send(Gson().toJson(move))
+        val moveResponse = MoveResponse(claim = move as? Claim, pass = move as? Pass)
+        send(Gson().toJson(moveResponse))
         continue
       }
 

@@ -1,6 +1,7 @@
 package org.icfp2017.solver
 
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
+import com.sun.javaws.exceptions.InvalidArgumentException
 import org.icfp2017.*
 import org.icfp2017.Map
 import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
@@ -81,10 +82,19 @@ object AllYourBaseAreBelongToUs : Strategy{
 
 interface Strategy {
     fun move(game: Game): Move
+
+    companion object {
+        fun forName(name: String) = when(name) {
+            "SpanningTree" -> SpanningTree
+            "First" -> FirstFree
+            "Random" -> RandomFree
+            else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
+        }
+    }
 }
 
 object Solver {
-    fun play(server: Server, name: String = "Lambada Punter", strategy: Strategy = FirstFree) {
+    fun play(server: Server, name: String = Arguments.name, strategy: Strategy = Arguments.strategy) {
         server.me(name) {
             server.setup { game ->
                 server.ready(

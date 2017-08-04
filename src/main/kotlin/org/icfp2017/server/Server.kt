@@ -34,7 +34,8 @@ interface Server {
 
 }
 
-class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int = 9024) : Server {
+
+class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Arguments.port) : Server {
 
   private data class MeRequest(@SerializedName("me") val me: String)
   private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)

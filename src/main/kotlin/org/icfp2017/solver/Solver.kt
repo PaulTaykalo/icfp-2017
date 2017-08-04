@@ -44,10 +44,7 @@ object SpanningTree : Strategy{
 
     }
 }
-
-// captures rivers close to bases first and then does spanning tree
 object AllYourBaseAreBelongToUs : Strategy{
-
     fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
         val edge = findMostAdjacentEdgeInSpanningTree(map)
         return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
@@ -80,6 +77,41 @@ object AllYourBaseAreBelongToUs : Strategy{
 }
 
 
+// captures rivers close to bases first and then does spanning tree
+object AllYourBaseAreBelongToUsRandom : Strategy{
+    val random = Random()
+    fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
+        val edge = findMostAdjacentEdgeInSpanningTree(map)
+        return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
+    }
+
+    fun riversCloseToBases(rivers:List<River>, map:Map, graph: UWGraph):List<River> {
+        val baseRivers = rivers.filter {  map.mines.contains(it.target) || map.mines.contains(it.source)}
+        val priorityBaseRivers = baseRivers.sortedWith(compareBy({graph.adjacentEdges(it.target).size},{graph.adjacentEdges(it.source).size}))
+        return  priorityBaseRivers
+    }
+
+    override fun move(game: Game): Move {
+
+        val rivers = game.map.rivers.unclaimed
+        if (rivers.isEmpty()) return game.pass()
+        val graph = toGraph(game.map)
+        val baseRivers = riversCloseToBases(rivers, game.map, graph)
+        if(baseRivers.isNotEmpty()){
+            return game.claim(baseRivers.first())
+        }
+        // if all base rivers are captures, do most connected things
+        val mostConnected = mostConnectedRivers(rivers, game.map)
+        if(mostConnected.isNotEmpty()) {
+            return game.claim(mostConnected.first())
+        }
+
+        // if minimal spanning tree is captured, do whatever is left
+        return  game.claim(rivers[random.nextInt(rivers.size)])
+    }
+}
+
+
 interface Strategy {
     fun move(game: Game): Move
 
@@ -89,6 +121,7 @@ interface Strategy {
             "First" -> FirstFree
             "Random" -> RandomFree
             "AllYourBaseAreBelongToUs" -> AllYourBaseAreBelongToUs
+            "AllYourBaseAreBelongToUsRandom" -> AllYourBaseAreBelongToUsRandom
             else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
         }
     }

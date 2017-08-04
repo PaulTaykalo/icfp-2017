@@ -27,11 +27,9 @@ typealias PunterName = String
 fun Map.apply(moves: Array<Move>) {
     moves.forEach { move ->
         if (move !is Claim) return@forEach
-
         val river = rivers.find {
             move.source == it.source && move.target == it.target
         }
-
         if (river != null) river.owner = move.punter
     }
 

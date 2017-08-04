@@ -5,6 +5,7 @@ package org.icfp2017.server
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import org.icfp2017.*
+import org.icfp2017.base.Score
 import org.icfp2017.base.StopCommand
 import java.io.InputStream
 import java.io.OutputStream
@@ -25,18 +26,13 @@ interface Server {
   fun setup(callback: (Game) -> Unit)
 
   // Send after setup completed
-  fun ready(punterID: PunterID)
-
-  fun onMove(observer: (Array<Move>) -> Move)
-
-  // Subscribe if you want to stop any calcution
-  fun onInterruption(callback: (String) -> Unit)
-
-  ///
-  fun onEnd(callback: (StopCommand) -> Unit)
+  fun ready(punterID: PunterID,
+            onMove: (Array<Move>) -> Move,
+            onInterruption: (String) -> Unit,
+            onEnd: (StopCommand) -> Unit
+  )
 
 }
-
 
 class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int = 9024) : Server {
 
@@ -50,8 +46,22 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
   private data class MovesArrayResponse(
       @SerializedName("moves") val move: Array<MoveResponse>
   )
+
+  private data class TimeoutResponse(val state: Any)
+
   private data class MoveArrayResponse(
       @SerializedName("move") val moves: MovesArrayResponse
+  )
+
+  private data class GeneralResponse(
+      @SerializedName("move") val moves: MovesArrayResponse?,
+      @SerializedName("stop") val stop: StopResponse?,
+      @SerializedName("timeout") val timeout: TimeoutResponse?
+  )
+
+  private data class StopResponse(
+      @SerializedName("moves") val moves: Array<MoveResponse>,
+      @SerializedName("scores") val scores: Array<Score>
   )
 
   private val client: Socket
@@ -81,26 +91,43 @@ class OnlineServer(serverName: String = "punter.inf.ed.ac.uk", serverPort: Int =
     callback(response)
   }
 
-  override fun ready(punterID: PunterID) {
+
+  override fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
     send(Gson().toJson(ReadyRequest(punterID)))
-  }
 
-  override fun onMove(observer: (Array<Move>) -> Move) {
-    val response: MoveArrayResponse = Gson().fromJson(readString(), MoveArrayResponse::class.java)
-    val moves: Array<Move> = response.moves.move.map {
-      it.claim ?: it.pass ?: Pass(-1)
-    }.toTypedArray()
+    // Read potential command
+    var timeoutsLeft = 10
+    while (true) {
+      val response: GeneralResponse = Gson().fromJson(readString(), GeneralResponse::class.java)
+      val moves = response.moves
+      if (moves != null) {
+        val typedMoves: Array<Move> = moves.move.map {
+          it.claim ?: it.pass ?: Pass(-1)
+        }.toTypedArray()
+        val move = onMove(typedMoves)
+        send(Gson().toJson(move))
+        continue
+      }
 
-    val move = observer(moves)
-    send(Gson().toJson(move))
-  }
+      val stop = response.stop
+      if (stop != null) {
+        val typedMoves: Array<Move> = stop.moves.map {
+          it.claim ?: it.pass ?: Pass(-1)
+        }.toTypedArray()
 
-  override fun onInterruption(callback: (String) -> Unit) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
+        onEnd(StopCommand(typedMoves, stop.scores))
+        break
+      }
 
-  override fun onEnd(callback: (StopCommand) -> Unit) {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+      val timeout = response.timeout
+      if (timeout != null) {
+        timeoutsLeft--
+        onInterruption("ALARMA!! \$timeoutsLeft")
+        continue
+      }
+
+      // Waat?
+    }
   }
 
   private fun send(json: String) {

@@ -14,32 +14,41 @@ data class Site(val id: SiteID)
 data class River(val source: SiteID, val target: SiteID, var owner: PunterID?)
 class Map(val sites: Array<Site>, val rivers: Array<River>, val mines: Array<Int>)
 
-class Game(val punter: PunterID, val punters: Int, val map: Map) {
+fun Map.apply(moves: Array<Move>) {
+    moves.forEach { move ->
+        if (move !is Claim) return@forEach
+
+        val river = rivers.find {
+            move.source == it.source && move.target == it.target
+        }
+
+        if (river != null) river.owner = move.punter
+    }
+}
+
+class Game(
+        val punter: PunterID,
+        val punters: Int,
+        val map: Map,
+        val strategy: Strategy = FirstFree) {
 
     fun move(moves: Array<Move>): Move {
-        apply(moves)
-        val river = selectRiver()
-
-        if (river != null) return Claim(punter, river.source, river.target)
-        else return Pass(punter)
+        map.apply(moves)
+        strategy.move(this)
     }
+}
 
-    private fun selectRiver(): River? {
-        val freeRivers = map.rivers.filter { it.owner == null }
+object FirstFree: Strategy {
+    override fun move(game: Game): Move {
+        val freeRivers = game.map.rivers.filter { it.owner == null }
         val river = freeRivers.firstOrNull()
-        return river
+
+        if (river != null) Claim(game.punter, river.source, river.target)
+        else Pass(game.punter)
     }
+}
 
-    private fun apply(moves: Array<Move>) {
-        moves.forEach { move ->
-            if (move !is Claim) return@forEach
-
-            val river = map.rivers.find {
-                move.source == it.source && move.target == it.target
-            }
-
-            if (river != null) river.owner = move.punter
-        }
-    }
+interface Strategy {
+    fun move(game: Game): Move
 }
 

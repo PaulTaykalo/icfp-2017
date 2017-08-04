@@ -54,7 +54,7 @@ object AllYourBaseAreBelongToUs : Strategy{
     }
 
     fun riversCloseToBases(rivers:List<River>, map:Map, graph: UWGraph):List<River> {
-        val baseRivers = map.rivers.filter {  map.mines.contains(it.target) || map.mines.contains(it.source)}
+        val baseRivers = rivers.filter {  map.mines.contains(it.target) || map.mines.contains(it.source)}
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({graph.adjacentEdges(it.target).size},{graph.adjacentEdges(it.source).size}))
         return  priorityBaseRivers
     }

@@ -1,0 +1,8 @@
+{
+	"maps":[
+		{
+			"name": "sample",
+			"filename":"maps/sample.json"
+		}
+	]
+}

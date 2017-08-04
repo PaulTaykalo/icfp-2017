@@ -52,3 +52,19 @@
       (with-open [f (io/writer history-out-file)]
         (binding [*out* f]
           (run! println @history))))))
+
+(defn make-tcp-client [name client host port]
+  (let [history (atom [])]
+    (with-open [socket (Socket. (InetAddress/getByName host) port)]
+      (send! socket (json/encode {:me name}) history)
+      (when-not (= (json/encode {:you name}) (recv! socket history))
+        (throw (RuntimeException. "Wrong response")))
+      (loop []
+        (let [inp (recv! socket history)
+              parsed-inp (json/decode inp true)]
+          (println inp)
+          (when (or (:map parsed-inp)
+                    (:move parsed-inp))
+            (send! socket (client inp) history))
+          (when-not (:stop parsed-inp)
+            (recur)))))))

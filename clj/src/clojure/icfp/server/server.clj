@@ -86,9 +86,16 @@
 
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 
-  (tcp/start-tcp-server 13000 2
-                        #(game-loop (slurp (io/file "res/london-tube.json")) %)
-                        (io/file "/tmp/hist.json"))
+  (future
+    (tcp/start-tcp-server 13000 2
+                         #(game-loop (slurp (io/file "res/test-map.json")) %)
+                         (io/file "/tmp/hist.json")))
+
+  (future
+    (tcp/make-tcp-client (rand-nth ["Bob" "Alice" "Joe" "John" "Mary" "Sue"])
+                         (smart1/make-random-client)
+                         "localhost"
+                         13000))
   )
 
 (defn -main [& args]

@@ -3,6 +3,7 @@
             [clojure.java.io :as io]
             [icfp.util :as util]
             [icfp.scorer :as scorer]
+            [icfp.client.first-smart :as smart1]
             [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg])
   (:import java.util.function.Function)
@@ -51,28 +52,9 @@
                           (send-stop-message-to-punter punter id (count punters)))
                         punters))))
 
-(defn random-punter [id]
-  (reify Function
-    (apply [_ in]
-      (let [req (json/parse-string in true)]
-        (cond (:move req)
-              ;; Hodit'
-              (let [[src tgt :as move] (some #(when-not ((:claimed @world) %)
-                                                %)
-                                             (shuffle (:rivers @world)))]
-                (println (format "[P%s] Making move %s" id move))
-                (json/encode
-                 {:claim {:punter id, :source src, :target tgt}}))
-
-              (:stop req)
-              (do (println (format "[P%s] Stop! Hammertime!" id))
-                  nil)
-
-              :else (do (println (format "[P%s] Received initial state" id))
-                        (json/encode {:ready id})))))))
-
 (comment
-  (game-loop (slurp (io/resource "test-map.json")) [(random-punter 0) (random-punter 1)])
+  (game-loop (slurp (io/resource "test-map.json"))
+             [(smart1/make-random-client) (smart1/make-random-client)])
 
   (send-initial-state-to-punter (random-punter 0) 0 2)
   (send-initial-state-to-punter (random-punter 1) 1 2)

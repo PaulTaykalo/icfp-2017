@@ -46,3 +46,14 @@ fun Map.apply(moves: Array<Move>) {
 
 val Array<River>.unclaimed: List<River>
     get() = filter { it.owner == null }
+
+
+fun Game.pass(): Pass {
+    return Pass(punter)
+}
+
+fun Game.claim(river: River): Claim {
+    return Claim(punter, river.source, river.target)
+}
+
+fun Game.claim(river: River?): Move = if (river == null) pass() else claim(river)

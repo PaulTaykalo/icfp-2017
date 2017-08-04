@@ -1,5 +1,17 @@
-package org.icfp2017
+@file:Suppress("ArrayInDataClass")
 
+package org.icfp2017
+import com.google.gson.annotations.SerializedName
+
+data class Game(
+    @SerializedName("punter") val punter: PunterID,
+    @SerializedName("punters") val punters: Int,
+    @SerializedName("map") val map: Map
+)
+
+data class Site(@SerializedName("id") val id: SiteID)
+data class River(@SerializedName("source") val source: SiteID, @SerializedName("target") val target: SiteID, @SerializedName("owner") var owner: PunterID?)
+data class Map(@SerializedName("punters") val sites: Array<Site>, @SerializedName("rivers") val rivers: Array<River>, @SerializedName("mines") val mines: Array<Int>)
 import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
 
 
@@ -15,33 +27,15 @@ data class Site(val id: SiteID)
 data class River(val source: SiteID, val target: SiteID, var owner: PunterID?)
 class Map(val sites: Array<Site>, val rivers: Array<River>, val mines: Array<Int>)
 
-class Game(val punter: PunterID, val punters: Int, val map: Map) {
+fun Map.apply(moves: Array<Move>) {
+    moves.forEach { move ->
+        if (move !is Claim) return@forEach
 
-    fun move(moves: Array<Move>): Move {
-        apply(moves)
-        val river = selectRiver()
-
-        if (river != null) return Claim(punter, river.source, river.target)
-        else return Pass(punter)
-    }
-
-    private fun selectRiver(): River? {
-        val freeRivers = map.rivers.filter { it.owner == null }
-
-        val river = mostConnectedRivers(freeRivers).firstOrNull()
-        return river
-    }
-
-    private fun apply(moves: Array<Move>) {
-        moves.forEach { move ->
-            if (move !is Claim) return@forEach
-
-            val river = map.rivers.find {
-                move.source == it.source && move.target == it.target
-            }
-
-            if (river != null) river.owner = move.punter
+        val river = rivers.find {
+            move.source == it.source && move.target == it.target
         }
+
+        if (river != null) river.owner = move.punter
     }
 
     private fun mostConnectedRivers(rivers: List<River>) : List<River>{
@@ -50,3 +44,5 @@ class Game(val punter: PunterID, val punters: Int, val map: Map) {
     }
 }
 
+val Array<River>.unclaimed: List<River>
+    get() = filter { it.owner == null }

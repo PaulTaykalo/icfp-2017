@@ -3,7 +3,8 @@
                           [org.bytopia/boot-javac-star "0.1.0" :scope "test"]
                           [boot/core "2.7.1" :scope "provided"]
                           [fudje "0.9.7" :scope "test"]
-                          [adzerk/boot-test "1.2.0" :scope "test"]]
+                          [adzerk/boot-test "1.2.0" :scope "test"]
+                          [cheshire "5.7.1"]]
           :source-paths #{"src/clojure" "src/java"}
           :test-paths #{"test/"}
           :resource-paths #{"res/"})
@@ -53,3 +54,4 @@
 (require '[boot-javac-star.core :refer [javac*]])
 
 #_(boot (javac*))
+#_(set-env! :dependencies #(conj % '[org.icfp2017/kotlin-part "1.0.0"]))

@@ -1,34 +1,31 @@
 package org.icfp2017.server
 
-import org.icfp2017.base.Move
+import org.icfp2017.Game
+import org.icfp2017.Move
+import org.icfp2017.PunterID
+import org.icfp2017.PunterName
+import org.icfp2017.base.StopCommand
 
 
 interface Server {
 
-  fun send(command: Move)
+  // Send me once we ready
+  // me == Usernam
+  fun me(me: PunterName, callback: (PunterName) -> Void)
 
-  fun ready()
+  // Send setup and wait for the callback
+  fun setup(callback: (Game) -> Void)
 
-}
+  // Send after setup completed
+  fun ready(punterID: PunterID)
 
-class ServerTCP : Server {
-  override fun ready() {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
+  fun onMove(observer: (Array<Move>) -> Move)
 
-  override fun send(command: Move) {
+  // Subscribe if you want to stop any calcution
+  fun onInterruption(callback: (String) -> Void)
 
-  }
-}
-
-class ServerInputOutput : Server {
-  override fun ready() {
-    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-  }
-
-  override fun send(command: Move) {
-
-  }
+  ///
+  fun onEnd(callback: (StopCommand) -> Void)
 
 }
 

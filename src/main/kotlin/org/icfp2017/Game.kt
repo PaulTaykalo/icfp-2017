@@ -7,6 +7,7 @@ sealed class Move {
 
 typealias SiteID = Int
 typealias PunterID = Int
+typealias PunterName = String
 
 class Site(val id: SiteID)
 class River(val source: SiteID, val target: SiteID)

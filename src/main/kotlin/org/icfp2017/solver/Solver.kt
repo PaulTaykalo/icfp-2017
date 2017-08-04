@@ -7,7 +7,7 @@ object Solver {
         server.me(name) {
             server.setup { game ->
                 server.ready(game.punter)
-                server.onMove { moves -> game.move(moves) }
+                server.onMove(game::move)
             }
         }
     }

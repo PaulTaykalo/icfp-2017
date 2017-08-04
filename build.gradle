@@ -25,7 +25,7 @@ repositories {
 dependencies {
   compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 
-  runtime fileTree(dir: 'clj/jars', include: '*.jar')
+  compile fileTree(dir: 'clj/jars', include: '*.jar')
 
   testCompile group: 'junit', name: 'junit', version: '4.12'
   testCompile "com.nhaarman:mockito-kotlin-kt1.1:1.5.0"

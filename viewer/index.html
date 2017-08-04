@@ -11,6 +11,7 @@
     <div class="container-fluid">
       <h1>&#955; Map Viewer</h1>
       <fieldset>
+        <input type="file" id="myFile" multiple size="50"/>
         <legend>Game Information</legend>
         <div id="dropdown">
           <select id="maps-select" class="form-control">
@@ -37,5 +38,43 @@
     <script src="../js-core/bluebird.min.js"></script>
     <script src="../js-core/js-core.js"></script>
     <script src="viewer.js"></script>
+    <script>
+(function(){
+    
+    function onChange(event) {
+        var reader = new FileReader();
+        reader.onload = onReaderLoad;
+        reader.readAsText(event.target.files[0]);
+    }
+
+    function onReaderLoad(event){
+        console.log(event.target.result);
+        var lines = event.target.result.split("\n")
+        var commands = []
+        lines.forEach((line) => {
+          if (line != "") {
+            commands.push(JSON.parse(line));
+          }
+        });
+
+        commands.forEach( command => {
+          if (command.map != undefined) {
+          if (cy.elements !== undefined) {
+                cy.destroy();
+              }
+          initCy(command.map, function () {
+          cy.autolock(true)
+          cy.edges().on("select", function(evt) { cy.edges().unselect() } );
+          } ); 
+
+          }
+
+        })
+    }
+    
+    document.getElementById('myFile').addEventListener('change', onChange);
+
+}());
+</script>
     </body>
 </html>

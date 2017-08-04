@@ -1,5 +1,9 @@
 package org.icfp2017
 
+class Game(val punter: PunterID, val punters: Int, val map: Map)
+class Map(val sites: Array<Site>, val rivers: Array<River>, val mines: Array<Int>)
+data class River(val source: SiteID, val target: SiteID, var owner: PunterID?)
+
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID): Move()
 data class Pass(val punter: PunterID): Move()
@@ -9,8 +13,6 @@ typealias PunterID = Int
 typealias PunterName = String
 
 data class Site(val id: SiteID)
-data class River(val source: SiteID, val target: SiteID, var owner: PunterID?)
-class Map(val sites: Array<Site>, val rivers: Array<River>, val mines: Array<Int>)
 
 fun Map.apply(moves: Array<Move>) {
     moves.forEach { move ->
@@ -24,29 +26,7 @@ fun Map.apply(moves: Array<Move>) {
     }
 }
 
-class Game(
-        val punter: PunterID,
-        val punters: Int,
-        val map: Map,
-        val strategy: Strategy = FirstFree) {
+val Array<River>.unclaimed: List<River>
+    get() = filter { it.owner == null }
 
-    fun move(moves: Array<Move>): Move {
-        map.apply(moves)
-        return strategy.move(this)
-    }
-}
-
-object FirstFree: Strategy {
-    override fun move(game: Game): Move {
-        val freeRivers = game.map.rivers.filter { it.owner == null }
-        val river = freeRivers.firstOrNull()
-
-        if (river != null) return  Claim(game.punter, river.source, river.target)
-        else return  Pass(game.punter)
-    }
-}
-
-interface Strategy {
-    fun move(game: Game): Move
-}
 

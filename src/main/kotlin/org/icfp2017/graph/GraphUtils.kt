@@ -53,15 +53,13 @@ fun toGraph(map:Map): UWGraph {
         return mostAjusted.first()
     }
 
-    fun findMostAdjacentEdgeInSpanningTree(map:Map) : River {
-        val graph = toGraph(map)
+    fun findMostAdjacentEdgeInSpanningTree(graph:UWGraph, mst:MST) : River {
 //        Logger.log("graph edges  " + graph.edges().size )
 //        Logger.log("graph edges  vals " + graph.edges())
 //        Logger.log("graph vertices  " + graph.vertices().count())
 //        Logger.log("graph vertices  vals" + graph.vertices())
 //        Logger.log("VertexToSite  " + graph.VertexToSite)
 //        Logger.log("SiteToVertex  " + graph.SiteToVertex)
-        val mst = mst(graph)
         val maxGraphId = maxId(graph, mst)
         val riverSource = graph.VertexToSite[maxGraphId.w]
         val riverTarget = graph.VertexToSite[maxGraphId.v]

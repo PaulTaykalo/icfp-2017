@@ -2,6 +2,8 @@ package org.icfp2017.solver
 
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
 import com.sun.javaws.exceptions.InvalidArgumentException
+import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.BoruvkaMST
+import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.MST
 import org.icfp2017.*
 import org.icfp2017.Map
 import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
@@ -27,15 +29,27 @@ object RandomFree: Strategy {
 }
 // looks for most  connected river in minimal spanning tree
 object SpanningTree : Strategy{
-    fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
-        val edge = findMostAdjacentEdgeInSpanningTree(map)
+
+    var graph: UWGraph? = null;
+    var mst: MST? = null;
+
+    fun init(game:Game){
+        if(graph == null){
+            graph = toGraph(game.map)
+            mst = BoruvkaMST(graph!!)
+        }
+
+    }
+    fun mostConnectedRivers(rivers: List<River>) : List<River>{
+        val edge = findMostAdjacentEdgeInSpanningTree(graph!!, mst!!)
         return rivers.filter { (it.source == edge.source && it.target == edge.target)|| ((it.source == edge.target && it.target == edge.source)) }
     }
 
     override fun move(game: Game): Move {
+        init(game)
         val rivers = game.map.rivers.unclaimed
         if (rivers.isEmpty()) return game.pass()
-        val mostConnected = mostConnectedRivers(rivers, game.map)
+        val mostConnected = mostConnectedRivers(rivers)
         if(mostConnected.isNotEmpty()){
             return game.claim(mostConnected.first())
         }
@@ -45,8 +59,18 @@ object SpanningTree : Strategy{
     }
 }
 object AllYourBaseAreBelongToUs : Strategy{
+    var graph: UWGraph? = null;
+    var mst: MST? = null;
+
+    fun init(game:Game){
+        if(graph == null){
+            graph = toGraph(game.map)
+            mst = BoruvkaMST(graph!!)
+        }
+
+    }
     fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
-        val edge = findMostAdjacentEdgeInSpanningTree(map)
+        val edge = findMostAdjacentEdgeInSpanningTree(graph!!, mst!!)
         return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
     }
 
@@ -57,7 +81,7 @@ object AllYourBaseAreBelongToUs : Strategy{
     }
 
     override fun move(game: Game): Move {
-
+        init(game)
         val rivers = game.map.rivers.unclaimed
         if (rivers.isEmpty()) return game.pass()
         val graph = toGraph(game.map)
@@ -80,8 +104,66 @@ object AllYourBaseAreBelongToUs : Strategy{
 // captures rivers close to bases first and then does spanning tree
 object AllYourBaseAreBelongToUsRandom : Strategy{
     val random = Random()
-    fun mostConnectedRivers(rivers: List<River>, map: Map) : List<River>{
-        val edge = findMostAdjacentEdgeInSpanningTree(map)
+    var graph: UWGraph? = null;
+    var mst: MST? = null;
+
+    fun init(game:Game){
+        if(graph == null){
+            graph = toGraph(game.map)
+            mst = BoruvkaMST(graph!!)
+        }
+
+    }
+
+    fun mostConnectedRivers(rivers: List<River>) : List<River>{
+        val edge = findMostAdjacentEdgeInSpanningTree(graph!!, mst!!)
+        return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
+    }
+
+    fun riversCloseToBases(rivers:List<River>, map:Map, graph: UWGraph):List<River> {
+        val baseRivers = rivers.filter {  map.mines.contains(it.target) || map.mines.contains(it.source)}
+        val priorityBaseRivers = baseRivers.sortedWith(compareBy({graph.adjacentEdges(it.target).size},{graph.adjacentEdges(it.source).size}))
+        return  priorityBaseRivers
+    }
+
+
+    override fun move(game: Game): Move {
+
+        init(game)
+
+        val rivers = game.map.rivers.unclaimed
+        if (rivers.isEmpty()) return game.pass()
+
+        val baseRivers = riversCloseToBases(rivers, game.map, graph!!)
+        if(baseRivers.isNotEmpty()){
+            return game.claim(baseRivers.first())
+        }
+        // if all base rivers are captures, do most connected things
+        val mostConnected = mostConnectedRivers(rivers)
+        if(mostConnected.isNotEmpty()) {
+            return game.claim(mostConnected.first())
+        }
+
+        // if minimal spanning tree is captured, do whatever is left
+        return  game.claim(rivers[random.nextInt(rivers.size)])
+    }
+}
+
+// captures rivers close to bases first and then does spanning tree
+object AllYourBaseAreBelongToUsConnectBases : Strategy{
+    val random = Random()
+    var graph: UWGraph? = null;
+    var mst: MST? = null;
+
+    fun init(game:Game){
+        if(graph == null){
+            graph = toGraph(game.map)
+            mst = BoruvkaMST(graph!!)
+        }
+
+    }
+    fun mostConnectedRivers(rivers: List<River>) : List<River>{
+        val edge = findMostAdjacentEdgeInSpanningTree(graph!!, mst!!)
         return rivers.filter { (it.source == edge.source && it.target == edge.source)|| ((it.source == edge.target && it.target == edge.source)) }
     }
 
@@ -93,6 +175,7 @@ object AllYourBaseAreBelongToUsRandom : Strategy{
 
     override fun move(game: Game): Move {
 
+        init(game)
         val rivers = game.map.rivers.unclaimed
         if (rivers.isEmpty()) return game.pass()
         val graph = toGraph(game.map)
@@ -101,11 +184,11 @@ object AllYourBaseAreBelongToUsRandom : Strategy{
             return game.claim(baseRivers.first())
         }
         // if all base rivers are captures, do most connected things
-        val mostConnected = mostConnectedRivers(rivers, game.map)
+        val mostConnected = mostConnectedRivers(rivers)
         if(mostConnected.isNotEmpty()) {
             return game.claim(mostConnected.first())
         }
-
+        game.punter
         // if minimal spanning tree is captured, do whatever is left
         return  game.claim(rivers[random.nextInt(rivers.size)])
     }

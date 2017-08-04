@@ -1,6 +1,7 @@
 package org.icfp2017
 
-import com.sun.org.apache.xpath.internal.operations.Bool
+import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
+
 
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID): Move()
@@ -26,7 +27,8 @@ class Game(val punter: PunterID, val punters: Int, val map: Map) {
 
     private fun selectRiver(): River? {
         val freeRivers = map.rivers.filter { it.owner == null }
-        val river = freeRivers.firstOrNull()
+
+        val river = mostConnectedRivers(freeRivers).firstOrNull()
         return river
     }
 
@@ -40,6 +42,11 @@ class Game(val punter: PunterID, val punters: Int, val map: Map) {
 
             if (river != null) river.owner = move.punter
         }
+    }
+
+    private fun mostConnectedRivers(rivers: List<River>) : List<River>{
+        val edge = findMostAdjacentEdgeInSpanningTree(map)
+        return rivers.filter { (it.source == edge.v && it.target == edge.w)|| ((it.source == edge.w && it.target == edge.v)) }
     }
 }
 

@@ -52,6 +52,7 @@ abstract class MSTTest(val strategy: (UWGraph) -> (MST)) {
         graph.addEdge(1, 4, 3.0)
         graph.addEdge(1, 3, 5.0)
         val mst = strategy(graph)
+
         Assert.assertEquals(11.0, mst.weight(), 1e-12)
     }
 

@@ -1,4 +1,5 @@
-(ns icfp.core)
+(ns icfp.core
+  (:import icfp.Dummy))
 
-(defn foobar []
-  (str "foo" "bar"))
+(defn foobar [a]
+  (str "foo " (Dummy/dummy a)))

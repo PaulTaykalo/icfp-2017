@@ -11,13 +11,7 @@
         ;; graph (apply g/graph (seq (:rivers world)))
         sites (:sites world)
         mines (set (:mines world))
-        ;; scored-shortest-path (into {}
-        ;;                            (for [f sites
-        ;;                                  t sites]
-        ;;                              [(util/river f t)
-        ;;                               (if (= f t)
-        ;;                                 0
-        ;;                                 (dec (count (ga/shortest-path graph f t))))]))
+        ;; scored-shortest-path (util/fast-shortest-paths graph mines)
         unused-rivers (:rivers world)
         union (apply u/union-find sites)
         union-sites-count (into {} (map #(vector % 1) sites))

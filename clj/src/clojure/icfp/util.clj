@@ -1,4 +1,6 @@
-(ns icfp.util)
+(ns icfp.util
+  (:require [loom.graph :as g]
+            [loom.alg :as ga]))
 
 (defn river [from to]
   (if (> to from) [from to] [to from]))
@@ -29,3 +31,11 @@
             (throw (RuntimeException. "Invalid claim"))))
         world)
       (update :remaining-moves dec)))
+
+(defn fast-shortest-paths [graph starts]
+  (->> starts
+       (mapcat
+        (fn [mine]
+          (ga/bf-traverse graph mine
+                          :f (fn [node _ depth] (vector (river mine node) depth)))))
+       (into {})))

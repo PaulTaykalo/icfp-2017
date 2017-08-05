@@ -23,13 +23,16 @@ object Logger {
         return result
     }
 
-    var measures = mutableMapOf<String, Long>()
+    var measures = mutableMapOf<String, Pair<Long, Set<Long>>>()
 
     inline fun <T> measurePart(action: String, block: () -> T): T {
         val start = System.currentTimeMillis()
         val result = block()
         val time = System.currentTimeMillis() - start
-        measures[action] = measures.getOrDefault(action, 0) + time
+
+        var part = measures.getOrDefault(action, Pair(0L, setOf<Long>()))
+        part = Pair(part.first + time, part.second + time)
+        measures[action] = part
         return  result
     }
 

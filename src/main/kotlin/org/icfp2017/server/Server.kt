@@ -172,7 +172,6 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
     override fun setup(callback: (Game) -> Unit) {
         val response: GameModel = Gson().fromJson(readString(), GameModel::class.java)
         val game = Game(response.punter, response.punters, response.map)
-        Logger.log("Sent $response")
         callback(game)
     }
 

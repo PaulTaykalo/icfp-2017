@@ -12,7 +12,7 @@ object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
     var port: Int = 9024
-    var strategy: Strategy = RandomFree
+    var strategy: Strategy = AllYourBaseAreBelongToUsRandom
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
 }

@@ -29,6 +29,8 @@
           (recur (- left-bytes bytes-read)
                  (str result (String. buff 0 bytes-read))))))))
 
+(def punter-names (atom {}))
+
 (defn start-tcp-server [port max-players game-loop-fn history-out-file]
   (let [punters (atom {})
         history (atom [])]
@@ -40,6 +42,7 @@
               _ (println "[INFO] Connected:" sock)
               handshake (json/parse-string (recv! sock history) true)]
           (when (:me handshake)
+            (swap! punter-names assoc (count @punters) (:me handshake))
             (send! sock (json/encode {:you (:me handshake)}) history)
             (swap! punters #(assoc % (count %) sock)))))
       (game-loop-fn

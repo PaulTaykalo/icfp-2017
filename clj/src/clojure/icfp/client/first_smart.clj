@@ -87,7 +87,7 @@
                                         0
                                         (dec (count (ga/shortest-path graph f t))))]))
         unused-rivers (:rivers world)
-        union (u/union-find sites)
+        union (apply u/union-find sites)
         union-sites-count (into {} (map #(vector % 1) sites))
         union-mines-count (into {} (map #(vector % (if (mines %) 1 0)) sites))]
     (assoc state
@@ -104,8 +104,10 @@
 
 (defn smart-consume-move [state move]
   (let [claim (get-claim move)
-        updated-state (-> (update state :world util/consume-move move)
-                          (update state :unused-rivers #(if claim (disj % (:river claim)) %)))]
+        updated-state (-> state
+                          (update :world util/consume-move move)
+                          (update :unused-rivers
+                                  #(if claim (disj % (:move claim)) %)))]
     (if (and claim (= (:id state) (:punter claim)))
       (let [[from to] (:move claim)
             old-union (:union updated-state)
@@ -123,5 +125,24 @@
                                                        (get union-mines-count old-to-head)))))
       updated-state)))
 
-(defn make-smart-random-client [& [offline?]]
-  (make-client smart-init smart-consume-move random-decision offline?))
+(defn score-move [state current-graph [from to]]
+  (let [{:keys [union union-mines-count union-sites-count unused-rivers]} state
+        from-head (union from)
+        to-head (union to)]
+    (+ (count (get current-graph from))
+       (count (get current-graph to))
+       (if (= from-head to-head)
+         (* -1 (count unused-rivers))
+         (+ (* (union-mines-count from-head) (union-sites-count to-head))
+            (* (union-mines-count to-head) (union-sites-count from-head)))))))
+
+(defn smart-decision [state]
+  (let [current-graph (apply g/graph (seq (:unused-rivers state)))
+        scores (->> (:unused-rivers state)
+                    (map #(vector % (score-move state current-graph %)))
+                    (sort #(> (second %1) (second %2))))
+        [move score] (first scores)]
+    move))
+
+(defn make-smart-client [& [offline?]]
+  (make-client smart-init smart-consume-move smart-decision offline?))

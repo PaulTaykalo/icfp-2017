@@ -72,13 +72,14 @@
                           punters)))
     (dorun (map-indexed (fn [id punter]
                           (send-stop-message-to-punter punter id))
-                        punters))))
+                        punters))
+    (scorer/score @world)))
 
 (comment
   (game-loop (slurp (io/resource "test-map.json"))
              [(smart1/make-random-client true) (smart1/make-random-client true)])
-  (game-loop (slurp (io/file "res/london-tube.json"))
-             [(smart1/make-random-client) (smart1/make-random-client)])
+  (game-loop (slurp (io/file "res/test-map.json"))
+             [(smart1/make-smart-client) (smart1/make-random-client)])
 
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2

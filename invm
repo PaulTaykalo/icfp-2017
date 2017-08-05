@@ -42,3 +42,12 @@ echo Running ./bin/icfp2017...
 scp $SSHOPTS -i ssh-key \
   'punter@localhost:/home/punter/icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f/log*.txt' \
   .
+
+last_log=$(ls log-* | tail -n 1)
+echo '----'
+echo 'Done. To view last log, run'
+echo ''
+echo '  $ ./view '$last_log
+echo ''
+echo ''
+

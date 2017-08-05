@@ -11,14 +11,13 @@ import org.icfp2017.solver.*
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9119
-    var strategy: Strategy<StrategyStateWithGame> = DumbAndGreedy
+    var port: Int = 9188
+    var strategy: String = DumbAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
-    var offline = true
+    var offline = false
 }
 
-val Arguments.strategyName: String get() = strategy.javaClass.simpleName
-val Arguments.nameWithStrategy: String get() = "$name [$strategyName]"
+val Arguments.nameWithStrategy: String get() = "$name [$strategy]"
 
 fun main(args: Array<String>) {
     if (args.contains("--help")) {
@@ -39,7 +38,7 @@ fun main(args: Array<String>) {
                 Arguments.port = value.toInt()
                 Arguments.offline = false
             }
-            "--strategy" -> Arguments.strategy = Strategy.forName(value)
+            "--strategy" -> value
             "--offline" -> Arguments.offline = value.toBoolean()
         }
     }
@@ -48,16 +47,16 @@ fun main(args: Array<String>) {
             "name" to Arguments.name,
             "server" to Arguments.server,
             "port" to Arguments.port,
-            "strategy" to Arguments.strategyName,
+            "strategy" to Arguments.strategy,
             "log" to Arguments.log,
             "offline" to Arguments.offline))))
 
     if (Arguments.offline) {
         val server = OfflineServer()
-        OfflineSolver.play<StrategyStateWithGame>(server)
+        Strategy.play(server)
     } else {
         val offlineServer = OfflineServer()
         val onlineServer = OnlineServer(offlineServer = offlineServer)
-        OfflineSolver.play<StrategyStateWithGame>(offlineServer)
+        Strategy.play(offlineServer)
     }
 }

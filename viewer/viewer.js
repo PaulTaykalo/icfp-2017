@@ -93,7 +93,7 @@ $(function(){
     loadMapList(false);
     selectMap(param1);
   } else {
-    loadMapList(true);
+    loadMapList(false);
   }
 })
 

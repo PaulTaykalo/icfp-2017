@@ -33,13 +33,8 @@
            :union-mines union-mines
            :union-sites union-sites)))
 
-(defn get-claim [move]
-  (when-let [claim (:claim move)]
-    {:punter claim
-     :move (util/river (:source claim) (:target claim))}))
-
 (defn smart-consume-move [state move]
-  (let [claim (get-claim move)
+  (let [claim (util/get-claim move)
         updated-state (-> state
                           (update :world util/consume-move move)
                           (update :unused-rivers

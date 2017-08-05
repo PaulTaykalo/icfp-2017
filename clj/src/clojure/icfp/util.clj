@@ -22,9 +22,14 @@
                              {:pass {:punter i}}))
            :remaining-moves (count (:rivers internal-map)))))
 
+(defn get-claim [move]
+  (when-let [claim (:claim move)]
+    {:punter claim
+     :move (river (:source claim) (:target claim))}))
+
 (defn consume-move [world move]
-  (-> (if-let [claim (and (not (:pass move)) (:claim move))]
-        (let [to-claim (river (:source claim) (:target claim))]
+  (-> (if-let [claim (get-claim move)]
+        (let [to-claim (:move claim)]
           (if (and (get (:rivers world) to-claim)
                    (not (get (:claimed world) to-claim)))
             (assoc-in world [:claimed to-claim] (:punter claim))

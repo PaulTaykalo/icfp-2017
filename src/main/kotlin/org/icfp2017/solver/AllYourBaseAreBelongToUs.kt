@@ -4,17 +4,14 @@ import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 
 object AllYourBaseAreBelongToUs : Strategy{
-    var graphUtils: GraphUtils? = null;
+    lateinit var graphUtils: GraphUtils
 
-    fun init(game: Game){
-        if(graphUtils == null){
-            graphUtils = GraphUtils(game)
-        }
+    override fun prepare(game: Game){
+        graphUtils = GraphUtils(game)
     }
 
     override fun move(game: Game): Move {
-        init(game)
-        val rivers = game.map.rivers.unclaimed
+        val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()
 
         val baseRivers =  graphUtils!!.riversCloseToBases(rivers, game.map)

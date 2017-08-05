@@ -2,7 +2,6 @@
 
 package org.icfp2017
 import com.google.gson.annotations.SerializedName
-import org.icfp2017.graph.findMostAdjacentEdgeInSpanningTree
 data class Game(
     @SerializedName("punter") val punter: PunterID,
     @SerializedName("punters") val punters: Int,

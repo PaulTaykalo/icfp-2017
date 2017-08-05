@@ -10,7 +10,6 @@ object Solver {
     fun play(server: Server, name: String = Arguments.nameWithStrategy, strategy: Strategy = Arguments.strategy) {
         server.me(name) {
             server.setup { game ->
-                TODO("define initial state for offline mode")
                 val initialState: State? = null
                 strategy.prepare(game)
                 server.ready(
@@ -19,7 +18,6 @@ object Solver {
                     onMove = { moves, state ->
                         game.apply(moves)
                         val move = strategy.move(game)
-                        TODO("get state for offline mode")
                         val updatedState: State? = null
                         ServerMove(move, updatedState)
                     },

@@ -48,12 +48,12 @@
                                              #(assoc % :state (print-str (offline/prepare-to-send-offline-state @state)))
                                              identity)
                                            {:ready (:id @state)
-                                            :futures (map (fn [mine]
-                                                            {:source mine
-                                                             :target (rand-nth (seq (-> @state :world :sites)))})
-                                                          (-> @state :world :mines))})))
+                                            ;; :futures (map (fn [mine]
+                                            ;;                 {:source mine
+                                            ;;                  :target (rand-nth (seq (-> @state :world :sites)))})
+                                            ;;               (-> @state :world :mines))
+                                            })))
 
               ;; ignore
               :else (do (println req)
                         nil))))))
-

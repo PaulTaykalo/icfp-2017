@@ -1,7 +1,10 @@
 (ns icfp.client.client
   (:require [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg]
-            icfp.client.first-smart)
+            icfp.client.first-smart
+            icfp.client.second-smart
+            icfp.client.random
+            )
   (:gen-class))
 
 (defn -main [& args]
@@ -23,6 +26,7 @@
   (cfg/with-options [server strategy]
    (tcp/make-tcp-client (str "CLJ/" strategy)
                         (case strategy
-                          :random (icfp.client.first-smart/make-random-client)
-                          :smart-v1 (icfp.client.first-smart/make-smart-client))
+                          :random (icfp.client.random/make-client)
+                          :smart-v1 (icfp.client.first-smart/make-client)
+                          :smart-v2 (icfp.client.second-smart/make-client))
                         (:host server) (:port server))))

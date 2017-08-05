@@ -5,6 +5,7 @@
                           [fudje "0.9.7" :scope "test"]
                           [adzerk/boot-test "1.2.0" :scope "test"]
                           [cheshire "5.7.1"]
+                          [org.jordanlewis/data.union-find "0.1.0"]
                           [aysylu/loom "1.0.0"]
                           [com.grammarly/omniconf "0.2.6"]]
           :source-paths #{"src/clojure" "src/java"}

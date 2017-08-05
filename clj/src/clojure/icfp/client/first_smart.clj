@@ -1,6 +1,7 @@
 (ns icfp.client.first-smart
     (:require [cheshire.core :as json]
               [icfp.util :as util]
+              [icfp.client.offline-helpers :as offline]
               [jordanlewis.data.union-find :as u]
               [loom.graph :as g]
               [loom.alg :as ga]
@@ -23,7 +24,8 @@
               (do
                 (when-let [saved-state (and offline?
                                             (:state req))]
-                  (reset! state (read-string saved-state)))
+                  (reset! state (offline/prepare-received-offline-state
+                                 (read-string saved-state))))
                 (reset! state
                         (reduce consume-move-function
                                 @state
@@ -34,7 +36,7 @@
                   (let [[src tgt :as move] (decision-function @state)]
                     (json/encode
                      ((if offline?
-                        #(assoc % :state (print-str @state))
+                        #(assoc % :state (print-str (offline/prepare-to-send-offline-state @state)))
                         identity)
                       {:claim {:punter (:id @state), :source src, :target tgt}})))))
 
@@ -47,7 +49,7 @@
                                                 :id (:punter req)}
                                                init-state-function))
                              (json/encode ((if offline?
-                                             #(assoc % :state (print-str @state))
+                                             #(assoc % :state (print-str (offline/prepare-to-send-offline-state @state)))
                                              identity)
                                            {:ready (:id @state)
                                             :futures (map (fn [mine]

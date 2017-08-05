@@ -20,8 +20,10 @@
     (when-not (= (:ready resp) punter-id)
       (throw (ex-info (str "Wrong response from punter " punter-id ": " resp)
                       {})))
-    (when-let [{:keys [source target]} (last (:futures resp))]
-      (swap! world assoc-in [:punter-futures punter-id] {:mine source, :site target}))
+    (when-let [futures (last (:futures resp))]
+      (swap! world assoc-in [:punter-futures punter-id]
+             (set (for [{:keys [source target]} futures]
+                    {:mine source, :site target}))))
     (:state resp)))
 
 (defn- prepare-moves [world]
@@ -90,7 +92,7 @@
 
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 
-  (score @world)
+  (scorer/score @world)
 
   (game-loop (slurp (io/resource "test-map.json")) [alice bob])
 

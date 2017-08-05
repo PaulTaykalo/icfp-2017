@@ -6,10 +6,8 @@ import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.Dijkstra
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.MST
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph.Edge
-import org.icfp2017.Game
-import org.icfp2017.Logger
+import org.icfp2017.*
 import org.icfp2017.Map
-import org.icfp2017.River
 
 class GraphUtils(game: Game) {
 
@@ -102,23 +100,25 @@ class GraphUtils(game: Game) {
         {
             allRivers.add(river)
             allEdges.add(riverToEdge[river] as Edge)
-            if(river.owner == null){
-                freeRivers.add(river)
-                freeEdges.add(riverToEdge[river] as Edge)
-            }else
-            {
+            if(river.owner != null){
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
+                if(river.owner == game.punter){
+                    ourRivers.add(river)
+                    ourEdges.add(riverToEdge[river] as Edge)
+                }else
+                {
+                    theirRivers.add(river)
+                    theirEdges.add(riverToEdge[river] as Edge)
+                }
+            }else // no one took rivers,they are free
+            {
+                freeRivers.add(river)
+                freeEdges.add(riverToEdge[river] as Edge)
+
             }
 
-            if(river.owner == game.punter){
-                ourRivers.add(river)
-                ourEdges.add(riverToEdge[river] as Edge)
-            }else
-            {
-                theirRivers.add(river)
-                theirEdges.add(riverToEdge[river] as Edge)
-            }
+
 
         }
     }
@@ -133,9 +133,16 @@ class GraphUtils(game: Game) {
     }
 
 
+    fun vertexFromSite(site:Int):Int{
+        val res = siteToVertex[site]
+        if(res == null)
+            throw NullPointerException()
+        return res
+    }
     fun riversCloseToBases(rivers: List<River>, map: Map): List<River> {
         val baseRivers = rivers.filter { map.mines.contains(it.target) || map.mines.contains(it.source) }
-        val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(it.target).size }, { graph!!.adjacentEdges(it.source).size }))
+
+        val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))
         return priorityBaseRivers
     }
 
@@ -145,8 +152,9 @@ class GraphUtils(game: Game) {
         val dijkstra= Dijkstra(graph!!, startVertexId!!)
         if(dijkstra.hasPathTo(endVertexId!!)){
             val path = dijkstra.pathTo(endVertexId)
+            //Logger.log("path is found "  + path)
 
-            return path.map { edgeToRiver[it] as River }
+            return path.map { River(vertexToSite[it.v] as SiteID, vertexToSite[it.w] as SiteID, null) }
 
         }else{
             return listOf()

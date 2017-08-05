@@ -17,6 +17,7 @@ interface Strategy {
             "AllYourBaseAreBelongToUs" -> AllYourBaseAreBelongToUs
             "AllYourBaseAreBelongToUsRandom" -> AllYourBaseAreBelongToUsRandom
             "DumbAndGreedy" -> DumbAndGreedy
+            "EagerBaseCatcher" -> EagerBaseCatcher
             else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
         }
     }

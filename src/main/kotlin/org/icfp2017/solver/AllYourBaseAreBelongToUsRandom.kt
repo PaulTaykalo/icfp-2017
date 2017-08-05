@@ -14,6 +14,7 @@ object AllYourBaseAreBelongToUsRandom : Strategy{
     }
 
     override fun move(game: Game): Move {
+        graphUtils.updateState(game)
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()
 

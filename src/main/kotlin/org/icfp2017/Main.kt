@@ -3,7 +3,6 @@
 package org.icfp2017
 
 import com.google.gson.Gson
-import com.sun.org.apache.xpath.internal.Arg
 import org.icfp2017.server.OfflineServer
 import org.icfp2017.server.OnlineServer
 import org.icfp2017.solver.*
@@ -16,6 +15,9 @@ object Arguments {
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
 }
+
+val Arguments.strategyName: String get() = strategy.javaClass.simpleName
+val Arguments.nameWithStrategy: String get() = "$name [$strategyName]"
 
 fun main(args: Array<String>) {
     if (args.contains("--help")) {
@@ -45,11 +47,11 @@ fun main(args: Array<String>) {
             "name" to Arguments.name,
             "server" to Arguments.server,
             "port" to Arguments.port,
-            "strategy" to Arguments.strategy.javaClass.canonicalName,
+            "strategy" to Arguments.strategyName,
             "log" to Arguments.log,
             "offline" to Arguments.offline))))
 
     val server = if (Arguments.offline) OfflineServer() else OnlineServer()
-    val name = Arguments.name + "[${Arguments.strategy.javaClass.canonicalName}]"
-    Solver.play(server, name = name)
+
+    Solver.play(server)
 }

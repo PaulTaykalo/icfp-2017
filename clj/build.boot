@@ -6,7 +6,7 @@
                           [adzerk/boot-test "1.2.0" :scope "test"]
                           [cheshire "5.7.1"]
                           [org.jordanlewis/data.union-find "0.1.0"]
-                          [aysylu/loom "1.0.0"]
+                          [aysylu/loom "1.0.0" :exclusions [org.clojure/clojurescript]]
                           [com.grammarly/omniconf "0.2.6"]]
           :source-paths #{"src/clojure" "src/java"}
           :test-paths #{"test/"}
@@ -56,8 +56,9 @@
 
 (deftask build-sim-server []
   (comp (javac) (aot :namespace '#{icfp.server.server})
+        (collect-deps :collect-dir "jars" :exclude-scope #{"test" "provided"})
         (pom :project 'lambada/icfp-sim-server)
-        (uber) (jar :file "sim-server-futures.jar" :main 'icfp.server.server)
+        (jar :file "sim-server-futures.jar" :main 'icfp.server.server)
         (target)))
 
 (deftask build-clj-client []

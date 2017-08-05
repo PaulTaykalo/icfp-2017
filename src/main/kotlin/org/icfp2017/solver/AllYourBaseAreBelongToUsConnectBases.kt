@@ -21,7 +21,7 @@ object AllYourBaseAreBelongToUsConnectBases : Strategy<StrategyStateWithGame> {
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return ServerMove(game.pass(), state)
 
-        val baseRivers = graphUtils.riversCloseToBases(rivers, game.map)
+        val baseRivers = graphUtils.riversCloseToBases(rivers, game)
         if (baseRivers.isNotEmpty()) {
             return ServerMove(game.claim(baseRivers.first()), state)
         }

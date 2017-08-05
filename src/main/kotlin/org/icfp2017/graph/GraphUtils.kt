@@ -54,24 +54,22 @@ class GraphUtils(game: Game) {
         //Logger.log("sites  " + map.sites)
         //Logger.log("size  " + map.sites.size)
 
-        val map = game.map
-
-        val vertexNumber = map.sites.size
+        val vertexNumber = game.sitesForSite.keys.size
         val graph = UWGraph(vertexNumber);
 
         var graphVertexId = 0
-        for (site in map.sites) {
-            vertexToSite.put(graphVertexId, site.id)
-            siteToVertex.put(site.id, graphVertexId)
+        for (site in game.sitesForSite.keys) {
+            vertexToSite.put(graphVertexId, site)
+            siteToVertex.put(site, graphVertexId)
             graphVertexId++
         }
 
-        for (river in map.rivers) {
+        for (river in game.unownedRivers + game.ownedRivers) {
             val source = siteToVertex[river.source]
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
                 var edge = graph.addEdge(source, target, 1.0, river)
-                if(river !in game.ownRivers) {
+                if(river !in game.myRivers) {
                     edge = graph.addEdge(source, target, java.lang.Double.POSITIVE_INFINITY, river)
 
                 }
@@ -99,14 +97,14 @@ class GraphUtils(game: Game) {
         // should not happen, should do delta
         initState(game)
 
-        for (river in game.map.rivers)
+        for (river in game.unownedRivers + game.ownedRivers)
         {
             allRivers.add(river)
             allEdges.add(riverToEdge[river] as Edge)
             if(river !in game.unownedRivers){
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
-                if(river in game.ownRivers){
+                if(river in game.myRivers){
                     ourRivers.add(river)
                     ourEdges.add(riverToEdge[river] as Edge)
                 }else
@@ -143,8 +141,8 @@ class GraphUtils(game: Game) {
         return res
     }
 
-    fun riversCloseToBases(rivers: List<River>, map: MapModel): List<River> {
-        val baseRivers = rivers.filter { map.mines.contains(it.target) || map.mines.contains(it.source) }
+    fun riversCloseToBases(rivers: List<River>, game: Game): List<River> {
+        val baseRivers = game.mines.flatMap { game.riversForSite[it]!! }
 
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))
         return priorityBaseRivers

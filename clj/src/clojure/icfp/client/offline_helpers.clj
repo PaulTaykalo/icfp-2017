@@ -12,7 +12,11 @@
      num-sets nil)))
 
 (defn prepare-to-send-offline-state [state]
-  (update state :union uf-serialize-to-edn))
+  (if (:union state)
+    (update state :union uf-serialize-to-edn)
+    state))
 
 (defn prepare-received-offline-state [serialized-state]
-  (update serialized-state :union uf-deserialize-from-edn))
+  (if (:union serialized-state)
+    (update serialized-state :union uf-deserialize-from-edn)
+    serialized-state))

@@ -14,7 +14,7 @@ object Arguments {
     var port: Int = 9119
     var strategy: Strategy<StrategyStateWithGame> = DumbAndGreedy
     var log: String = "./log-${System.currentTimeMillis()}.txt"
-    var offline = false
+    var offline = true
 }
 
 val Arguments.strategyName: String get() = strategy.javaClass.simpleName

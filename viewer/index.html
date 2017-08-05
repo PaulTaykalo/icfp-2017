@@ -60,9 +60,15 @@
     var data = document.getElementById('data');
     if (data) {
       parse(data.innerText);
+    } else {
+      fetch("history.json", {mode: "no-cors"})
+      .then(function(res) {
+        return res.text() })
+      .then(function(json) {
+        return parse(json)
+      })
     }
-
-  });
+}); // load
 
     </script>
   </body>

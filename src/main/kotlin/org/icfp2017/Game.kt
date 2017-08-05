@@ -16,15 +16,6 @@ data class Game(
     val sitesForSite = calculateSitesForSite()
     val siteScores = calculateScores()
 
-    private fun  calculateSitesForSite(): Map<SiteID, Set<SiteID>> {
-        fun sitesForSite(site: SiteID): Set<SiteID> {
-            val rivers = riversForSite[site]!!
-            return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
-        }
-
-        return map.sites.map { it.id to sitesForSite(it.id)}.toMap()
-    }
-
     private fun calculateRiversForSites(): Map<SiteID, Set<River>> {
         val results = mapOf(*map.sites.map { it.id to mutableSetOf<River>()}.toTypedArray())
         map.rivers.forEach {
@@ -35,18 +26,32 @@ data class Game(
         return results
     }
 
+    private fun  calculateSitesForSite(): Map<SiteID, Set<SiteID>> {
+        fun sitesForSite(site: SiteID): Set<SiteID> {
+            val rivers = riversForSite[site]!!
+            return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
+        }
+
+        return map.sites.map { it.id to sitesForSite(it.id)}.toMap()
+    }
+
+
     private fun calculateScores(): Map<SiteID, Map<SiteID, Long>> {
-        var scores = mapOf(*map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toTypedArray())
+        var scores = map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
 
-        var step = 1L
         mines.forEach { mine ->
-            val rivers = riversForSite[mine]!!
+            var step = 1L
+            scores[mine]!![mine] = 0
+            var front = mutableSetOf(mine)
+            while (front.isNotEmpty()) {
+                val site = front.elementAt(0)
+                val sites = sitesForSite[site]!!.filter { scores[it]!![mine] == null }
+                sites.forEach { scores[it]!![mine] = step * step }
 
-            rivers
-                    .flatMap { arrayListOf(it.source, it.target) }
-                    .filter { scores[it]!![mine] == null }
-                    .forEach { scores[it]!![mine] = step * step }
-            step += 1
+                front.addAll(sites)
+                front.remove(site)
+                step += 1
+            }
         }
 
         Logger.log(Gson().toJson(scores))

@@ -7,7 +7,7 @@ import org.icfp2017.Move
 import org.icfp2017.server.ServerMove
 
 
-interface StrategyState{}
+interface StrategyState {}
 
 class DummyState: StrategyState
 

@@ -3,7 +3,6 @@ package org.icfp2017
 import org.amshove.kluent.`should equal to`
 import org.amshove.kluent.shouldContain
 import org.junit.Test
-import icfp.Api
 
 class SimServerTest {
 

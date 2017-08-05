@@ -25,7 +25,8 @@
                           (for [punter (range (:punter-count world))]
                             [punter 0]))]
     (into final-score
-          (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
+          (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))
+                :when id]
             [id (let [connected (ga/connected-components (apply g/graph owned))]
                   (+
                    ;; Graph part

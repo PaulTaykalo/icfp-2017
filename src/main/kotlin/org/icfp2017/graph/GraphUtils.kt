@@ -2,6 +2,7 @@ package org.icfp2017.graph
 
 
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.BoruvkaMST
+import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.Dijkstra
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.MST
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph.Edge
@@ -16,6 +17,7 @@ class GraphUtils(game: Game) {
     var mst: MST? = null;
     var mstEdges: List<Edge>? = null;
     var mostAjustedMst: List<Edge>? = null;
+
 
     val riverToEdge:HashMap<River, Edge> = hashMapOf()
     val edgeToRiver:HashMap<Edge, River> = hashMapOf()
@@ -107,7 +109,6 @@ class GraphUtils(game: Game) {
             {
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
-
             }
 
             if(river.owner == game.punter){
@@ -122,7 +123,7 @@ class GraphUtils(game: Game) {
         }
     }
     fun mostConnectedRivers(rivers: Iterable<River>): List<River> {
-        val edge = findMostAdjacentEdgeInSpanningTree(graph!!, mst!!)
+        val edge = findMostAdjacentEdgeInSpanningTree()
         return rivers.filter {  (it.source == edge.source && it.target == edge.target) || ((it.source == edge.target && it.target == edge.source)) }
     }
 
@@ -133,9 +134,23 @@ class GraphUtils(game: Game) {
         return priorityBaseRivers
     }
 
+    fun findPath(startSiteId:Int, endSiteId:Int) :Iterable<River>{
+        val startVertexId = siteToVertex[startSiteId];
+        val endVertexId = siteToVertex[endSiteId];
+        val dijkstra= Dijkstra(graph!!, startVertexId!!)
+        if(dijkstra.hasPathTo(endVertexId!!)){
+            val path = dijkstra.pathTo(endVertexId)
+
+            return path.map { edgeToRiver[it] as River }
+
+        }else{
+            return listOf()
+        }
+
+    }
 
 
-    fun findMostAdjacentEdgeInSpanningTree(graph: UWGraph, mst: MST): River {
+    fun findMostAdjacentEdgeInSpanningTree(): River {
 //        Logger.log("graph edges  " + graph.edges().size )
 //        Logger.log("graph edges  vals " + graph.edges())
 //        Logger.log("graph vertices  " + graph.vertices().count())

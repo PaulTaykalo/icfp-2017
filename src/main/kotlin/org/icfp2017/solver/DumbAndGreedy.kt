@@ -9,7 +9,7 @@ object DumbAndGreedy : Strategy<StrategyStateWithGame> {
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
         val reachedPoints = game.sitesReachedForMine.flatMap { it.value }
@@ -29,6 +29,6 @@ object DumbAndGreedy : Strategy<StrategyStateWithGame> {
             delta
         }
 
-        return ServerMove(game.claim(river), state)
+        return Pair(game.claim(river), state)
     }
 }

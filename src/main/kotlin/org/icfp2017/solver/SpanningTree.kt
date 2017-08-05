@@ -19,19 +19,19 @@ object SpanningTree : Strategy<StrategyStateWithGame> {
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
 
         init(game)
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
+        if (rivers.isEmpty()) return Pair(game.pass(), state)
         val mostConnected = graphUtils!!.mostConnectedRivers(rivers)
         if (mostConnected.isNotEmpty()) {
-            return ServerMove(game.claim(mostConnected.first()), state)
+            return Pair(game.claim(mostConnected.first()), state)
         }
         // if minimal spanning tree is captured, do whatever is left
-        return ServerMove(game.claim(rivers.first()), state)
+        return Pair(game.claim(rivers.first()), state)
 
     }
 }

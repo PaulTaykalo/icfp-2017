@@ -52,10 +52,11 @@ fun main(args: Array<String>) {
             "offline" to Arguments.offline))))
 
     if (Arguments.offline) {
-        val server = OfflineServer<StrategyStateWithGame>()
-        OfflineSolver.play(server)
+        val server = OfflineServer()
+        OfflineSolver.play<StrategyStateWithGame>(server)
     } else {
-//        val server = OnlineServer()
-//        Solver.play(server)
+        val offlineServer = OfflineServer()
+        val onlineServer = OnlineServer(offlineServer = offlineServer)
+        OfflineSolver.play<StrategyStateWithGame>(offlineServer)
     }
 }

@@ -4,7 +4,6 @@ import com.google.gson.annotations.SerializedName
 import com.sun.javaws.exceptions.InvalidArgumentException
 import org.icfp2017.Game
 import org.icfp2017.Move
-import org.icfp2017.server.ServerMove
 
 data class StrategyStateWithGame(
     @SerializedName("game") val game: Game
@@ -12,7 +11,7 @@ data class StrategyStateWithGame(
 
 interface Strategy<State> {
 
-    fun serverMove(moves: Array<Move>, state: State): ServerMove<State>
+    fun serverMove(moves: Array<Move>, state: State): Pair<Move, State>
     fun prepare(game: Game): State
 
     companion object {

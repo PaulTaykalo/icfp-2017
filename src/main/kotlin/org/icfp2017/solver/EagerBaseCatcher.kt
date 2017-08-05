@@ -14,13 +14,13 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
         graphUtils.updateState(game)
 
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
+        if (rivers.isEmpty()) return Pair(game.pass(), state)
 
         var path :Iterable<River> = listOf();
 
@@ -39,7 +39,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
                     if(intersection.isNotEmpty())
                     {
                       //  Logger.log("intersection is " + intersection.first())
-                        return ServerMove(game.claim(intersection.first()), state)
+                        return Pair(game.claim(intersection.first()), state)
                     }
                     //Logger.log("intersection is empty")
                 }
@@ -49,7 +49,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
 
 //        val baseRivers =  graphUtils!!.riversCloseToBases(rivers, game.map)
 //        if(baseRivers.isNotEmpty()){
-//            return ServerMove(game.claim(baseRivers.first()), state)
+//            return Pair(game.claim(baseRivers.first()), state)
 //        }
 //        // if all base rivers are captures, do most connected things
 //        val mostConnected = graphUtils!!.mostConnectedRivers(rivers)
@@ -58,6 +58,6 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
 //        }
 
         // if minimal spanning tree is captured, do whatever is left
-        return ServerMove(game.claim(rivers[random.nextInt(rivers.size)]), state)
+        return Pair(game.claim(rivers[random.nextInt(rivers.size)]), state)
     }
 }

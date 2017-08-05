@@ -7,25 +7,24 @@ import org.icfp2017.base.StopCommand
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
-class OfflineServer<State> {
+class OfflineServer {
 
-    val serverBehaviour = ServerBehaviour({ json -> send(json) }, {
-        readString()
-    })
+    var serverBehaviour = ServerBehaviour({ json -> send(json) }, { readString() })
 
-    val inputStream = BufferedReader(InputStreamReader(System.`in`))
+    private var inputStream = BufferedReader(InputStreamReader(System.`in`))
+    private var outputStream = System.`out`
 
     fun me(me: PunterName, callback: (PunterName) -> Unit) {
         serverBehaviour.me(me, callback)
     }
 
-    fun setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, State) -> ServerMove<State>, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+    inline fun <reified State> setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, State) -> Pair<Move, State>, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
         Logger.log("On offline set up!")
         // Read potential command
         var timeoutsLeft = 10
         while (true) {
-            val turnsType = object : TypeToken<GeneralResponse<State>>() {}.type
-            val response = Gson().fromJson<GeneralResponse<State>>(readString(), turnsType)
+            val turnsType = object : TypeToken<GeneralResponse>() {}.type
+            val response = Gson().fromJson<GeneralResponse>(serverBehaviour.readString(), turnsType)
 
             if (response.punter != null && response.punters != null && response.map != null) {
                 val game = Game(response.punter, response.punters, response.map)
@@ -39,13 +38,16 @@ class OfflineServer<State> {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
                 val state = response.state!!
-                val move = onMove(typedMoves, state)
+                val ss = Gson().fromJson(state, State::class.java)
+
+                val (move,s) = onMove(typedMoves, ss)
+                val rr = Gson().toJson(s)
 
                 val moveResponse = MoveRequest(
-                        claim = move.move as? Claim,
-                        pass = move.move as? Pass,
-                        state = move.state)
-                send(Gson().toJson(moveResponse))
+                        claim = move as? Claim,
+                        pass = move as? Pass,
+                        state = rr)
+                serverBehaviour.send(Gson().toJson(moveResponse))
                 continue
             }
 
@@ -72,15 +74,16 @@ class OfflineServer<State> {
         }
     }
 
-    fun ready(punterID: PunterID, state: State) {
+    inline fun <reified State> ready(punterID: PunterID, state: State) {
         Logger.log("On offline ready")
-        send(Gson().toJson(ReadyRequest(punterID, Gson().toJson(state))))
+        val ss = Gson().toJson(state)
+        serverBehaviour.send(Gson().toJson(ReadyRequest(punterID, ss)))
     }
 
-    fun send(json: JSONString) {
+    private fun send(json: JSONString) {
         val message = "${json.length}:"+json
         Logger.log("--> ${message}")
-        System.`out`.print(message)
+        outputStream.print(message)
     }
 
     private fun readString(): JSONString {
@@ -117,3 +120,6 @@ class OfflineServer<State> {
     }
 }
 
+class OfflineServerForOnline {
+
+}

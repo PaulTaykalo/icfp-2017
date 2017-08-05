@@ -11,12 +11,12 @@ object RandomFree : Strategy<StrategyStateWithGame> {
     }
 
     val random = Random()
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
+        if (rivers.isEmpty()) return Pair(game.pass(), state)
 
-        return ServerMove(game.claim(rivers[random.nextInt(rivers.size)]), state)
+        return Pair(game.claim(rivers[random.nextInt(rivers.size)]), state)
     }
 }

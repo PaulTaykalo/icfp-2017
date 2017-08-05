@@ -1,19 +1,41 @@
 @file:Suppress("ArrayInDataClass")
 
 package org.icfp2017
+import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 data class Game(
         val punter: PunterID,
         val punters: Int,
-        val map: Map
+        val map: MapModel
 ) {
     var unownedRivers: Set<River> = map.rivers.toSet()
     var mines: Set<SiteID> = map.mines.toSet()
     var reachableSites: Set<SiteID> = setOf()
     var siteScores = calculateScores()
 
-    private fun calculateScores(): HashMap<SiteID, HashMap<SiteID, Long>> {
-        return hashMapOf()
+
+    private fun calculateScores(): Map<SiteID, Map<SiteID, Long>> {
+        val riversForSite = mapOf(*map.sites.map { it.id to mutableSetOf<River>()}.toTypedArray())
+        map.rivers.forEach {
+            riversForSite[it.source]!!.add(it)
+            riversForSite[it.target]!!.add(it)
+        }
+
+        var scores = mapOf(*map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toTypedArray())
+
+        var step = 1L
+        mines.forEach { mine ->
+            val rivers = riversForSite[mine]!!
+
+            val sites = rivers
+                    .flatMap { arrayListOf(it.source, it.target) }
+                    .filter { scores[it]!![mine] == null }
+                    .forEach { scores[it]!![mine] = step * step }
+            step += 1
+        }
+
+        Logger.log(Gson().toJson(scores))
+        return scores
     }
 
     fun apply(moves: Array<Move>) {
@@ -45,7 +67,7 @@ data class River(
         @SerializedName("owner") var owner: PunterID?
 )
 
-data class Map(
+data class MapModel(
         @SerializedName("sites") val sites: Array<Site>,
         @SerializedName("rivers") val rivers: Array<River>,
         @SerializedName("mines") val mines: Array<Int>

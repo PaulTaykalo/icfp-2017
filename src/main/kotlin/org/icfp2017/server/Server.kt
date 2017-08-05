@@ -151,7 +151,7 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
     private data class GameModel(
             @SerializedName("punter") val punter: PunterID,
             @SerializedName("punters") val punters: Int,
-            @SerializedName("map") val map: org.icfp2017.Map
+            @SerializedName("map") val map: MapModel
     )
 
     override fun me(me: PunterName, callback: (PunterName) -> Unit) {

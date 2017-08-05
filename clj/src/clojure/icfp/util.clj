@@ -27,5 +27,4 @@
             (assoc-in world [:claimed to-claim] (:punter claim))
             (throw (RuntimeException. "Invalid claim"))))
         world)
-      (update :moves-history #(cons move %))
       (update :remaining-moves dec)))

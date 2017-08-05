@@ -81,4 +81,4 @@
     move))
 
 (defn make-client [& [offline?]]
-  (clint.fw/make-client smart-init smart-consume-move smart-decision offline?))
+  (client.fw/make-client smart-init smart-consume-move smart-decision offline?))

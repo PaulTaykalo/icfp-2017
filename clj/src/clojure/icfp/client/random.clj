@@ -16,5 +16,4 @@
   (update state :world util/consume-move move))
 
 (defn make-client [& [offline?]]
-  (clint.fw/make-client identity simple-consume-move random-decision offline?))
-
+  (client.fw/make-client identity simple-consume-move random-decision offline?))

@@ -25,7 +25,8 @@ interface Server {
 
     // Send after setup completed
     fun ready(punterID: PunterID,
-              onMove: (Array<Move>) -> Move,
+              state: State?,
+              onMove: (Array<Move>, State?) -> ServerMove,
               onInterruption: (String) -> Unit,
               onEnd: (StopCommand) -> Unit
     )
@@ -33,6 +34,11 @@ interface Server {
 }
 
 typealias JSONString = String
+typealias State = Unit
+data class ServerMove(
+        @SerializedName("move") val move: Move,
+        @SerializedName("state") val state: State?
+)
 
 class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Arguments.port) : Server {
 
@@ -59,8 +65,8 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
         serverBehaviour.setup(callback)
     }
 
-    override fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
-        serverBehaviour.ready(punterID, onMove, onInterruption, onEnd)
+    override fun ready(punterID: PunterID, state: State?, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+        serverBehaviour.ready(punterID, state, onMove, onInterruption, onEnd)
     }
 
     private fun send(json: String) {
@@ -107,17 +113,22 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
 
 }
 
-class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString) {
+class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString) : Server {
 
     private data class MeRequest(@SerializedName("me") val me: String)
-    private data class ReadyRequest(@SerializedName("ready") val ready: PunterID)
     private data class MeResponse(@SerializedName("you") val you: String)
+    private data class ReadyRequest(
+            @SerializedName("ready") val ready: PunterID,
+            @SerializedName("state") val state: State?
+    )
     private data class MoveResponse(
             @SerializedName("claim") val claim: Claim?,
-            @SerializedName("pass") val pass: Pass?
+            @SerializedName("pass") val pass: Pass?,
+            @SerializedName("state") val state: State?
     )
     private data class MovesArrayResponse(
-            @SerializedName("moves") val move: Array<MoveResponse>
+            @SerializedName("moves") val move: Array<MoveResponse>,
+            @SerializedName("state") val state: State?
     )
 
     private data class TimeoutResponse(val state: Any)
@@ -140,10 +151,10 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
     private data class GameModel(
             @SerializedName("punter") val punter: PunterID,
             @SerializedName("punters") val punters: Int,
-            @SerializedName("map") val map: org.icfp2017.Map
+            @SerializedName("map") val map: MapModel
     )
 
-    fun me(me: PunterName, callback: (PunterName) -> Unit) {
+    override fun me(me: PunterName, callback: (PunterName) -> Unit) {
         val me = Gson().toJson(MeRequest(me))
         Logger.log(me)
         send(me)
@@ -151,15 +162,15 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
         callback(response.you)
     }
 
-    fun setup(callback: (Game) -> Unit) {
+    override fun setup(callback: (Game) -> Unit) {
         val response: GameModel = Gson().fromJson(readString(), GameModel::class.java)
         val game = Game(response.punter, response.punters, response.map)
         Logger.log("Sent $response")
         callback(game)
     }
 
-    fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
-        send(Gson().toJson(ReadyRequest(punterID)))
+    override fun ready(punterID: PunterID, state: State?, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+        send(Gson().toJson(ReadyRequest(punterID, state)))
 
         // Read potential command
         var timeoutsLeft = 10
@@ -170,8 +181,13 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
                 val typedMoves: Array<Move> = moves.move.map {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
-                val move = onMove(typedMoves)
-                val moveResponse = MoveResponse(claim = move as? Claim, pass = move as? Pass)
+                val state = moves.state
+                val move = onMove(typedMoves, state)
+
+                val moveResponse = MoveResponse(
+                        claim = move.move as? Claim,
+                        pass = move.move as? Pass,
+                        state = move.state)
                 send(Gson().toJson(moveResponse))
                 continue
             }

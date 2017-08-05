@@ -45,3 +45,7 @@ svg {
   display: block;
   background: #000;
 }
+
+#data {
+  display: none;
+}

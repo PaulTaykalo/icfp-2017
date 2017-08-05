@@ -21,8 +21,8 @@ class OfflineServer : Server {
         serverBehaviour.setup(callback)
     }
 
-    override fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
-        serverBehaviour.ready(punterID, onMove, onInterruption, onEnd)
+    override fun ready(punterID: PunterID, state: State?, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+        serverBehaviour.ready(punterID, state, onMove, onInterruption, onEnd)
     }
 
     fun send(json: JSONString) {

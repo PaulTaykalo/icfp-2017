@@ -77,7 +77,7 @@
 (comment
   (game-loop (slurp (io/resource "test-map.json"))
              [(smart1/make-random-client true) (smart1/make-random-client true)])
-  (game-loop (slurp (io/resource "test-map.json"))
+  (game-loop (slurp (io/file "res/london-tube.json"))
              [(smart1/make-random-client) (smart1/make-random-client)])
 
   (scorer/-score (slurp (io/resource "test-map.json"))

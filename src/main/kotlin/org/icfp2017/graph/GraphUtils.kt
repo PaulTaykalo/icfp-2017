@@ -6,8 +6,11 @@ import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.Dijkstra
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.MST
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph.Edge
+import org.icfp2017.Game
+import org.icfp2017.Logger
+import org.icfp2017.River
 import org.icfp2017.*
-import org.icfp2017.Map
+import org.icfp2017.MapModel
 
 class GraphUtils(game: Game) {
 
@@ -139,7 +142,8 @@ class GraphUtils(game: Game) {
             throw NullPointerException()
         return res
     }
-    fun riversCloseToBases(rivers: List<River>, map: Map): List<River> {
+
+    fun riversCloseToBases(rivers: List<River>, map: MapModel): List<River> {
         val baseRivers = rivers.filter { map.mines.contains(it.target) || map.mines.contains(it.source) }
 
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))

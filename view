@@ -1,0 +1,10 @@
+#!/bin/bash
+
+FILENAME="$1"
+
+cat viewer/index.html | sed 's/Map Viewer/'$FILENAME'/g' > "viewer/$FILENAME.html"
+echo '<div id="data">' >> "viewer/$FILENAME.html"
+cat $FILENAME >> "viewer/$FILENAME.html"
+echo '</div>' >> "viewer/$FILENAME.html"
+
+open "viewer/$FILENAME.html"

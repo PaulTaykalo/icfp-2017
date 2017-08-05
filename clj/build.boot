@@ -60,6 +60,12 @@
         (uber) (jar :file "sim-server-futures.jar" :main 'icfp.server.server)
         (target)))
 
+(deftask build-clj-client []
+  (comp (javac) (aot :namespace '#{icfp.client.client})
+        (pom :project 'lambada/icfp-clj-client)
+        (uber) (jar :file "clj-client.jar" :main 'icfp.client.client)
+        (target)))
+
 (require '[boot-javac-star.core :refer [javac*]])
 
 #_(boot (javac*))

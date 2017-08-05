@@ -12,14 +12,7 @@
         mines (set (:mines world))
         sites (set (:sites world))
         futures (or (:punter-futures world) {})
-        shortest-path (into {}
-                            (for [f mines
-                                  t sites]
-                              [(util/river f t)
-                               (if (= f t)
-                                 0
-                                 (dec (count (ga/shortest-path graph f t))))]))
-
+        shortest-path (util/fast-shortest-paths graph mines)
         claimed (:claimed world)
         final-score (into {}
                           (for [punter (range (:punter-count world))]

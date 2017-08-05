@@ -3,7 +3,9 @@
             [clojure.java.io :as io]
             [icfp.util :as util]
             [icfp.scorer :as scorer]
-            [icfp.client.first-smart :as smart1]
+            [icfp.client.first-smart :as c.smart1]
+            [icfp.client.second-smart :as c.smart2]
+            [icfp.client.random :as c.random]
             [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg])
   (:import java.util.function.Function)
@@ -43,11 +45,11 @@
                       (update :moves-history #(cons resp %))))
     (:state resp)))
 
-(defn send-stop-message-to-punter [punter punter-id]
-  (let [score (scorer/score @world)
-        msg {:stop {:moves (prepare-moves @world)
+(defn send-stop-message-to-punter [punter score punter-id]
+  (let [msg {:stop {:moves (prepare-moves @world)
                     :scores (map (fn [[punter score]] {:punter punter
-                                                       :score score})
+                                                      :name (@tcp/punter-names punter "<unknown>")
+                                                      :score score})
                                  score)}}]
     (punter (json/encode msg) true)))
 
@@ -70,17 +72,17 @@
                           (assoc % id
                                  (prompt-punter-for-move punter id state)))))
                           punters)))
-    (dorun (map-indexed (fn [id punter]
-                          (send-stop-message-to-punter punter id))
-                        punters))
-    (scorer/score @world)))
+    (let [score (scorer/score @world)]
+      (dorun (map-indexed (fn [id punter]
+                            (send-stop-message-to-punter punter score id))
+                          punters)))))
 
 (comment
   (game-loop (slurp (io/resource "test-map.json"))
-             [(smart1/make-random-client true) (smart1/make-random-client true)])
+             [(c.random/make-client true) (c.random/make-client true)])
   (sort #(< (first %1) (first %2))
-        (game-loop (slurp (io/file "res/london-tube.json"))
-                   [(smart1/make-smart-client) (smart1/make-smart-client)]))
+        (game-loop (slurp (io/file "res/edinburgh.json"))
+                   [(c.smart1/make-client) (c.random/make-client)]))
 
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2
@@ -105,12 +107,12 @@
 
   (future
     (tcp/make-tcp-client (rand-nth ["Bob" "Alice" "Joe" "John" "Mary" "Sue"])
-                         (smart1/make-random-client)
+                         (c.random/make-client)
                          "localhost"
                          13000))
   (future
     (tcp/make-tcp-client (rand-nth ["Bob" "Alice" "Joe" "John" "Mary" "Sue"])
-                         (smart1/make-smart-client)
+                         (c.smart1/make-client)
                          "localhost"
                          13000))
   )

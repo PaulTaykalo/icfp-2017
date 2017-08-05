@@ -11,23 +11,38 @@ data class Game(
     var unownedRivers: Set<River> = map.rivers.toSet()
     var mines: Set<SiteID> = map.mines.toSet()
     var reachableSites: Set<SiteID> = setOf()
-    var siteScores = calculateScores()
 
+    val riversForSite = calculateRiversForSites()
+    val sitesForSite = calculateSitesForSite()
+    val siteScores = calculateScores()
 
-    private fun calculateScores(): Map<SiteID, Map<SiteID, Long>> {
-        val riversForSite = mapOf(*map.sites.map { it.id to mutableSetOf<River>()}.toTypedArray())
-        map.rivers.forEach {
-            riversForSite[it.source]!!.add(it)
-            riversForSite[it.target]!!.add(it)
+    private fun  calculateSitesForSite(): Map<SiteID, Set<SiteID>> {
+        fun sitesForSite(site: SiteID): Set<SiteID> {
+            val rivers = riversForSite[site]!!
+            return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
         }
 
+        return map.sites.map { it.id to sitesForSite(it.id)}.toMap()
+    }
+
+    private fun calculateRiversForSites(): Map<SiteID, Set<River>> {
+        val results = mapOf(*map.sites.map { it.id to mutableSetOf<River>()}.toTypedArray())
+        map.rivers.forEach {
+            results[it.source]!!.add(it)
+            results[it.target]!!.add(it)
+        }
+
+        return results
+    }
+
+    private fun calculateScores(): Map<SiteID, Map<SiteID, Long>> {
         var scores = mapOf(*map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toTypedArray())
 
         var step = 1L
         mines.forEach { mine ->
             val rivers = riversForSite[mine]!!
 
-            val sites = rivers
+            rivers
                     .flatMap { arrayListOf(it.source, it.target) }
                     .filter { scores[it]!![mine] == null }
                     .forEach { scores[it]!![mine] = step * step }

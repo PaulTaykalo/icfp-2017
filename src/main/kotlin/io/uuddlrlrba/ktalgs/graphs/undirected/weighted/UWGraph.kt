@@ -24,15 +24,17 @@ package io.uuddlrlrba.ktalgs.graphs.undirected.weighted
 
 import io.uuddlrlrba.ktalgs.datastructures.Queue
 import io.uuddlrlrba.ktalgs.graphs.Graph
+import org.icfp2017.River
 
 class UWGraph(public override val V: Int): Graph {
 
-    public var SiteToVertex:HashMap<Int, Int> = hashMapOf()
-    public var VertexToSite:HashMap<Int, Int> = hashMapOf()
+
     public override var E: Int = 0
     private val adj: Array<Queue<Edge>> = Array(V) { Queue<Edge>() }
 
     public class Edge(public val v: Int, public val w: Int, public val weight: Double): Comparable<Edge> {
+        public var river: River? = null;
+
         override fun compareTo(other: Edge): Int {
             return this.weight.compareTo(other.weight)
         }
@@ -43,11 +45,23 @@ class UWGraph(public override val V: Int): Graph {
             throw IllegalArgumentException()
         }
 
+
         override fun toString(): String {
             return "Edge(v=$v, w=$w, weight=$weight)"
         }
 
 
+    }
+
+
+
+    public fun addEdge(v: Int, w: Int, weight: Double, river: River) : Edge{
+        val edge = Edge(v, w, weight)
+        edge.river = river;
+        adj[v].add(edge)
+        adj[w].add(edge)
+        E++
+        return edge;
     }
 
     public fun addEdge(v: Int, w: Int, weight: Double) {

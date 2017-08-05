@@ -10,6 +10,7 @@ object AllYourBaseAreBelongToUs : Strategy{
         if(graphUtils == null){
             graphUtils = GraphUtils(game)
         }
+        graphUtils!!.updateState(game)
     }
 
     override fun move(game: Game): Move {

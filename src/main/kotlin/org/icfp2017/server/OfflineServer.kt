@@ -21,6 +21,7 @@ class OfflineServer {
     }
 
     fun setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, StrategyStateWithGame) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+        Logger.log("On offline set up!")
         // Read potential command
         var timeoutsLeft = 10
         while (true) {
@@ -70,11 +71,14 @@ class OfflineServer {
     }
 
     fun ready(punterID: PunterID, state: StrategyStateWithGame) {
+        Logger.log("On offline ready")
         send(Gson().toJson(ReadyRequest(punterID, state)))
     }
 
     fun send(json: JSONString) {
-        System.`out`.println("${json.length}:"+json)
+        val message = "${json.length}:"+json
+        Logger.log("--> ${message}")
+        System.`out`.println(message)
     }
 
     private fun readString(): JSONString {

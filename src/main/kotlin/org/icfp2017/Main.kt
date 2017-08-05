@@ -51,7 +51,11 @@ fun main(args: Array<String>) {
             "log" to Arguments.log,
             "offline" to Arguments.offline))))
 
-    val server = if (Arguments.offline) OfflineServer() else OnlineServer()
-
-    Solver.play(server)
+    if (Arguments.offline) {
+        val server = OfflineServer()
+        OfflineSolver.play(server)
+    } else {
+        val server = OnlineServer()
+        Solver.play(server)
+    }
 }

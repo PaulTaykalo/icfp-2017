@@ -14,7 +14,7 @@ class OfflineServer : Server {
     val inputStream = BufferedReader(InputStreamReader(System.`in`))
 
     override fun me(me: PunterName, callback: (PunterName) -> Unit) {
-        callback("PewPew")
+        serverBehaviour.me(me, callback)
     }
 
     override fun setup(callback: (Game) -> Unit) {

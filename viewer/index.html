@@ -48,7 +48,7 @@
         var commands = []
         lines.forEach((line) => {
           if (line != "") {
-            commands.push(JSON.parse(line));
+            try { commands.push(JSON.parse(line)); } catch(e) {}
           }
         });
 

@@ -16,13 +16,14 @@ object DumbAndGreedy : Strategy<StrategyStateWithGame> {
         val niceRivers = nicePoints
                 .flatMap { game.riversForSite[it]!! }
                 .filter { it.owner == null }
-                .filterNot { (it.target in reachedPoints) && (it.source in reachedPoints) }
 
         val currentScore = game.calculateScoreForReachable(game.sitesReachedForMine)
         val river = niceRivers.maxBy {
             val newReachability = game.updateSitesReachability(game.sitesReachedForMine, it)
             val newScore = game.calculateScoreForReachable(newReachability)
             val delta = newScore - currentScore
+
+            if (it.target in game.mines || it.source in game.mines) delta + 10
 
             delta
         }

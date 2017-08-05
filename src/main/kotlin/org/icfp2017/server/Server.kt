@@ -35,9 +35,46 @@ interface Server {
 
 typealias JSONString = String
 typealias State = Unit
+
 data class ServerMove(
         @SerializedName("move") val move: Move,
         @SerializedName("state") val state: State?
+)
+
+data class ReadyRequest(
+        @SerializedName("ready") val ready: PunterID,
+        @SerializedName("state") val state: State?
+)
+
+data class MoveResponse(
+        @SerializedName("claim") val claim: Claim?,
+        @SerializedName("pass") val pass: Pass?,
+        @SerializedName("state") val state: State?
+)
+
+data class MovesArrayResponse(
+        @SerializedName("moves") val move: Array<MoveResponse>,
+        @SerializedName("state") val state: State?
+)
+
+data class TimeoutResponse(val state: Any)
+
+data class StopResponse(
+        @SerializedName("moves") val moves: Array<MoveResponse>,
+        @SerializedName("scores") val scores: Array<Score>
+)
+
+data class GeneralResponse(
+        // setup
+        @SerializedName("punter") val punter: PunterID?,
+        @SerializedName("punters") val punters: Int?,
+        @SerializedName("map") val map: MapModel?,
+        // move
+        @SerializedName("move") val moves: MovesArrayResponse?,
+        // stop
+        @SerializedName("stop") val stop: StopResponse?,
+        // offline
+        @SerializedName("timeout") val timeout: TimeoutResponse?
 )
 
 class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Arguments.port) : Server {
@@ -117,36 +154,6 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
 
     private data class MeRequest(@SerializedName("me") val me: String)
     private data class MeResponse(@SerializedName("you") val you: String)
-    private data class ReadyRequest(
-            @SerializedName("ready") val ready: PunterID,
-            @SerializedName("state") val state: State?
-    )
-    private data class MoveResponse(
-            @SerializedName("claim") val claim: Claim?,
-            @SerializedName("pass") val pass: Pass?,
-            @SerializedName("state") val state: State?
-    )
-    private data class MovesArrayResponse(
-            @SerializedName("moves") val move: Array<MoveResponse>,
-            @SerializedName("state") val state: State?
-    )
-
-    private data class TimeoutResponse(val state: Any)
-
-    private data class MoveArrayResponse(
-            @SerializedName("move") val moves: MovesArrayResponse
-    )
-
-    private data class GeneralResponse(
-            @SerializedName("move") val moves: MovesArrayResponse?,
-            @SerializedName("stop") val stop: StopResponse?,
-            @SerializedName("timeout") val timeout: TimeoutResponse?
-    )
-
-    private data class StopResponse(
-            @SerializedName("moves") val moves: Array<MoveResponse>,
-            @SerializedName("scores") val scores: Array<Score>
-    )
 
     private data class GameModel(
             @SerializedName("punter") val punter: PunterID,

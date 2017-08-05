@@ -24,7 +24,7 @@
 
 (defn get-claim [move]
   (when-let [claim (:claim move)]
-    {:punter claim
+    {:punter (:punter claim)
      :move (river (:source claim) (:target claim))}))
 
 (defn consume-move [world move]

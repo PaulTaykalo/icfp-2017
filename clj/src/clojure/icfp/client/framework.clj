@@ -34,7 +34,9 @@
                      ((if offline?
                         #(assoc % :state (print-str (offline/prepare-to-send-offline-state @state)))
                         identity)
-                      {:claim {:punter (:id @state), :source src, :target tgt}})))))
+                      (if move
+                        {:claim {:punter (:id @state), :source src, :target tgt}}
+                        {:pass {:punter (:id @state)}}))))))
 
               (:stop req) (do (println "Endgame:" req) nil)
 

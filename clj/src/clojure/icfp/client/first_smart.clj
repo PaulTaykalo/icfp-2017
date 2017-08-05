@@ -8,16 +8,13 @@
 
 (defn smart-init [state]
   (let [world (:world state)
-        ;; graph (apply g/graph (seq (:rivers world)))
         sites (:sites world)
         mines (set (:mines world))
-        ;; scored-shortest-path (util/fast-shortest-paths graph mines)
         unused-rivers (:rivers world)
         union (apply u/union-find sites)
         union-sites-count (into {} (map #(vector % 1) sites))
         union-mines-count (into {} (map #(vector % (if (mines %) 1 0)) sites))]
     (assoc state
-           ;; :scored-shortest-path scored-shortest-path
            :unused-rivers unused-rivers
            :union union
            :union-sites-count union-sites-count

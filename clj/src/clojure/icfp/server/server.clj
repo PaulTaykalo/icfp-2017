@@ -4,6 +4,7 @@
             [icfp.util :as util]
             [icfp.scorer :as scorer]
             [icfp.client.first-smart :as c.smart1]
+            [icfp.client.second-smart :as c.smart2]
             [icfp.client.random :as c.random]
             [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg])

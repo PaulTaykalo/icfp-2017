@@ -4,6 +4,7 @@
             [icfp.util :as util]
             [icfp.scorer :as scorer]
             [icfp.client.first-smart :as c.smart1]
+            [icfp.client.second-smart :as c.smart2]
             [icfp.client.random :as c.random]
             [icfp.server.tcp :as tcp]
             [omniconf.core :as cfg])
@@ -81,7 +82,7 @@
              [(c.random/make-client true) (c.random/make-client true)])
   (sort #(< (first %1) (first %2))
         (game-loop (slurp (io/file "res/london-tube.json"))
-                   [(c.smart1/make-client) (c.random/make-client)]))
+                   [(c.smart2/make-client) (c.random/make-client)]))
 
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2

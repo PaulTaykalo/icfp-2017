@@ -3,7 +3,6 @@
 package org.icfp2017
 
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 
 private typealias Reachability = Map<SiteID, Set<SiteID>>
 
@@ -119,21 +118,15 @@ class Game(
     }
 }
 
-data class Site(
-        @SerializedName("id") val id: SiteID
-)
+data class SiteModel(val id: SiteID)
+data class River(val source: SiteID, val target:SiteID)
 
-data class River(
-        @SerializedName("source") val source: SiteID,
-        @SerializedName("target") val target: SiteID
-)
+//typealias River = Array<SiteID>
+//
+//val River.source: SiteID get() = get(0)
+//val River.target: SiteID get() = get(1)
 
-data class MapModel(
-        @SerializedName("sites") val sites: Array<Site>,
-        @SerializedName("rivers") val rivers: Array<River>,
-        @SerializedName("mines") val mines: Array<Int>
-)
-
+data class MapModel(val sites: Array<SiteModel>, val rivers: Array<River>, val mines: Array<SiteID>)
 
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()

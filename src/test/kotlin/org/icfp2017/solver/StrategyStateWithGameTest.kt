@@ -6,7 +6,7 @@ import org.amshove.kluent.`should not equal`
 import org.icfp2017.Game
 import org.icfp2017.MapModel
 import org.icfp2017.River
-import org.icfp2017.Site
+import org.icfp2017.SiteModel
 import org.junit.Assert.*
 import org.junit.Test
 
@@ -16,7 +16,7 @@ class StrategyStateWithGameTest {
         val strategyStateWithGame = StrategyStateWithGame(
             Game(1, 2,
                 MapModel(
-                    arrayOf(Site(1),Site(2)),
+                    arrayOf(SiteModel(1), SiteModel(2)),
                     arrayOf(River(1, 2)),
                     arrayOf(1))
             )
@@ -29,7 +29,7 @@ class StrategyStateWithGameTest {
         val strategyStateWithGame = StrategyStateWithGame(
             Game(1, 2,
                 MapModel(
-                    arrayOf(Site(1),Site(2)),
+                    arrayOf(SiteModel(1),SiteModel(2)),
                     arrayOf(River(1, 2)),
                     arrayOf(1))
             )

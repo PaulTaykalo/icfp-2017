@@ -1,6 +1,7 @@
 package org.icfp2017.solver
 
 import org.icfp2017.Arguments
+import org.icfp2017.Logger
 import org.icfp2017.nameWithStrategy
 import org.icfp2017.server.OfflineServer
 
@@ -14,7 +15,9 @@ object OfflineSolver {
                     server.ready(game.punter, state)
                 },
                 onMove = { moves, state ->
-                    strategy.serverMove(moves, state)
+                    Logger.measure("strategy") {
+                        strategy.serverMove(moves, state)
+                    }
                 },
                 onEnd = {},
                 onInterruption = {}

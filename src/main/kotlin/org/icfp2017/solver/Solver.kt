@@ -15,8 +15,10 @@ object Solver {
                     punterID = game.punter,
                     state = initialState,
                     onMove = { moves, state ->
-                        game.apply(moves)
-                        strategy.serverMove(moves, state ?: StrategyStateWithGame(game))
+                        Logger.measure("strategyDuration") {
+                            game.apply(moves)
+                            strategy.serverMove(moves, state ?: StrategyStateWithGame(game))
+                        }
                     },
                     onInterruption = {
 

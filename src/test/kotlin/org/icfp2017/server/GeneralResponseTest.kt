@@ -1,13 +1,6 @@
 package org.icfp2017.server
 
 import com.google.gson.Gson
-import org.amshove.kluent.`should equal`
-import org.icfp2017.Game
-import org.icfp2017.MapModel
-import org.icfp2017.River
-import org.icfp2017.Site
-import org.icfp2017.solver.StrategyStateWithGame
-import org.junit.Assert.*
 import org.junit.Test
 
 class GeneralResponseTest {

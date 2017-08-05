@@ -124,7 +124,12 @@ class GraphUtils(game: Game) {
     }
     fun mostConnectedRivers(rivers: Iterable<River>): List<River> {
         val edge = findMostAdjacentEdgeInSpanningTree()
-        return rivers.filter {  (it.source == edge.source && it.target == edge.target) || ((it.source == edge.target && it.target == edge.source)) }
+        if(edge == null) {
+            return rivers.toList()
+        }else
+        {
+            return rivers.filter { (it.source == edge.source && it.target == edge.target) || ((it.source == edge.target && it.target == edge.source)) }
+        }
     }
 
 
@@ -150,14 +155,16 @@ class GraphUtils(game: Game) {
     }
 
 
-    fun findMostAdjacentEdgeInSpanningTree(): River {
+    fun findMostAdjacentEdgeInSpanningTree(): River? {
 //        Logger.log("graph edges  " + graph.edges().size )
 //        Logger.log("graph edges  vals " + graph.edges())
 //        Logger.log("graph vertices  " + graph.vertices().count())
 //        Logger.log("graph vertices  vals" + graph.vertices())
 //        Logger.log("VertexToSite  " + graph.VertexToSite)
 //        Logger.log("SiteToVertex  " + graph.SiteToVertex)
-        val mostFatEdge =  mostAjustedMstFree.intersect(freeEdges).first()
+        val mostFatEdge =  mostAjustedMstFree.intersect(freeEdges).firstOrNull()
+        if(mostFatEdge == null)
+            return null;
         val mostFatRiver = edgeToRiver[mostFatEdge]
 
         if (mostFatRiver != null) return mostFatRiver

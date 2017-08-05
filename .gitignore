@@ -30,3 +30,4 @@ gradle-app.setting
 
 # icfp2017
 log-*.txt
+ssh-key*

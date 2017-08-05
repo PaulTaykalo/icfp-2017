@@ -20,7 +20,7 @@
     (when-not (= (:ready resp) punter-id)
       (throw (ex-info (str "Wrong response from punter " punter-id ": " resp)
                       {})))
-    (when-let [futures (last (:futures resp))]
+    (when-let [futures (:futures resp)]
       (swap! world assoc-in [:punter-futures punter-id]
              (set (for [{:keys [source target]} futures]
                     {:mine source, :site target}))))
@@ -83,7 +83,7 @@
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2
                  "[{\"claim\":{\"punter\":0,\"source\":1,\"target\":3}},{\"claim\":{\"punter\":1,\"source\":5,\"target\":6}}]")
-  
+
   (send-initial-state-to-punter (random-punter 0) 0 2)
   (send-initial-state-to-punter (random-punter 1) 1 2)
 

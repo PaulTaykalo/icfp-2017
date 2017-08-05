@@ -33,7 +33,7 @@
   (let [punters (atom {})
         history (atom [])]
     (with-open [server-sock (ServerSocket. port 50 (InetAddress/getByName "0.0.0.0"))]
-      (println "[INFO] Starting SimServer on port" port)
+      (println "[INFO] Starting SimServerFutures on port" port)
       (while (< (count @punters) max-players)
         (println "[INFO] Waiting for" (- max-players (count @punters)) "more clients...")
         (let [sock (.accept server-sock)

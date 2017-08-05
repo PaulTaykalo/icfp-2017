@@ -1,0 +1,44 @@
+#!/bin/bash
+
+ARGS="$@"
+SSHOPTS="-o StrictHostKeyChecking=no -o Port=2222"
+
+nc -z localhost 2222 2> /dev/null
+
+if [ $? -ne 0 ]; then
+  echo "Install VirtualBox and import the latest image from https://icfpcontest2017.github.io/vm/"
+  echo "Make sure in VM settings network port forwarding is set to 2222 -> 22"
+  exit 1
+fi
+
+if [ ! -f ssh-key ]; then
+  echo "Generating SSH key"
+  ssh-keygen -f ssh-key -t rsa -N ''
+  echo "Installing SSH key to VM"
+  echo "When prompted for the password, enter icfp2017"
+  scp $SSHOPTS ssh-key.pub punter@localhost:/home/punter/.ssh/authorized_keys
+  echo "Done!"
+fi
+
+echo "Checking VM connection. If prompted for the password, something is wrong"
+ssh $SSHOPTS -i ssh-key punter@localhost 'echo OK'
+
+echo "Building archive..."
+./gradlew assembleSubmitArchive
+
+scp $SSHOPTS -i ssh-key \
+  build/distributions/icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f.tar.gz \
+  punter@localhost:/home/punter
+
+ssh $SSHOPTS -i ssh-key punter@localhost "
+echo Extracting archive
+rm -r icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f
+tar -xf icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f.tar.gz
+cd icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f
+echo Running ./bin/icfp2017...
+./bin/icfp2017 ${ARGS}
+"
+
+scp $SSHOPTS -i ssh-key \
+  'punter@localhost:/home/punter/icfp-2f4d2e0a-dfcd-4a7d-958c-75ac4b6d4d3f/log*.txt' \
+  .

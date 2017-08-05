@@ -49,7 +49,9 @@
                              (json/encode ((if offline?
                                              #(assoc % :state (print-str @state))
                                              identity)
-                                           {:ready (:id @state)})))
+                                           {:ready (:id @state)
+                                            :futures [{:source (rand-nth (seq (-> @state :world :mines)))
+                                                       :target (rand-nth (seq (-> @state :world :sites)))}]})))
 
               ;; ignore
               :else (do (println req)

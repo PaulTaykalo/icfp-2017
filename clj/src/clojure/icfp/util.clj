@@ -14,6 +14,7 @@
            :punter-count punter-count
            :initial-json-map init-json-map
            :claimed {}
+           :punter-futures {}
            :moves-history (reverse
                            (for [i (range punter-count)]
                              {:pass {:punter i}}))

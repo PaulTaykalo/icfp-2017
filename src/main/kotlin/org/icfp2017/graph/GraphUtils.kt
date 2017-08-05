@@ -1,10 +1,7 @@
 package org.icfp2017.graph
 
 
-import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.BoruvkaMST
-import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.Dijkstra
-import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.MST
-import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph
+import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.*
 import io.uuddlrlrba.ktalgs.graphs.undirected.weighted.UWGraph.Edge
 import org.icfp2017.Game
 import org.icfp2017.Logger
@@ -69,10 +66,10 @@ class GraphUtils(game: Game) {
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
                 var edge = graph.addEdge(source, target, 1.0, river)
-                if(river !in game.myRivers) {
-                    edge = graph.addEdge(source, target, java.lang.Double.POSITIVE_INFINITY, river)
-
-                }
+//                if(river !in game.myRivers) {
+//                    edge = graph.addEdge(source, target, java.lang.Double.POSITIVE_INFINITY, river)
+//
+//                }
                 riverToEdge.put(river, edge)
                 edgeToRiver.put(edge, river)
 
@@ -145,15 +142,18 @@ class GraphUtils(game: Game) {
         val baseRivers = game.mines.flatMap { game.riversForSite[it]!! }
 
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))
-        return priorityBaseRivers
+        return priorityBaseRivers.intersect(rivers).toList()
     }
 
     fun findPath(startSiteId:Int, endSiteId:Int) :Iterable<River>{
         val startVertexId = siteToVertex[startSiteId];
         val endVertexId = siteToVertex[endSiteId];
-        val dijkstra= Dijkstra(graph!!, startVertexId!!)
-        if(dijkstra.hasPathTo(endVertexId!!)){
-            val path = dijkstra.pathTo(endVertexId)
+        val astar = AStar()
+
+        val path = astar.aStar(graph!!, startVertexId!!, endVertexId!!)
+
+        if(path!=null){
+
             //Logger.log("path is found "  + path)
 
             return path.map { River(vertexToSite[it.v] as SiteID, vertexToSite[it.w] as SiteID) }

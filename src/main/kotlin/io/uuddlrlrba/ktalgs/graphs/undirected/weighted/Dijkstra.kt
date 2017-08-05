@@ -25,6 +25,7 @@ package io.uuddlrlrba.ktalgs.graphs.undirected.weighted
 import io.uuddlrlrba.ktalgs.datastructures.IndexedPriorityQueue
 import io.uuddlrlrba.ktalgs.datastructures.Stack
 import io.uuddlrlrba.ktalgs.graphs.NoSuchPathException
+import org.icfp2017.Logger
 
 class Dijkstra(graph: UWGraph, val from: Int) {
     /**
@@ -49,26 +50,65 @@ class Dijkstra(graph: UWGraph, val from: Int) {
 
         // relax vertices in order of distance from s
         pq.insert(from, distTo[from])
-        while (!pq.isEmpty()) {
+
+        while (pq.isNotEmpty()) {
+//            if(pq.isNotEmpty()) {
+           // Logger.log("\n start of iteration priority queue size is " + pq.size)
+//            }
             val v = pq.poll().first
+
             for (e in graph.adjacentEdges(v)) {
+              //  Logger.log("adj edges "+ v + " are " +e)
                 relax(e)
             }
+
         }
+
     }
 
     // relax edge e and update pq if changed
     private fun relax(e: UWGraph.Edge) {
         val v = e.v
         val w = e.w
+        val distW = distTo[w]
+        val distV = distTo[v]
+        val weight = e.weight
+        //Logger.log("v is $v and w is $w")
+        val shouldBeRelaxed = distTo[w] > distTo[v] + e.weight;
+        //Logger.log("distTo[w] $distW > distTo[v] $distV + e.weight $weight is $shouldBeRelaxed")
         if (distTo[w] > distTo[v] + e.weight) {
+            val newDistW = distTo[v] + e.weight
+           // Logger.log("new dist W =  $newDistW")
             distTo[w] = distTo[v] + e.weight
             edgeTo[w] = e
+
             if (pq.contains(w)) {
+             //   Logger.log("pq contains w $w")
                 pq.decreaseKey(w, distTo[w])
             } else {
+               // Logger.log("pq doest not contain w $w")
                 pq.insert(w, distTo[w])
+
             }
+            //Logger.log("size of pq is " + pq.size)
+        }
+
+        if (distTo[v] > distTo[w] + e.weight) {
+            val newDistV = distTo[w] + e.weight
+
+            //Logger.log("new dist v =  $newDistV")
+            distTo[v] = distTo[w] + e.weight
+            edgeTo[v] = e
+
+            if (pq.contains(v)) {
+              //  Logger.log("pq contains v $v")
+                pq.decreaseKey(v, distTo[v])
+            } else {
+                //Logger.log("pq doest not contain v $v")
+                pq.insert(v, distTo[v])
+
+            }
+            //Logger.log("size of pq is " + pq.size)
         }
     }
 

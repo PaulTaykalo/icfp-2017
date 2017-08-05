@@ -2,9 +2,14 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 
-object DumbAndGreedy: Strategy {
+object DumbAndGreedy: Strategy<StrategyStateWithGame> {
 
-    override fun move(game: Game): Move {
+    override fun prepare(game: Game): StrategyStateWithGame {
+        return StrategyStateWithGame(game)
+    }
+
+    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+        val game = state.game
         val rivers = game.unownedRivers
                 .asSequence()
                 .filter {

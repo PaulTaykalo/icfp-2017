@@ -3,6 +3,8 @@ package org.icfp2017.server
 import com.google.gson.Gson
 import org.icfp2017.*
 import org.icfp2017.base.StopCommand
+import org.icfp2017.solver.StrategyState
+import org.icfp2017.solver.StrategyStateWithGame
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -18,7 +20,7 @@ class OfflineServer {
         serverBehaviour.me(me, callback)
     }
 
-    fun setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+    fun setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, StrategyStateWithGame) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
         // Read potential command
         var timeoutsLeft = 10
         while (true) {
@@ -35,7 +37,7 @@ class OfflineServer {
                 val typedMoves: Array<Move> = moves.move.map {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
-                val state = moves.state
+                val state = moves.state!!
                 val move = onMove(typedMoves, state)
 
                 val moveResponse = MoveResponse(
@@ -67,7 +69,7 @@ class OfflineServer {
         }
     }
 
-    fun ready(punterID: PunterID, state: State?) {
+    fun ready(punterID: PunterID, state: StrategyStateWithGame) {
         send(Gson().toJson(ReadyRequest(punterID, state)))
     }
 

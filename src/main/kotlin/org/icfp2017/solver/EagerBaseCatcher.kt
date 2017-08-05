@@ -4,15 +4,17 @@ import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 import java.util.*
 
-object EagerBaseCatcher : Strategy{
+object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
     val random = Random()
     lateinit var graphUtils: GraphUtils
 
-    override fun prepare(game: Game){
+    override fun prepare(game: Game): StrategyStateWithGame {
         graphUtils = GraphUtils(game)
+        return StrategyStateWithGame(game)
     }
 
-    override fun move(game: Game): Move {
+    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+        val game = state.game
         graphUtils.updateState(game)
 
         val rivers = game.unownedRivers.toList()

@@ -4,7 +4,7 @@ import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 
 // looks for most  connected river in minimal spanning tree
-object SpanningTree : Strategy{
+object SpanningTree : Strategy<StrategyStateWithGame>{
 
     var graphUtils: GraphUtils? = null;
 
@@ -13,8 +13,12 @@ object SpanningTree : Strategy{
             graphUtils = GraphUtils(game)
         }
     }
+    override fun prepare(game: Game): StrategyStateWithGame {
+        return StrategyStateWithGame(game)
+    }
 
-    override fun move(game: Game): Move {
+    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+        val game = state.game
         init(game)
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()

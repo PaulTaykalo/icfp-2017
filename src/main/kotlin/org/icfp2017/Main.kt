@@ -11,7 +11,7 @@ object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
     var port: Int = 9028
-    var strategy: Strategy = DumbAndGreedy
+    var strategy: Strategy<StrategyStateWithGame> = DumbAndGreedy
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
 }

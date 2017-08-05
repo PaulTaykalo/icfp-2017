@@ -7,11 +7,12 @@ import com.google.gson.annotations.SerializedName
 import org.icfp2017.*
 import org.icfp2017.base.Score
 import org.icfp2017.base.StopCommand
+import org.icfp2017.solver.StrategyStateWithGame
 import java.io.InputStream
 import java.io.OutputStream
-import java.net.Socket
-import java.net.InetSocketAddress
 import java.net.InetAddress
+import java.net.InetSocketAddress
+import java.net.Socket
 
 
 interface Server {
@@ -25,8 +26,8 @@ interface Server {
 
     // Send after setup completed
     fun ready(punterID: PunterID,
-              state: State?,
-              onMove: (Array<Move>, State?) -> ServerMove,
+              state: StrategyStateWithGame?,
+              onMove: (Array<Move>, StrategyStateWithGame?) -> ServerMove,
               onInterruption: (String) -> Unit,
               onEnd: (StopCommand) -> Unit
     )
@@ -34,27 +35,26 @@ interface Server {
 }
 
 typealias JSONString = String
-typealias State = Unit
 
 data class ServerMove(
         @SerializedName("move") val move: Move,
-        @SerializedName("state") val state: State?
+        @SerializedName("state") val state: StrategyStateWithGame?
 )
 
 data class ReadyRequest(
         @SerializedName("ready") val ready: PunterID,
-        @SerializedName("state") val state: State?
+        @SerializedName("state") val state: StrategyStateWithGame?
 )
 
 data class MoveResponse(
         @SerializedName("claim") val claim: Claim?,
         @SerializedName("pass") val pass: Pass?,
-        @SerializedName("state") val state: State?
+        @SerializedName("state") val state: StrategyStateWithGame?
 )
 
 data class MovesArrayResponse(
         @SerializedName("moves") val move: Array<MoveResponse>,
-        @SerializedName("state") val state: State?
+        @SerializedName("state") val state: StrategyStateWithGame?
 )
 
 data class TimeoutResponse(val state: Any)
@@ -102,7 +102,7 @@ class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Argu
         serverBehaviour.setup(callback)
     }
 
-    override fun ready(punterID: PunterID, state: State?, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+    override fun ready(punterID: PunterID, state: StrategyStateWithGame?, onMove: (Array<Move>, StrategyStateWithGame?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
         serverBehaviour.ready(punterID, state, onMove, onInterruption, onEnd)
     }
 
@@ -176,7 +176,7 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
         callback(game)
     }
 
-    override fun ready(punterID: PunterID, state: State?, onMove: (Array<Move>, State?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+    override fun ready(punterID: PunterID, state: StrategyStateWithGame?, onMove: (Array<Move>, StrategyStateWithGame?) -> ServerMove, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
         send(Gson().toJson(ReadyRequest(punterID, state)))
 
         // Read potential command

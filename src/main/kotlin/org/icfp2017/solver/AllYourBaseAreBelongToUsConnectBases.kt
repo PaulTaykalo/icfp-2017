@@ -5,15 +5,17 @@ import org.icfp2017.graph.GraphUtils
 import java.util.*
 
 // captures rivers close to bases first and then does spanning tree
-object AllYourBaseAreBelongToUsConnectBases : Strategy{
+object AllYourBaseAreBelongToUsConnectBases : Strategy<StrategyStateWithGame>{
     val random = Random()
     lateinit var graphUtils: GraphUtils
 
-    override fun prepare(game: Game) {
+    override fun prepare(game: Game): StrategyStateWithGame {
         graphUtils = GraphUtils(game)
+        return StrategyStateWithGame(game)
     }
 
-    override fun move(game: Game): Move {
+    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+        val game = state.game
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()
 

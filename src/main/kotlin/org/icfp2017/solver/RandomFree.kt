@@ -4,9 +4,14 @@ import org.icfp2017.*
 import java.util.*
 
 
-object RandomFree: Strategy {
+object RandomFree: Strategy<StrategyStateWithGame> {
+    override fun prepare(game: Game): StrategyStateWithGame {
+        return StrategyStateWithGame(game)
+    }
+
     val random = Random()
-    override fun move(game: Game): Move {
+    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+        val game = state.game
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()
 

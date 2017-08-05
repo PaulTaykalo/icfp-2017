@@ -11,8 +11,8 @@ import org.icfp2017.solver.*
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9024
-    var strategy: Strategy = AllYourBaseAreBelongToUsRandom
+    var port: Int = 9028
+    var strategy: Strategy = DumbAndGreedy
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
 }
@@ -37,6 +37,7 @@ fun main(args: Array<String>) {
                 Arguments.offline = false
             }
             "--strategy" -> Arguments.strategy = Strategy.forName(value)
+            "--offline" -> Arguments.offline = value.toBoolean()
         }
     }
 

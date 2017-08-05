@@ -3,21 +3,18 @@
 package org.icfp2017
 import com.google.gson.annotations.SerializedName
 data class Game(
-        @SerializedName("punter") val punter: PunterID,
-        @SerializedName("punters") val punters: Int,
-        @SerializedName("map") val map: Map
+        val punter: PunterID,
+        val punters: Int,
+        val map: Map
 ) {
     var unownedRivers: Set<River> = map.rivers.toSet()
-        private set
-
     var mines: Set<SiteID> = map.mines.toSet()
-        private set
-
     var reachableSites: Set<SiteID> = setOf()
-        private set
+    var siteScores = calculateScores()
 
-    var siteScores: HashMap<SiteID, HashMap<SiteID, Int>> = hashMapOf()
-        private set
+    private fun calculateScores(): HashMap<SiteID, HashMap<SiteID, Long>> {
+        return hashMapOf()
+    }
 
     fun apply(moves: Array<Move>) {
         // Apply moves to map.

@@ -5,7 +5,7 @@ import org.icfp2017.*
 object DumbAndGreedy: Strategy {
 
     override fun move(game: Game): Move {
-        val river = game.unownedRivers
+        val rivers = game.unownedRivers
                 .asSequence()
                 .filter {
                     val sourceReached = it.source in game.reachableSites
@@ -19,9 +19,7 @@ object DumbAndGreedy: Strategy {
 
                     return@filter sourceReached || targetReached || sourceIsMine || targetIsMine
                 }
-                // Add ranging of rivers.
-                .firstOrNull() ?: return game.pass()
 
-        return game.claim(river)
+        return game.claim(rivers.firstOrNull())
     }
 }

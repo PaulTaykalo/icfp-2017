@@ -8,6 +8,7 @@ object Solver {
     fun play(server: Server, name: String = Arguments.name, strategy: Strategy = Arguments.strategy) {
         server.me(name) {
             server.setup { game ->
+                strategy.prepare(game)
                 server.ready(
                     punterID = game.punter,
                     onMove = { moves ->

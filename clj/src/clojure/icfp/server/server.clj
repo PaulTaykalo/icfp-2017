@@ -80,9 +80,8 @@
 (comment
   (game-loop (slurp (io/resource "test-map.json"))
              [(c.random/make-client true) (c.random/make-client true)])
-  (sort #(< (first %1) (first %2))
-        (game-loop (slurp (io/file "res/boston.json"))
-                   [(c.smart2/make-client) (c.smart1/make-client)]))
+  (game-loop (slurp (io/file "res/london-tube.json"))
+             [(c.smart1/make-client) (c.smart2/make-client)])
 
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2

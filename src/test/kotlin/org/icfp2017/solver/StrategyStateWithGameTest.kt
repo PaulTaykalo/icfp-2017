@@ -17,7 +17,7 @@ class StrategyStateWithGameTest {
             Game(1, 2,
                 MapModel(
                     arrayOf(Site(1),Site(2)),
-                    arrayOf(River(1, 2, owner = null)),
+                    arrayOf(River(1, 2)),
                     arrayOf(1))
             )
         )
@@ -30,7 +30,7 @@ class StrategyStateWithGameTest {
             Game(1, 2,
                 MapModel(
                     arrayOf(Site(1),Site(2)),
-                    arrayOf(River(1, 2, owner = null)),
+                    arrayOf(River(1, 2)),
                     arrayOf(1))
             )
         )

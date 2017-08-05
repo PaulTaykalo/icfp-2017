@@ -20,13 +20,13 @@
  * SOFTWARE.
  */
 
-package io.uuddlrlrba.ktalgs.graphs.directed.weighted
+package io.uuddlrlrba.ktalgs.graphs.undirected.weighted
 
 import io.uuddlrlrba.ktalgs.datastructures.IndexedPriorityQueue
 import io.uuddlrlrba.ktalgs.datastructures.Stack
 import io.uuddlrlrba.ktalgs.graphs.NoSuchPathException
 
-class Dijkstra(graph: DWGraph, val from: Int) {
+class Dijkstra(graph: UWGraph, val from: Int) {
     /**
      * distTo[v] = distance  of shortest s->v path
      */
@@ -35,7 +35,7 @@ class Dijkstra(graph: DWGraph, val from: Int) {
     /**
      * edgeTo[v] = last edge on shortest s->v path
      */
-    private val edgeTo: Array<DWGraph.Edge?> = arrayOfNulls(graph.V)
+    private val edgeTo: Array<UWGraph.Edge?> = arrayOfNulls(graph.V)
 
     /**
      * priority queue of vertices
@@ -58,9 +58,9 @@ class Dijkstra(graph: DWGraph, val from: Int) {
     }
 
     // relax edge e and update pq if changed
-    private fun relax(e: DWGraph.Edge) {
-        val v = e.from
-        val w = e.to
+    private fun relax(e: UWGraph.Edge) {
+        val v = e.v
+        val w = e.w
         if (distTo[w] > distTo[v] + e.weight) {
             distTo[w] = distTo[v] + e.weight
             edgeTo[w] = e
@@ -98,13 +98,13 @@ class Dijkstra(graph: DWGraph, val from: Int) {
      * @return a shortest path from the source vertex `s` to vertex `v`
      *         as an iterable of edges, and `null` if no such path
      */
-    fun pathTo(v: Int): Iterable<DWGraph.Edge> {
+    fun pathTo(v: Int): Iterable<UWGraph.Edge> {
         if (!hasPathTo(v)) throw NoSuchPathException("There is no path from [$from] to [$v]")
-        val path = Stack<DWGraph.Edge>()
+        val path = Stack<UWGraph.Edge>()
         var e = edgeTo[v]
         while (e != null) {
             path.push(e)
-            e = edgeTo[e.from]
+            e = edgeTo[e.v]
         }
         return path
     }

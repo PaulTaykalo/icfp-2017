@@ -44,13 +44,14 @@ class GraphUtils(game: Game) {
        initState(game)
     }
 
-    fun toGraph(map: Map): UWGraph {
+    fun toGraph(game: Game): UWGraph {
 
         //Logger.log("transforming to graph")
         //Logger.log("map is " + map)
         //Logger.log("sites  " + map.sites)
         //Logger.log("size  " + map.sites.size)
 
+        val map = game.map
 
         val vertexNumber = map.sites.size
         val graph = UWGraph(vertexNumber);
@@ -66,9 +67,13 @@ class GraphUtils(game: Game) {
             val source = siteToVertex[river.source]
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
-                val edge = graph.addEdge(source, target, 1.0, river)
+                var edge = graph.addEdge(source, target, 1.0, river)
+                if(river.owner != game.punter) {
+                    edge = graph.addEdge(source, target, java.lang.Double.POSITIVE_INFINITY, river)
+
+                }
                 riverToEdge.put(river, edge)
-                edgeToRiver.put(edge,river)
+                edgeToRiver.put(edge, river)
 
             } else {
                 Logger.log("mapping is screwed up wiht $source and $target")
@@ -79,7 +84,7 @@ class GraphUtils(game: Game) {
     }
 
     fun initState(game:Game){
-        graph = toGraph(game.map)
+        graph = toGraph(game)
         mst = BoruvkaMST(graph!!)
         mstEdges = mst!!.edges().toList()
         mostAjustedMst = mstEdges!!.sortedWith(compareBy({ graph!!.adjacentVertices(it.v).size }, { graph!!.adjacentVertices(it.w).size }))

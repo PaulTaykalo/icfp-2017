@@ -2,7 +2,7 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 
-object DumbAndGreedy: Strategy<StrategyStateWithGame> {
+object DumbAndGreedy : Strategy<StrategyStateWithGame> {
 
     override fun prepare(game: Game): StrategyStateWithGame {
         return StrategyStateWithGame(game)
@@ -10,21 +10,23 @@ object DumbAndGreedy: Strategy<StrategyStateWithGame> {
 
     override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
         val game = state.game
-        val rivers = game.unownedRivers
-                .asSequence()
-                .filter {
-                    val sourceReached = it.source in game.reachableSites
-                    val targetReached = it.target in game.reachableSites
+        game.apply(moves)
+        val reachedPoints = game.sitesReachedForMine.flatMap { it.value }
+        val nicePoints = reachedPoints.toSet() + game.mines.toSet()
+        val niceRivers = nicePoints
+                .flatMap { game.riversForSite[it]!! }
+                .filter { it.owner == null }
+                .filterNot { (it.target in reachedPoints) && (it.source in reachedPoints) }
 
-                    /// Avoid cycles in graph
-                    if (sourceReached && targetReached) return@filter false
+        val currentScore = game.calculateScoreForReachable(game.sitesReachedForMine)
+        val river = niceRivers.maxBy {
+            val newReachability = game.updateSitesReachability(game.sitesReachedForMine, it)
+            val newScore = game.calculateScoreForReachable(newReachability)
+            val delta = newScore - currentScore
 
-                    val sourceIsMine = it.source in game.mines
-                    val targetIsMine = it.target in game.mines
+            delta
+        }
 
-                    return@filter sourceReached || targetReached || sourceIsMine || targetIsMine
-                }
-
-        return game.claim(rivers.firstOrNull())
+        return game.claim(river)
     }
 }

@@ -1,4 +1,4 @@
-(ns icfp.client.first-smart
+(ns icfp.client.second-smart
     (:require [icfp.util :as util]
               [icfp.client.framework :as client.fw]
               [jordanlewis.data.union-find :as u]
@@ -81,4 +81,4 @@
     move))
 
 (defn make-client [& [offline?]]
-  (clint.fw/make-client smart-init smart-consume-move smart-decision offline?))
+  (client.fw/make-client smart-init smart-consume-move smart-decision offline?))

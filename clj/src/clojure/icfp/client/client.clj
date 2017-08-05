@@ -17,7 +17,7 @@
                :strategy {:description "which strat to use"
                           :type :keyword
                           :required true
-                          :one-of [:random :smart-v1]}})
+                          :one-of [:random :smart-v1 :smart-v2]}})
   (when-not (seq args)
     (cfg/populate-from-cmd ["--help"])
     (System/exit 1))

@@ -3,7 +3,6 @@ package org.icfp2017.server
 import com.google.gson.Gson
 import org.icfp2017.*
 import org.icfp2017.base.StopCommand
-import org.icfp2017.solver.StrategyState
 import org.icfp2017.solver.StrategyStateWithGame
 import java.io.BufferedReader
 import java.io.InputStreamReader

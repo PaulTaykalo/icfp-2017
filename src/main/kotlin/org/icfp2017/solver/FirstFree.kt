@@ -3,6 +3,7 @@ package org.icfp2017.solver
 import org.icfp2017.Game
 import org.icfp2017.Move
 import org.icfp2017.claim
+import org.icfp2017.server.ServerMove
 
 object FirstFree: Strategy<StrategyStateWithGame> {
 
@@ -10,8 +11,9 @@ object FirstFree: Strategy<StrategyStateWithGame> {
         return StrategyStateWithGame(game)
     }
 
-    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
         val game = state.game
-        return game.claim(game.unownedRivers.firstOrNull())
+        game.apply(moves)
+        return ServerMove(game.claim(game.unownedRivers.firstOrNull()), state)
     }
 }

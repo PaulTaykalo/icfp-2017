@@ -2,6 +2,7 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
+import org.icfp2017.server.ServerMove
 import java.util.*
 
 object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
@@ -13,12 +14,13 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
         val game = state.game
+        game.apply(moves)
         graphUtils.updateState(game)
 
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return game.pass()
+        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
 
         var path :Iterable<River> = listOf();
 
@@ -37,7 +39,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
                     if(intersection.isNotEmpty())
                     {
                       //  Logger.log("intersection is " + intersection.first())
-                        return game.claim(intersection.first())
+                        return ServerMove(game.claim(intersection.first()), state)
                     }
                     //Logger.log("intersection is empty")
                 }
@@ -47,7 +49,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
 
 //        val baseRivers =  graphUtils!!.riversCloseToBases(rivers, game.map)
 //        if(baseRivers.isNotEmpty()){
-//            return game.claim(baseRivers.first())
+//            return ServerMove(game.claim(baseRivers.first()), state)
 //        }
 //        // if all base rivers are captures, do most connected things
 //        val mostConnected = graphUtils!!.mostConnectedRivers(rivers)
@@ -56,6 +58,6 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
 //        }
 
         // if minimal spanning tree is captured, do whatever is left
-        return  game.claim(rivers[random.nextInt(rivers.size)])
+        return ServerMove(game.claim(rivers[random.nextInt(rivers.size)]), state)
     }
 }

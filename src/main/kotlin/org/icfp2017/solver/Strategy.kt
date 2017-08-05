@@ -6,26 +6,17 @@ import org.icfp2017.Game
 import org.icfp2017.Move
 import org.icfp2017.server.ServerMove
 
-
-interface StrategyState {}
-
-class DummyState: StrategyState
-
 data class StrategyStateWithGame(
     @SerializedName("game") val game: Game
-): StrategyState
+)
 
-interface Strategy <State: StrategyState> {
-    fun move(moves: Array<Move>, state: State): Move
+interface Strategy<State> {
 
-    fun serverMove(moves: Array<Move>, state: State): ServerMove {
-        return ServerMove(move(moves, state), state as? StrategyStateWithGame)
-    }
-
+    fun serverMove(moves: Array<Move>, state: State): ServerMove
     fun prepare(game: Game): State
 
     companion object {
-        fun forName(name: String) = when(name) {
+        fun forName(name: String) = when (name) {
             "SpanningTree" -> SpanningTree
             "First" -> FirstFree
             "Random" -> RandomFree

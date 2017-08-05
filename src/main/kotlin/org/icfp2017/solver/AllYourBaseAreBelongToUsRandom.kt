@@ -16,24 +16,24 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+    override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
         val game = state.game
         graphUtils.updateState(game)
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return game.pass()
+        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
 
         val baseRivers =  graphUtils.riversCloseToBases(rivers, game.map)
         if(baseRivers.isNotEmpty()){
-            return game.claim(baseRivers.first())
+            return ServerMove(game.claim(baseRivers.first()), state)
         }
         // if all base rivers are captures, do most connected things
         val mostConnected = graphUtils.mostConnectedRivers(rivers)
         if(mostConnected.isNotEmpty()) {
-            return game.claim(mostConnected.first())
+            return ServerMove(game.claim(mostConnected.first()), state)
         }
 
 
         // if minimal spanning tree is captured, do whatever is left
-        return  game.claim(rivers[random.nextInt(rivers.size)])
+        return  ServerMove(game.claim(rivers[random.nextInt(rivers.size)]), state)
     }
 }

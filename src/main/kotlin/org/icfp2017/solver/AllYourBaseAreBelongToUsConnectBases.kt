@@ -2,10 +2,11 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
+import org.icfp2017.server.ServerMove
 import java.util.*
 
 // captures rivers close to bases first and then does spanning tree
-object AllYourBaseAreBelongToUsConnectBases : Strategy<StrategyStateWithGame>{
+object AllYourBaseAreBelongToUsConnectBases : Strategy<StrategyStateWithGame> {
     val random = Random()
     lateinit var graphUtils: GraphUtils
 
@@ -14,23 +15,24 @@ object AllYourBaseAreBelongToUsConnectBases : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun move(moves: Array<Move>, state: StrategyStateWithGame): Move {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
         val game = state.game
+        game.apply(moves)
         val rivers = game.unownedRivers.toList()
-        if (rivers.isEmpty()) return game.pass()
+        if (rivers.isEmpty()) return ServerMove(game.pass(), state)
 
-        val baseRivers =  graphUtils!!.riversCloseToBases(rivers, game.map)
-        if(baseRivers.isNotEmpty()){
-            return game.claim(baseRivers.first())
+        val baseRivers = graphUtils.riversCloseToBases(rivers, game.map)
+        if (baseRivers.isNotEmpty()) {
+            return ServerMove(game.claim(baseRivers.first()), state)
         }
         // if all base rivers are captures, do most connected things
-        val mostConnected = graphUtils!!.mostConnectedRivers(rivers)
-        if(mostConnected.isNotEmpty()) {
-            return game.claim(mostConnected.first())
+        val mostConnected = graphUtils.mostConnectedRivers(rivers)
+        if (mostConnected.isNotEmpty()) {
+            return ServerMove(game.claim(mostConnected.first()), state)
         }
 
         //game.punter
         // if minimal spanning tree is captured, do whatever is left
-        return  game.claim(rivers[random.nextInt(rivers.size)])
+        return ServerMove(game.claim(rivers[random.nextInt(rivers.size)]), state)
     }
 }

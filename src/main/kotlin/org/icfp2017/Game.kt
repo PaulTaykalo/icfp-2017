@@ -13,6 +13,7 @@ data class Game(
         val map: MapModel
 ) {
     var unownedRivers = map.rivers.toSet()
+    var ownRivers = setOf<River>()
     var mines = map.mines.toSet()
 
     var sitesReachedForMine = mines.map { it to setOf<SiteID>()}.toMap()
@@ -22,7 +23,7 @@ data class Game(
     val siteScores = calculateScores()
 
     private fun calculateRiversForSites(): Map<SiteID, Set<River>> {
-        val results = mapOf(*map.sites.map { it.id to mutableSetOf<River>() }.toTypedArray())
+        val results = map.sites.map { it.id to mutableSetOf<River>() }.toMap()
         map.rivers.forEach {
             results[it.source]!!.add(it)
             results[it.target]!!.add(it)
@@ -67,14 +68,11 @@ data class Game(
         // Apply moves to map.
         moves.forEach { move ->
             if (move !is Claim) return@forEach
-            val river = map.rivers.find {
-                move.source == it.source && move.target == it.target
-            } ?: return@forEach
-
-            river.owner = move.punter
+            val river = River(move.source, move.target)
             unownedRivers -= river
 
-            if (river.owner == punter) {
+            if (move.punter == punter) {
+                ownRivers += river
                 sitesReachedForMine = updateSitesReachability(sitesReachedForMine, river)
             }
         }
@@ -96,7 +94,7 @@ data class Game(
                 newSites.add(site)
                 front.remove(site)
 
-                val rivers = riversForSite[site]!!.filter { it.owner == punter }
+                val rivers = riversForSite[site]!! - ownRivers
                 val connectedSites = rivers.map { it.source }.toSet() +
                         rivers.map { it.target }.toSet() - sites - newSites
 
@@ -125,8 +123,7 @@ data class Site(
 
 data class River(
         @SerializedName("source") val source: SiteID,
-        @SerializedName("target") val target: SiteID,
-        @SerializedName("owner") var owner: PunterID?
+        @SerializedName("target") val target: SiteID
 )
 
 data class MapModel(

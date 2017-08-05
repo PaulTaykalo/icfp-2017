@@ -71,7 +71,7 @@ class GraphUtils(game: Game) {
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
                 var edge = graph.addEdge(source, target, 1.0, river)
-                if(river.owner != game.punter) {
+                if(river !in game.ownRivers) {
                     edge = graph.addEdge(source, target, java.lang.Double.POSITIVE_INFINITY, river)
 
                 }
@@ -103,10 +103,10 @@ class GraphUtils(game: Game) {
         {
             allRivers.add(river)
             allEdges.add(riverToEdge[river] as Edge)
-            if(river.owner != null){
+            if(river !in game.unownedRivers){
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
-                if(river.owner == game.punter){
+                if(river in game.ownRivers){
                     ourRivers.add(river)
                     ourEdges.add(riverToEdge[river] as Edge)
                 }else
@@ -158,7 +158,7 @@ class GraphUtils(game: Game) {
             val path = dijkstra.pathTo(endVertexId)
             //Logger.log("path is found "  + path)
 
-            return path.map { River(vertexToSite[it.v] as SiteID, vertexToSite[it.w] as SiteID, null) }
+            return path.map { River(vertexToSite[it.v] as SiteID, vertexToSite[it.w] as SiteID) }
 
         }else{
             return listOf()

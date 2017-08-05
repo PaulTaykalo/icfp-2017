@@ -20,9 +20,15 @@ gradle-app.setting
 
 # Avoid ignoring clojure project jars
 !clj/jars/*.jar
+!clj/server/*.jar
 
 # Removed idea settings
 .idea/
 
 # macOS
 .DS_Store
+
+# icfp2017
+log-*.txt
+log-*.txt.html
+ssh-key*

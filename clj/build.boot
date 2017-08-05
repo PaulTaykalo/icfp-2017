@@ -5,6 +5,7 @@
                           [fudje "0.9.7" :scope "test"]
                           [adzerk/boot-test "1.2.0" :scope "test"]
                           [cheshire "5.7.1"]
+                          [org.jordanlewis/data.union-find "0.1.0"]
                           [aysylu/loom "1.0.0"]
                           [com.grammarly/omniconf "0.2.6"]]
           :source-paths #{"src/clojure" "src/java"}
@@ -56,7 +57,14 @@
 (deftask build-sim-server []
   (comp (javac) (aot :namespace '#{icfp.server.server})
         (pom :project 'lambada/icfp-sim-server)
-        (uber) (jar :main 'icfp.server.server) (target)))
+        (uber) (jar :file "sim-server-futures.jar" :main 'icfp.server.server)
+        (target)))
+
+(deftask build-clj-client []
+  (comp (javac) (aot :namespace '#{icfp.client.client})
+        (pom :project 'lambada/icfp-clj-client)
+        (uber) (jar :file "clj-client.jar" :main 'icfp.client.client)
+        (target)))
 
 (require '[boot-javac-star.core :refer [javac*]])
 

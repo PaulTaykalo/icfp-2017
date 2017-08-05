@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Map Viewer</title>
+    <link rel="stylesheet" href="../js-core/bootstrap.min.css">
+    <link rel="stylesheet" href="viewer.css">
+  </head>
+
+  <body>
+    <div class="container-fluid">
+      <h1>&#955; Map Viewer</h1>
+      <fieldset>
+        <input type="file" id="myFile" multiple size="50"/>
+      </fieldset>
+    </div>
+    <div class="container-fluid">
+      <fieldset>
+        <legend>Canvas</legend>
+        <div class="container-fluid" id="cy"></div>
+        <div id="loading">
+          <span class="fa fa-refresh fa-spin"></span>
+        </div>
+      </fieldset>
+    </div>
+    <!--- load scripts -->
+    <script src="js-core/jquery.min.js"></script>
+    <script src="js-core/bootstrap.min.js"></script>
+    <script src="js-core/fastclick.min.js"></script>
+    <script src="js-core/cytoscape.min.js"></script>
+    <script src="js-core/bluebird.min.js"></script>
+    <script src="js-core/js-core.js"></script>
+    <script src="viewer.js"></script>
+    <script>
+
+  addEventListener('load', function(){
+
+    function onChange(event) {
+        var reader = new FileReader();
+        reader.onload = function(event) {
+          parse(event.target.result);
+        };
+        reader.readAsText(event.target.files[0]);
+    }
+
+    function parse(text) {
+        var lines = text.split("\n")
+        var commands = []
+        lines.forEach((line) => {
+          if (line != "") {
+            commands.push(JSON.parse(line));
+          }
+        });
+
+        loadCommands(commands)
+    }
+
+    document.getElementById('myFile').addEventListener('change', onChange);
+
+    var data = document.getElementById('data');
+    if (data) {
+      parse(data.innerText);
+    } else {
+      fetch("history.json", {mode: "no-cors"})
+      .then(function(res) {
+        return res.text() })
+      .then(function(json) {
+        return parse(json)
+      })
+    }
+}); // load
+
+    </script>
+  </body>
+</html>

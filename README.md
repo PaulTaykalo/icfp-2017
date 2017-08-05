@@ -12,6 +12,11 @@ Info about Kotlin & cool Kotlin libs: [Awesome Kotlin](https://kotlin.link/)
 ./gradlew run
 ```
 
+## Run in VM
+```
+./invm [parameters list]
+```
+
 ## Test
 ```
 ./gradlew test

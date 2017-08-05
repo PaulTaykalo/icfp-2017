@@ -26,6 +26,7 @@ class OfflineServer {
         var timeoutsLeft = 10
         while (true) {
             val response: GeneralResponse = Gson().fromJson(readString(), GeneralResponse::class.java)
+            Logger.log("responce: ${response}")
 
             if (response.punter != null && response.punters != null && response.map != null) {
                 val game = Game(response.punter, response.punters, response.map)
@@ -35,22 +36,29 @@ class OfflineServer {
 
             val moves = response.moves
             if (moves != null) {
+                Logger.log("is is a move!")
                 val typedMoves: Array<Move> = moves.move.map {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
-                val state = moves.state!!
+                Logger.log("try state: ${response.state}")
+                val state = response.state!!
+                Logger.log("1")
                 val move = onMove(typedMoves, state)
+                Logger.log("move strat: ${move}")
 
                 val moveResponse = MoveResponse(
                         claim = move.move as? Claim,
                         pass = move.move as? Pass,
                         state = move.state)
+                Logger.log("move responce to send: ${moveResponse}")
                 send(Gson().toJson(moveResponse))
+                Logger.log("move responce sent!")
                 continue
             }
 
             val stop = response.stop
             if (stop != null) {
+                Logger.log("is is a stop!")
                 val typedMoves: Array<Move> = stop.moves.map {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
@@ -61,12 +69,13 @@ class OfflineServer {
 
             val timeout = response.timeout
             if (timeout != null) {
+                Logger.log("is is a timeout!")
                 timeoutsLeft--
                 onInterruption("ALARMA!! \$timeoutsLeft")
                 continue
             }
 
-            // Waat?
+            Logger.log("Aaaaaaaaa!")
         }
     }
 
@@ -78,7 +87,7 @@ class OfflineServer {
     fun send(json: JSONString) {
         val message = "${json.length}:"+json
         Logger.log("--> ${message}")
-        System.`out`.println(message)
+        System.`out`.print(message)
     }
 
     private fun readString(): JSONString {

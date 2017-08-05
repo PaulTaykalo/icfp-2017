@@ -53,8 +53,7 @@ data class MoveResponse(
 )
 
 data class MovesArrayResponse(
-        @SerializedName("moves") val move: Array<MoveResponse>,
-        @SerializedName("state") val state: StrategyStateWithGame?
+        @SerializedName("moves") val move: Array<MoveResponse>
 )
 
 data class TimeoutResponse(val state: Any)
@@ -74,7 +73,8 @@ data class GeneralResponse(
         // stop
         @SerializedName("stop") val stop: StopResponse?,
         // offline
-        @SerializedName("timeout") val timeout: TimeoutResponse?
+        @SerializedName("timeout") val timeout: TimeoutResponse?,
+        @SerializedName("state") val state: StrategyStateWithGame?
 )
 
 class OnlineServer(serverName: String = Arguments.server, serverPort: Int = Arguments.port) : Server {
@@ -188,7 +188,7 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
                 val typedMoves: Array<Move> = moves.move.map {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
-                val state = moves.state
+                val state = response.state
                 val move = onMove(typedMoves, state)
 
                 val moveResponse = MoveResponse(

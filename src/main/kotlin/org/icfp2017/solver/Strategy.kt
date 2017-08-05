@@ -11,7 +11,7 @@ interface StrategyState{}
 
 class DummyState: StrategyState
 
-class StrategyStateWithGame(
+data class StrategyStateWithGame(
     @SerializedName("game") val game: Game
 ): StrategyState
 

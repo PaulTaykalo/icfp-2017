@@ -2,4 +2,4 @@
 
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-java -Xmx6G -cp '../jars/*:sim-server-futures.jar' icfp.server.server "$@"
+java -Xmx6G -cp $DIR/../jars/*:$DIR/sim-server-futures.jar icfp.server.server "$@"

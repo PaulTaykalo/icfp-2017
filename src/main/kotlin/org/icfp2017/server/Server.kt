@@ -127,7 +127,7 @@ class OnlineServer(
         if (potentialState != null) {
 
             val readyRequest: ReadyRequest? = Gson().fromJson(json, ReadyRequest::class.java)
-            if (readyRequest != null) {
+            if (readyRequest != null && generalRequest.get("ready") != null) {
                 val outJson = Gson().toJson(ReadyRequest(readyRequest.ready, null))
                 state = readyRequest.state
                 serverBehaviour.send(outJson)
@@ -199,7 +199,7 @@ class OnlineServer(
     }
 
     private fun send(json: String) {
-        Logger.log(json)
+        Logger.log("[TCP] --> $json")
         val byteArray = json.toByteArray()
         val prefix = "${byteArray.size}:".toByteArray()
         outputStream.write(prefix)
@@ -211,7 +211,7 @@ class OnlineServer(
     private fun readString(): String {
         val size = readSize()
         val result = readBytes(size)
-        Logger.log(result)
+        Logger.log("[TCP] <-- $result")
         return result
     }
 

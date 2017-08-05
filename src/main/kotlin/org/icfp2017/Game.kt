@@ -8,10 +8,19 @@ data class Game(
         @SerializedName("map") val map: Map
 ) {
     var unownedRivers: Set<River> = map.rivers.toSet()
+        private set
+
     var mines: Set<SiteID> = map.mines.toSet()
+        private set
+
     var reachableSites: Set<SiteID> = setOf()
+        private set
+
+    var siteScores: HashMap<SiteID, HashMap<SiteID, Int>> = hashMapOf()
+        private set
 
     fun apply(moves: Array<Move>) {
+        // Apply moves to map.
         moves.forEach { move ->
             if (move !is Claim) return@forEach
             val river = map.rivers.find {
@@ -53,10 +62,6 @@ data class Pass(val punter: PunterID): Move()
 typealias SiteID = Int
 typealias PunterID = Int
 typealias PunterName = String
-
-val Array<River>.unclaimed: List<River>
-    get() = filter { it.owner == null }
-
 
 fun Game.pass(): Pass {
     return Pass(punter)

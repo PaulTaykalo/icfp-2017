@@ -18,6 +18,11 @@ object Arguments {
 }
 
 fun main(args: Array<String>) {
+    if (args.contains("--help")) {
+        println("Usage: ./bin/icfp2017 --name=value")
+        println("See Main.kt for list of supported arguments")
+        return
+    }
 
     args.forEach {
         val (name, value) = it.split("=")

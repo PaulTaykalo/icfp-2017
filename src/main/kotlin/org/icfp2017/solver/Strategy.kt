@@ -7,6 +7,7 @@ import org.icfp2017.Move
 
 interface Strategy {
     fun move(game: Game): Move
+    fun prepare(game: Game) {}
 
     companion object {
         fun forName(name: String) = when(name) {

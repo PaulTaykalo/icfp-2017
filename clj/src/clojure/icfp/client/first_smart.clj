@@ -22,14 +22,11 @@
                                             (:state req))]
                   (reset! state (read-string saved-state)))
                 (reset! state
-                        (update @state
-                                :world
-                                (fn [world]
-                                  (-> (reduce #(consume-move-function %2 %1)
-                                              world
-                                              (:moves (:move req)))
-                                      ;; to reduce traffic
-                                      (assoc :moves-history nil)))))
+                        (reduce consume-move-function
+                                @state
+                                (-> req
+                                    :move
+                                    :moves)))
                 (when-not dont-answer?
                   (let [[src tgt :as move] (decision-function @state)]
                     (json/encode
@@ -63,5 +60,8 @@
              %)
           (shuffle (:rivers world)))))
 
+(defn simple-consume-move [state move]
+  (update state :world util/consume-move move))
+
 (defn make-random-client [& [offline?]]
-  (make-client identity util/consume-move random-decision offline?))
+  (make-client identity simple-consume-move random-decision offline?))

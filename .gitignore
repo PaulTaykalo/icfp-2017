@@ -27,3 +27,6 @@ gradle-app.setting
 
 # macOS
 .DS_Store
+
+# icfp2017
+log-*.txt

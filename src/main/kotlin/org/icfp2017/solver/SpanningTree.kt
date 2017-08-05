@@ -12,12 +12,11 @@ object SpanningTree : Strategy{
         if(graphUtils == null){
             graphUtils = GraphUtils(game)
         }
-        graphUtils!!.updateState(game)
     }
 
     override fun move(game: Game): Move {
         init(game)
-        val rivers = graphUtils!!.freeRivers
+        val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return game.pass()
         val mostConnected = graphUtils!!.mostConnectedRivers(rivers)
         if(mostConnected.isNotEmpty()){

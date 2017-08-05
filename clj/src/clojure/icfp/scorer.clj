@@ -51,4 +51,4 @@
     (json/encode
      (map (fn [[punter score]]
             {:punter punter :score score})
-          (score (reduce #(util/consume-move %2 %1) world moves))))))
+          (score (reduce util/consume-move world moves))))))

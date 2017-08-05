@@ -36,7 +36,8 @@
         resp (cond (:claim resp) (assoc-in resp [:claim :punter] punter-id)
                    (:pass resp) (assoc-in resp [:pass :punter] punter-id)
                    :else resp)]
-    (reset! world (-> (util/consume-move resp @world)
+    (reset! world (-> @world
+                      (util/consume-move resp)
                       (update :moves-history #(cons resp %))))
     (:state resp)))
 

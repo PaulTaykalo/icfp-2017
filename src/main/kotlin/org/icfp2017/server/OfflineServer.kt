@@ -4,6 +4,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import org.icfp2017.*
 import org.icfp2017.base.StopCommand
+import org.icfp2017.solver.StrategyStateWithGame
+import sun.rmi.runtime.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
@@ -23,8 +25,10 @@ class OfflineServer {
         // Read potential command
         var timeoutsLeft = 10
         while (true) {
-            val turnsType = object : TypeToken<GeneralResponse>() {}.type
-            val response = Gson().fromJson<GeneralResponse>(serverBehaviour.readString(), turnsType)
+            val response: GeneralResponse = Logger.measure("parsing reposnse") {
+                Gson().fromJson(serverBehaviour.readString(), GeneralResponse::class.java)
+            }
+            Logger.log("responce: ${response}")
 
             if (response.punter != null && response.punters != null && response.map != null) {
                 val game = Game(response.punter, response.punters, response.map)

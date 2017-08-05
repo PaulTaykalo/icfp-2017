@@ -3,26 +3,26 @@
 package org.icfp2017
 
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 
 private typealias Reachability = Map<SiteID, Set<SiteID>>
 
-data class Game(
+class Game(
         val punter: PunterID,
         val punters: Int,
-        val map: MapModel
+        map: MapModel
 ) {
+    var ownedRivers = setOf<River>()
     var unownedRivers = map.rivers.toSet()
-    var ownRivers = setOf<River>()
+    var myRivers = setOf<River>()
     var mines = map.mines.toSet()
 
     var sitesReachedForMine = mines.map { it to setOf<SiteID>()}.toMap()
 
-    val riversForSite = calculateRiversForSites()
-    val sitesForSite = calculateSitesForSite()
-    val siteScores = calculateScores()
+    val riversForSite = calculateRiversForSites(map)
+    val sitesForSite = calculateSitesForSite(map)
+    val siteScores = calculateScores(map)
 
-    private fun calculateRiversForSites(): Map<SiteID, Set<River>> {
+    private fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {
         val results = map.sites.map { it.id to mutableSetOf<River>() }.toMap()
         map.rivers.forEach {
             results[it.source]!!.add(it)
@@ -32,7 +32,7 @@ data class Game(
         return results
     }
 
-    private fun calculateSitesForSite(): Map<SiteID, Set<SiteID>> {
+    private fun calculateSitesForSite(map: MapModel): Map<SiteID, Set<SiteID>> {
         fun sitesForSite(site: SiteID): Set<SiteID> {
             val rivers = riversForSite[site]!!
             return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
@@ -42,7 +42,7 @@ data class Game(
     }
 
 
-    private fun calculateScores(): Map<SiteID, Map<SiteID, Long>> {
+    private fun calculateScores(map:MapModel): Map<SiteID, Map<SiteID, Long>> {
         var scores = map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
 
         mines.forEach { mine ->
@@ -70,9 +70,10 @@ data class Game(
             if (move !is Claim) return@forEach
             val river = River(move.source, move.target)
             unownedRivers -= river
+            ownedRivers += river
 
             if (move.punter == punter) {
-                ownRivers += river
+                myRivers += river
                 sitesReachedForMine = updateSitesReachability(sitesReachedForMine, river)
             }
         }
@@ -94,7 +95,7 @@ data class Game(
                 newSites.add(site)
                 front.remove(site)
 
-                val rivers = riversForSite[site]!! - ownRivers
+                val rivers = riversForSite[site]!! - myRivers
                 val connectedSites = rivers.map { it.source }.toSet() +
                         rivers.map { it.target }.toSet() - sites - newSites
 
@@ -117,21 +118,15 @@ data class Game(
     }
 }
 
-data class Site(
-        @SerializedName("id") val id: SiteID
-)
+data class SiteModel(val id: SiteID)
+data class River(val source: SiteID, val target:SiteID)
 
-data class River(
-        @SerializedName("source") val source: SiteID,
-        @SerializedName("target") val target: SiteID
-)
+//typealias River = Array<SiteID>
+//
+//val River.source: SiteID get() = get(0)
+//val River.target: SiteID get() = get(1)
 
-data class MapModel(
-        @SerializedName("sites") val sites: Array<Site>,
-        @SerializedName("rivers") val rivers: Array<River>,
-        @SerializedName("mines") val mines: Array<Int>
-)
-
+data class MapModel(val sites: Array<SiteModel>, val rivers: Array<River>, val mines: Array<SiteID>)
 
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()

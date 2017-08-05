@@ -22,14 +22,18 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
         val rivers = game.unownedRivers.toList()
         if (rivers.isEmpty()) return Pair(game.pass(), state)
 
-        val baseRivers =  graphUtils.riversCloseToBases(rivers, game.map)
+        val baseRivers =  graphUtils.riversCloseToBases(rivers, game)
         if(baseRivers.isNotEmpty()){
-            return Pair(game.claim(baseRivers.first()), state)
+            val claim = baseRivers.first()
+            //Logger.log("base river claim $claim")
+            return Pair(game.claim(claim), state)
         }
         // if all base rivers are captures, do most connected things
         val mostConnected = graphUtils.mostConnectedRivers(rivers)
         if(mostConnected.isNotEmpty()) {
-            return Pair(game.claim(mostConnected.first()), state)
+            val claim = mostConnected.first()
+            //Logger.log("most connected claim $claim")
+            return Pair(game.claim(claim), state)
         }
 
 

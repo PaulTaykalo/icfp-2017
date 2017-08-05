@@ -78,8 +78,9 @@
 (comment
   (game-loop (slurp (io/resource "test-map.json"))
              [(smart1/make-random-client true) (smart1/make-random-client true)])
-  (game-loop (slurp (io/file "res/test-map.json"))
-             [(smart1/make-smart-client) (smart1/make-random-client)])
+  (sort #(< (first %1) (first %2))
+        (game-loop (slurp (io/file "res/london-tube.json"))
+                   [(smart1/make-smart-client) (smart1/make-smart-client)]))
 
   (scorer/-score (slurp (io/resource "test-map.json"))
                  2
@@ -105,6 +106,11 @@
   (future
     (tcp/make-tcp-client (rand-nth ["Bob" "Alice" "Joe" "John" "Mary" "Sue"])
                          (smart1/make-random-client)
+                         "localhost"
+                         13000))
+  (future
+    (tcp/make-tcp-client (rand-nth ["Bob" "Alice" "Joe" "John" "Mary" "Sue"])
+                         (smart1/make-smart-client)
                          "localhost"
                          13000))
   )

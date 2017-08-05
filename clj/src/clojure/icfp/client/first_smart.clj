@@ -78,22 +78,22 @@
 
 (defn smart-init [state]
   (let [world (:world state)
-        graph (apply g/graph (seq (:rivers world)))
+        ;; graph (apply g/graph (seq (:rivers world)))
         sites (:sites world)
         mines (set (:mines world))
-        scored-shortest-path (into {}
-                                   (for [f sites
-                                         t sites]
-                                     [(util/river f t)
-                                      (if (= f t)
-                                        0
-                                        (dec (count (ga/shortest-path graph f t))))]))
+        ;; scored-shortest-path (into {}
+        ;;                            (for [f sites
+        ;;                                  t sites]
+        ;;                              [(util/river f t)
+        ;;                               (if (= f t)
+        ;;                                 0
+        ;;                                 (dec (count (ga/shortest-path graph f t))))]))
         unused-rivers (:rivers world)
         union (apply u/union-find sites)
         union-sites-count (into {} (map #(vector % 1) sites))
         union-mines-count (into {} (map #(vector % (if (mines %) 1 0)) sites))]
     (assoc state
-           :scored-shortest-path scored-shortest-path
+           ;; :scored-shortest-path scored-shortest-path
            :unused-rivers unused-rivers
            :union union
            :union-sites-count union-sites-count
@@ -131,8 +131,12 @@
   (let [{:keys [union union-mines-count union-sites-count unused-rivers]} state
         from-head (union from)
         to-head (union to)]
-    (+ (count (get current-graph from))
-       (count (get current-graph to))
+    (+ (if (zero? (union-mines-count from))
+         (count (get current-graph from))
+         0)
+       (if (zero? (union-mines-count to))
+         (count (get current-graph to))
+         0)
        (if (= from-head to-head)
          (* -1 (count unused-rivers))
          (+ (* (union-mines-count from-head) (union-sites-count to-head))

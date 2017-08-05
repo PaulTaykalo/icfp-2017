@@ -24,19 +24,26 @@
         final-score (into {}
                           (for [punter (range (:punter-count world))]
                             [punter 0]))]
-    (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
-      [id (->> (let [connected (ga/connected-components (apply g/graph owned))]
-                 (for [conn connected]
-                   (for [from (filter mines conn)
-                         to conn]
-                     [from to])))
-               (apply concat)                 ; components
-               (map #(let [[mine site] %
-                           shp (shortest-path (apply util/river %))]
-                       (if (get (get futures id) {:mine mine :site site})
-                         (cube shp)
-                         (square shp))))
-               (reduce + 0))])))
+    (into final-score
+          (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
+            [id (let [connected (ga/connected-components (apply g/graph owned))]
+                  (+
+                   ;; Graph part
+                   (reduce + 0
+                           (for [conn connected]
+                             (reduce + 0
+                                     (for [from (filter mines conn)
+                                           to conn]
+                                       (square (shortest-path (util/river from to)))))))
+
+                   ;; Futures
+                   (->> (for [{:keys [mine site]} (get-in world [:punter-futures id])
+                              :let [future-score (cube (shortest-path (util/river mine site)))]]
+                          (if (some #(let [cs (set %)] (and (cs mine) (cs site)))
+                                    connected)
+                            future-score
+                            (- future-score)))
+                        (reduce +))))]))))
 
 (defn -score [json-world punter-count json-moves]
   (let [world (util/make-world (json/decode json-world) punter-count)

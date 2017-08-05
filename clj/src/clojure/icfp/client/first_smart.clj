@@ -47,8 +47,10 @@
                                              #(assoc % :state (print-str @state))
                                              identity)
                                            {:ready (:id @state)
-                                            :futures [{:source (rand-nth (seq (-> @state :world :mines)))
-                                                       :target (rand-nth (seq (-> @state :world :sites)))}]})))
+                                            :futures (map (fn [mine]
+                                                            {:source mine
+                                                             :target (rand-nth (seq (-> @state :world :sites)))})
+                                                          (-> @state :world :mines))})))
 
               ;; ignore
               :else (do (println req)

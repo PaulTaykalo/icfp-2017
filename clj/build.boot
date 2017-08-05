@@ -56,7 +56,8 @@
 (deftask build-sim-server []
   (comp (javac) (aot :namespace '#{icfp.server.server})
         (pom :project 'lambada/icfp-sim-server)
-        (uber) (jar :main 'icfp.server.server) (target)))
+        (uber) (jar :file "sim-server-futures.jar" :main 'icfp.server.server)
+        (target)))
 
 (require '[boot-javac-star.core :refer [javac*]])
 

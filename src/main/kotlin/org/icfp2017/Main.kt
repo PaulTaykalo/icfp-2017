@@ -4,7 +4,7 @@ package org.icfp2017
 
 import com.google.gson.Gson
 import org.icfp2017.server.OfflineServer
-import org.icfp2017.server.OnlineServer
+//import org.icfp2017.server.OnlineServer
 import org.icfp2017.solver.*
 
 object Arguments {
@@ -52,10 +52,10 @@ fun main(args: Array<String>) {
             "offline" to Arguments.offline))))
 
     if (Arguments.offline) {
-        val server = OfflineServer()
+        val server = OfflineServer<StrategyStateWithGame>()
         OfflineSolver.play(server)
     } else {
-        val server = OnlineServer()
-        Solver.play(server)
+//        val server = OnlineServer()
+//        Solver.play(server)
     }
 }

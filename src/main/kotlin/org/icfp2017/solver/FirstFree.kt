@@ -11,7 +11,7 @@ object FirstFree: Strategy<StrategyStateWithGame> {
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
         return ServerMove(game.claim(game.unownedRivers.firstOrNull()), state)

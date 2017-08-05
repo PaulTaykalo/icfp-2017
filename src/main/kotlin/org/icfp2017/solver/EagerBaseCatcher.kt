@@ -14,7 +14,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
+    override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
         val game = state.game
         game.apply(moves)
         graphUtils.updateState(game)

@@ -16,7 +16,7 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
         return StrategyStateWithGame(game)
     }
 
-    override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): ServerMove {
+    override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): ServerMove<StrategyStateWithGame> {
         val game = state.game
         graphUtils.updateState(game)
         val rivers = game.unownedRivers.toList()

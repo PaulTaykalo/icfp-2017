@@ -12,7 +12,7 @@ data class StrategyStateWithGame(
 
 interface Strategy<State> {
 
-    fun serverMove(moves: Array<Move>, state: State): ServerMove
+    fun serverMove(moves: Array<Move>, state: State): ServerMove<State>
     fun prepare(game: Game): State
 
     companion object {

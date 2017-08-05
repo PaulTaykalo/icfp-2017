@@ -34,7 +34,8 @@
                    (:pass resp) (assoc-in resp [:pass :punter] punter-id)
                    :else resp)]
     (dosync
-     (reset! world (util/consume-move resp @world)))
+     (reset! world (-> (util/consume-move resp @world)
+                       (update :moves-history #(cons resp %)))))
     (:state resp)))
 
 (defn send-stop-message-to-punter [punter punter-id]

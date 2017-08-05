@@ -36,7 +36,7 @@
                         identity)
                       {:claim {:punter (:id @state), :source src, :target tgt}})))))
 
-              (:stop req) nil
+              (:stop req) (do (println "Endgame:" req) nil)
 
               (:map req) (do (reset! state (-> {:world (-> (util/make-world (:map req) (:punters req))
                                                            ;; to reduce traffic

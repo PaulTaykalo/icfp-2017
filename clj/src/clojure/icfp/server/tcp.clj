@@ -62,7 +62,6 @@
       (loop []
         (let [inp (recv! socket history)
               parsed-inp (json/decode inp true)]
-          (println inp)
           (when (or (:map parsed-inp)
                     (:move parsed-inp))
             (send! socket (client inp) history))

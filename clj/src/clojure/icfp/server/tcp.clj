@@ -70,3 +70,19 @@
             (send! socket (client inp) history))
           (when-not (:stop parsed-inp)
             (recur)))))))
+
+(defn make-offline-client [name client]
+  (let [history (atom [])]
+    (send! *out* (json/encode {:me name}) history)
+    (when-not (= (json/encode {:you name}) (recv! *in* history))
+      (throw (RuntimeException. "Wrong response")))
+    (loop []
+      (let [inp (recv! *in* history)
+            parsed-inp (json/decode inp true)]
+        (when (or (:map parsed-inp)
+                  (:move parsed-inp))
+          (send! *out* (client inp) history))
+        (when-not (:stop parsed-inp)
+          (recur))))))
+
+#_(make-offline-client "hi" (icfp.client.random/make-client true))

@@ -137,6 +137,12 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
             @SerializedName("scores") val scores: Array<Score>
     )
 
+    private data class GameModel(
+            @SerializedName("punter") val punter: PunterID,
+            @SerializedName("punters") val punters: Int,
+            @SerializedName("map") val map: org.icfp2017.Map
+    )
+
     fun me(me: PunterName, callback: (PunterName) -> Unit) {
         val me = Gson().toJson(MeRequest(me))
         Logger.log(me)
@@ -146,11 +152,11 @@ class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSON
     }
 
     fun setup(callback: (Game) -> Unit) {
-        val response: Game = Gson().fromJson(readString(), Game::class.java)
+        val response: GameModel = Gson().fromJson(readString(), GameModel::class.java)
+        val game = Game(response.punter, response.punters, response.map)
         Logger.log("Sent $response")
-        callback(response)
+        callback(game)
     }
-
 
     fun ready(punterID: PunterID, onMove: (Array<Move>) -> Move, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
         send(Gson().toJson(ReadyRequest(punterID)))

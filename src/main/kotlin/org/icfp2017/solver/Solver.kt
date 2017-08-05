@@ -5,9 +5,10 @@ import org.icfp2017.server.Server
 
 
 object Solver {
-    fun play(server: Server, name: String = Arguments.name, strategy: Strategy = Arguments.strategy) {
+    fun play(server: Server, name: String = Arguments.nameWithStrategy, strategy: Strategy = Arguments.strategy) {
         server.me(name) {
             server.setup { game ->
+                strategy.prepare(game)
                 server.ready(
                     punterID = game.punter,
                     onMove = { moves ->

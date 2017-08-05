@@ -6,6 +6,8 @@
 
 (defn square [x] (* x x))
 
+(defn cube [x] (* x x x))
+
 (defn score [world]
   (let [graph (apply g/graph (seq (:rivers world)))
         mines (set (:mines world))
@@ -25,12 +27,23 @@
     (into final-score
           (for [[id owned] (group-by #(claimed %) (seq (:rivers world)))]
             [id (let [connected (ga/connected-components (apply g/graph owned))]
-                  (reduce + 0
-                          (for [conn connected]
-                            (reduce + 0
-                                    (for [from (filter mines conn)
-                                          to conn]
-                                      (square (shortest-path (util/river from to))))))))]))))
+                  (+
+                   ;; Graph part
+                   (reduce + 0
+                           (for [conn connected]
+                             (reduce + 0
+                                     (for [from (filter mines conn)
+                                           to conn]
+                                       (square (shortest-path (util/river from to)))))))
+
+                   ;; Futures
+                   (if-let [{:keys [mine site]} (get-in world [:punter-futures id])]
+                     (let [future-score (cube (shortest-path (util/river mine site)))]
+                       (if (some #(let [cs (set %)] (and (cs mine) (cs site)))
+                                 connected)
+                         future-score
+                         (- future-score)))
+                     0)))]))))
 
 (defn -score [json-world punter-count json-moves]
   (let [world (util/make-world (json/decode json-world) punter-count)

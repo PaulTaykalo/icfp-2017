@@ -14,11 +14,14 @@
 (defn send-initial-state-to-punter [punter punter-id punters-count]
   (let [msg {:punter punter-id
              :punters punters-count
-             :map (:initial-json-map @world)}
+             :map (:initial-json-map @world)
+             :settings {:futures true}}
         resp  (json/decode (punter (json/encode msg)) true)]
     (when-not (= (:ready resp) punter-id)
       (throw (ex-info (str "Wrong response from punter " punter-id ": " resp)
                       {})))
+    (when-let [{:keys [source target]} (last (:futures resp))]
+      (swap! world assoc-in [:punter-futures punter-id] {:mine source, :site target}))
     (:state resp)))
 
 (defn- prepare-moves [world]
@@ -33,9 +36,8 @@
         resp (cond (:claim resp) (assoc-in resp [:claim :punter] punter-id)
                    (:pass resp) (assoc-in resp [:pass :punter] punter-id)
                    :else resp)]
-    (dosync
-     (reset! world (-> (util/consume-move resp @world)
-                       (update :moves-history #(cons resp %)))))
+    (reset! world (-> (util/consume-move resp @world)
+                      (update :moves-history #(cons resp %))))
     (:state resp)))
 
 (defn send-stop-message-to-punter [punter punter-id]

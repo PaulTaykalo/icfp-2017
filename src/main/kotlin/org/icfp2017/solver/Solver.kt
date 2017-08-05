@@ -11,7 +11,7 @@ object Solver {
                 server.ready(
                     punterID = game.punter,
                     onMove = { moves ->
-                        game.map.apply(moves)
+                        game.apply(moves)
                         strategy.move(game)
                     },
                     onInterruption = {

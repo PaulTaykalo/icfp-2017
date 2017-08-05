@@ -49,5 +49,6 @@ fun main(args: Array<String>) {
             "offline" to Arguments.offline))))
 
     val server = if (Arguments.offline) OfflineServer() else OnlineServer()
-    Solver.play(server)
+    val name = Arguments.name + "[${Arguments.strategy.javaClass.canonicalName}]"
+    Solver.play(server, name = name)
 }

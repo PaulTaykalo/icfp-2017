@@ -10,8 +10,8 @@ import org.icfp2017.solver.*
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9016
-    var strategy: String = DumbAndGreedy.javaClass.simpleName
+    var port: Int = 9007
+    var strategy: String = SmartAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
     var logType = "error"

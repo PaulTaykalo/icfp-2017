@@ -4,7 +4,13 @@
   (:import [java.net InetSocketAddress Socket SocketTimeoutException ServerSocket InetAddress]))
 
 (defn- send! [sock msg history]
-  (swap! history conj msg)
+  (let [msg (dissoc (json/parse-string msg true) :state)
+        msg (if (:move msg)
+              (update-in msg [:move :moves]
+                         (fn [move] (map #(dissoc % :state) move)))
+              msg)
+        msg (json/encode msg)]
+    (swap! history conj msg))
   (doto (io/writer sock)
     (.write (str (count msg) ":"))
     (.write msg)
@@ -23,7 +29,13 @@
         sz (read-size rdr)]
     (loop [left-bytes sz, result ""]
       (if (zero? left-bytes)
-        (do (swap! history conj result)
+        (do (let [msg (dissoc (json/parse-string result true) :state)
+                  msg (if (:move msg)
+                        (update-in msg [:move :moves]
+                                   (fn [move] (map #(dissoc % :state) move)))
+                        msg)
+                  msg (json/encode msg)]
+              (swap! history conj msg))
             result)
         (let [bytes-read (.read rdr buff)]
           (recur (- left-bytes bytes-read)

@@ -64,6 +64,7 @@
                                  id
                                  (send-initial-state-to-punter punter id (count punters))))
                         punters))
+    (println "[INFO] Initial state sent, let the game begin!")
     (while (> (:remaining-moves @world) 0)
       (dorun (map-indexed
               (fn [id punter]
@@ -72,6 +73,7 @@
                           (assoc % id
                                  (prompt-punter-for-move punter id state)))))
                           punters)))
+    (println "[INFO] Game complete, calculating scores...")
     (let [score (scorer/score @world)]
       (dorun (map-indexed (fn [id punter]
                             (send-stop-message-to-punter punter score id))

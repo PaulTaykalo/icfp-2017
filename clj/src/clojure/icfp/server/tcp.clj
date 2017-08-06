@@ -45,6 +45,7 @@
             (swap! punter-names assoc (count @punters) (:me handshake))
             (send! sock (json/encode {:you (:me handshake)}) history)
             (swap! punters #(assoc % (count %) sock)))))
+      (println "[INFO] All clients connected, starting game loop")
       (game-loop-fn
        (map (fn [[id punter-sock]]
               (fn [in & [dont-recv?]]

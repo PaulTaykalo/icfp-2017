@@ -27,6 +27,7 @@ interface Strategy<State> {
 //            "First" to { server -> OfflineSolver.play(server, strategy = FirstFree) },
 //            "Random" to { server -> OfflineSolver.play(server, strategy = RandomFree) },
             "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
+            "AllYourBaseAreBelongToUsExpansion" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsExpansion) },
             "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
             "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
                 "MinMax" to { server -> OfflineSolver.play(server, strategy = AlphaBeta) },

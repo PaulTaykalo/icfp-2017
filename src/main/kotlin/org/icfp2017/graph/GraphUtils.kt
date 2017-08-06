@@ -7,7 +7,7 @@ import org.icfp2017.Game
 import org.icfp2017.Logger
 import org.icfp2017.River
 import org.icfp2017.*
-import org.icfp2017.MapModel
+import org.icfp2017.solver.AllYourBaseAreBelongToUsExpansionState
 
 class GraphUtils {
 
@@ -39,7 +39,17 @@ class GraphUtils {
 
     val mostAjustedMstFree: MutableSet<Edge> = mutableSetOf();
 
-    constructor(game: Game): this(game.sitesForSite, game.unownedRivers, game.ownedRivers)
+    constructor(game: Game): this(
+            game.sitesForSite,
+            game.unownedRivers,
+            game.ownedRivers
+    )
+
+    constructor(allBasesExpansionState: AllYourBaseAreBelongToUsExpansionState): this(
+            allBasesExpansionState.sitesForSite,
+            allBasesExpansionState.unownedRivers,
+            allBasesExpansionState.ownedRivers
+    )
 
     constructor(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {
         initState(sitesForSite, unownedRivers, ownedRivers)
@@ -87,11 +97,7 @@ class GraphUtils {
             }
         }
 
-        return graph;
-    }
-
-    fun updateState(game:Game){
-        updateState(game.sitesForSite, game.unownedRivers, game.ownedRivers, game.myRivers)
+        return graph
     }
 
     fun updateState(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>, myRivers: Set<River>) {
@@ -139,8 +145,8 @@ class GraphUtils {
         return res
     }
 
-    fun riversCloseToBases(rivers: List<River>, game: Game): List<River> {
-        val baseRivers = game.mines.flatMap { game.riversForSite[it]!! }
+    fun riversCloseToBases(rivers: List<River>, mines: Set<SiteID>, riversForSite: RiversForSite): List<River> {
+        val baseRivers = mines.flatMap { riversForSite[it]!! }
 
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))
         return priorityBaseRivers.intersect(rivers).toList()

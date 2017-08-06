@@ -17,11 +17,16 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
     override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val graphUtils = GraphUtils(state.game)
         val newGame = applyMoves(moves, state.game)
-        graphUtils.updateState(newGame)
+        graphUtils.updateState(
+                newGame.sitesForSite,
+                newGame.unownedRivers,
+                newGame.ownedRivers,
+                newGame.myRivers
+        )
         val rivers = newGame.unownedRivers.toList()
         if (rivers.isEmpty()) return Pair(newGame.pass(),  StrategyStateWithGame(newGame))
 
-        val baseRivers =  graphUtils.riversCloseToBases(rivers, newGame)
+        val baseRivers =  graphUtils.riversCloseToBases(rivers, newGame.mines, newGame.riversForSite)
         if(baseRivers.isNotEmpty()){
             val claim = baseRivers.first()
             //Logger.log("base river claim $claim")

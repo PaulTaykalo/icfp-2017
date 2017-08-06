@@ -16,7 +16,7 @@ object EagerBaseCatcher : Strategy<StrategyStateWithGame>{
     override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
 
         val newGame = applyMoves(moves, state.game)
-        graphUtils.updateState(newGame)
+        graphUtils.updateState(newGame.sitesForSite, newGame.unownedRivers, newGame.ownedRivers, newGame.myRivers)
 
         val rivers = newGame.unownedRivers.toList()
         if (rivers.isEmpty()) return Pair(newGame.pass(), state)

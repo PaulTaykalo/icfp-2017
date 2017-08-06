@@ -19,56 +19,70 @@ data class MeRequest(val me: String)
 data class MeResponse(val you: String)
 
 data class ReadyRequest(
-    val ready: PunterID,
-    val state: JSONString
+        val ready: PunterID,
+        val futures: Array<FutureRequest>?,
+        val state: JSONString
+)
+
+data class FutureRequest(
+        val source: SiteID,
+        val target: SiteID
 )
 
 data class MoveResponse(
-    val claim: Claim?,
-    val pass: Pass?
+        val claim: Claim?,
+        val pass: Pass?,
+        val splurge: Splurge?
 )
 
 data class MoveRequest(
-    val claim: Claim?,
-    val pass: Pass?,
-    val state: JSONString
+        val claim: Claim?,
+        val pass: Pass?,
+        val splurge: Splurge?,
+        val state: JSONString
 )
 
 data class MovesArrayResponse(val moves: Array<MoveResponse>)
 
 data class StopResponse(
-    val moves: Array<MoveResponse>,
-    val scores: Array<Score>
+        val moves: Array<MoveResponse>,
+        val scores: Array<Score>
 )
 
 data class SetupResponse(
-    val punter: PunterID,
-    val punters: Int,
-    val map: MapModel
+        val punter: PunterID,
+        val punters: Int,
+        val map: MapModel,
+        val settings: SettingsResponse?
+)
+
+data class SettingsResponse(
+        val futures: Boolean?,
+        val splurges: Boolean?
 )
 
 data class MovesResponse(
-    val move: MovesArrayResponse,
-    val state: JSONString
+        val move: MovesArrayResponse,
+        val state: JSONString
 )
 
 data class StopGeneralResponse(
-    val stop: StopResponse,
-    val state: JSONString?
+        val stop: StopResponse,
+        val state: JSONString?
 )
 
 data class OnlineReadyRequest(val ready: PunterID)
 data class OnlineMoveRequest(
-    val claim: Claim?,
-    val pass: Pass?
+        val claim: Claim?,
+        val pass: Pass?,
+        val splurge: Splurge?
 )
 
 
 class OnlineServer(
-    serverName: String = Arguments.server,
-    serverPort: Int = Arguments.port,
-    offlineServer: OfflineServer)
-{
+        serverName: String = Arguments.server,
+        serverPort: Int = Arguments.port,
+        offlineServer: OfflineServer) {
 
     private val serverBehaviour = ServerBehaviour({ json -> send(json) }, { readString() })
 
@@ -90,9 +104,10 @@ class OnlineServer(
         inputStream = client.inputStream
         this.offlineServer = offlineServer
 
+        offlineServer.exitAfterMove = false
         offlineServer.serverBehaviour = ServerBehaviour(
-            { json -> handleOfflineRequest(json) },
-            { sendJsonToClient() }
+                { json -> handleOfflineRequest(json) },
+                { sendJsonToClient() }
         )
 
     }
@@ -122,7 +137,7 @@ class OnlineServer(
 
             val moveRequest = gson.fromJson(json, MoveRequest::class.java)
             if (moveRequest != null) {
-                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass))
+                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass, moveRequest.splurge))
                 state = moveRequest.state
                 serverBehaviour.send(outJson)
                 return
@@ -213,7 +228,8 @@ class OnlineServer(
 
 
 }
-class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString)  {
+
+class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString) {
 
     private val gson = Gson()
 

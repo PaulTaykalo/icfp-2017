@@ -67,6 +67,8 @@
     (while (> (:remaining-moves @world) 0)
       (dorun (map-indexed
               (fn [id punter]
+                (when (zero? (rem (:remaining-moves @world) 100))
+                  (println "[INFO] Remaining moves:" (:remaining-moves @world)))
                 (swap! punters-state
                        #(let [state (get % id)]
                           (assoc % id

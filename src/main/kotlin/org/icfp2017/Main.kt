@@ -20,9 +20,15 @@ object Arguments {
 val Arguments.nameWithStrategy: String get() = "$name [$strategy]"
 
 fun main(args: Array<String>) {
+
     if (args.contains("--help")) {
         println("Usage: ./bin/icfp2017 --name=value")
         println("See Main.kt for list of supported arguments")
+        return
+    }
+
+    if (args.contains("--dump")) {
+        println(Strategy.strategyFactory.keys.joinToString(","))
         return
     }
 

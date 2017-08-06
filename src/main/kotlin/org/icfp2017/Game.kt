@@ -3,11 +3,13 @@
 package org.icfp2017
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
+import org.icfp2017.server.SettingsResponse
 
 private typealias MineID = Int
 private typealias Reachability = Map<MineID, Set<SiteID>>
 private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
-private  typealias RiversForSite = Map<SiteID, Set<River>>
+private typealias RiversForSite = Map<SiteID, Set<River>>
 private typealias  SitesForSite = Map<SiteID, Set<SiteID>>
 
 fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {
@@ -114,24 +116,25 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
             newSiteReachebleForMine = updateSitesReachability(newSiteReachebleForMine, river,newMyRivers, game.riversForSite)
         }
     }
-    return Game(game.punter, game.punters, game.mapModel, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
+    return Game(game.punter, game.punters, game.mapModel, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
             game.riversForSite, game.sitesForSite, game.siteScores)
 
 }
 
 data class Game(
-        val punter: PunterID,
-        val punters: Int,
-        val mapModel: MapModel,
-        val sites : Array<SiteModel> = mapModel.sites,
-        val mines:Set<SiteID> = mapModel.mines.toSet(),
-        val ownedRivers:Set<River> = setOf<River>(),
-        val unownedRivers:Set<River> = mapModel.rivers.toSet(),
-        val myRivers:Set<River> = setOf<River>(),
-        val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
-        val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
-        val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
-        val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
+    val punter: PunterID,
+    val punters: Int,
+    @SerializedName("map") val mapModel: MapModel,
+    val settings: SettingsResponse?,
+    val sites : Array<SiteModel> = mapModel.sites,
+    val mines:Set<SiteID> = mapModel.mines.toSet(),
+    val ownedRivers:Set<River> = setOf<River>(),
+    val unownedRivers:Set<River> = mapModel.rivers.toSet(),
+    val myRivers:Set<River> = setOf<River>(),
+    val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
+    val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
+    val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
+    val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
 )
 data class SiteModel(val id: SiteID)
 data class River(val source: SiteID, val target:SiteID)
@@ -146,6 +149,7 @@ data class MapModel(val sites: Array<SiteModel>, val rivers: Array<River>, val m
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()
 data class Pass(val punter: PunterID) : Move()
+data class Splurge(val punter: PunterID, val route: Array<SiteID>) : Move()
 
 typealias SiteID = Int
 typealias PunterID = Int

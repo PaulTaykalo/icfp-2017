@@ -119,6 +119,7 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
             is Pass -> listOf()
             is Splurge -> it.claims
             is Claim -> listOf(it)
+            is Option -> listOf(it).map { Claim(it.punter, it.source, it.target) }
         }
     }
 
@@ -171,6 +172,7 @@ sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()
 data class Pass(val punter: PunterID) : Move()
 data class Splurge(val punter: PunterID, val route: Array<SiteID>) : Move()
+data class Option(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()
 
 typealias SiteID = Int
 typealias PunterID = Int

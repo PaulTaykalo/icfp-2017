@@ -76,6 +76,7 @@ class OfflineServer {
                         claim = move as? Claim,
                         pass = move as? Pass,
                         splurge = move as? Splurge,
+                        option = move as? Option,
                         state = rr)
 
                 val json = Logger.measure("server: move response serialization") {

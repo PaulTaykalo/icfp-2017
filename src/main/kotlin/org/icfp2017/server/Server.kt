@@ -39,6 +39,7 @@ data class MoveRequest(
         val claim: Claim?,
         val pass: Pass?,
         val splurge: Splurge?,
+        val option: Option?,
         val state: JSONString
 )
 

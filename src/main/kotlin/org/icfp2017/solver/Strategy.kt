@@ -22,7 +22,6 @@ interface Strategy<State> {
             "SpanningTree" -> OfflineSolver.play(server, strategy = SpanningTree)
             "First" -> OfflineSolver.play(server, strategy = FirstFree)
             "Random" -> OfflineSolver.play(server, strategy = RandomFree)
-            "AllYourBaseAreBelongToUs" -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUs)
             "AllYourBaseAreBelongToUsRandom" -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom)
             "DumbAndGreedy" -> OfflineSolver.play(server, strategy = DumbAndGreedy)
             "EagerBaseCatcher" -> OfflineSolver.play(server, strategy = EagerBaseCatcher)

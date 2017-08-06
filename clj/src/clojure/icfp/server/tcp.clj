@@ -4,7 +4,8 @@
   (:import [java.net InetSocketAddress Socket SocketTimeoutException ServerSocket InetAddress]))
 
 (defn- send! [sock msg history]
-  (swap! history conj msg)
+  (let [msg (json/encode (dissoc (json/parse-string msg true) :state))]
+    (swap! history conj msg))
   (doto (io/writer sock)
     (.write (str (count msg) ":"))
     (.write msg)
@@ -23,7 +24,8 @@
         sz (read-size rdr)]
     (loop [left-bytes sz, result ""]
       (if (zero? left-bytes)
-        (do (swap! history conj result)
+        (do (let [result (json/encode (dissoc (json/parse-string result true) :state))]
+              (swap! history conj result))
             result)
         (let [bytes-read (.read rdr buff)]
           (recur (- left-bytes bytes-read)
@@ -55,7 +57,7 @@
             @punters))
       (with-open [f (io/writer history-out-file)]
         (binding [*out* f]
-          (run! (comp println #(dissoc % :state)) @history))))))
+          (run! println @history))))))
 
 (defn make-tcp-client [name client host port]
   (let [history (atom [])]

@@ -9,7 +9,7 @@ import org.icfp2017.server.OfflineServer
 import org.icfp2017.solver.alphaBeta.AlphaBeta
 
 data class StrategyStateWithGame(
-    @SerializedName("game") val game: Game
+        @SerializedName("game") val game: Game
 )
 
 interface Strategy<State> {
@@ -23,14 +23,14 @@ interface Strategy<State> {
     companion object {
 
         val strategyFactory: Map<String, (OfflineServer) -> Unit> = mapOf(
-            "SpanningTree" to { server -> OfflineSolver.play(server, strategy = SpanningTree) },
-//            "First" to { server -> OfflineSolver.play(server, strategy = FirstFree) },
-//            "Random" to { server -> OfflineSolver.play(server, strategy = RandomFree) },
-            "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
-            "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
-            "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
+                "SpanningTree" to { server -> OfflineSolver.play(server, strategy = SpanningTree) },
+                "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
+                "AllYourBaseAreBelongToUsExpansion" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsExpansion) },
+                "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
+                "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
                 "MinMax" to { server -> OfflineSolver.play(server, strategy = AlphaBeta) },
-            "EagerBaseCatcher" to { server -> OfflineSolver.play(server, strategy = EagerBaseCatcher) }
+                "EagerBaseCatcher" to { server -> OfflineSolver.play(server, strategy = EagerBaseCatcher) },
+                "DumbAndGreedy2" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy2) }
         )
 
         fun play(server: OfflineServer, name: String = Arguments.strategy) = strategyFactory[name]!!(server)

@@ -48,6 +48,46 @@ object DumbAndGreedy : Strategy<Game> {
     }
 }
 
+object DumbAndGreedy2 : Strategy<Game> {
+    override fun prepare(game: Game) = game
+
+    private fun topRivers(game: Game): Collection<Pair<River, Long>> {
+        val reachedPoints = game.sitesReachedForMine.flatMap { it.value }
+        val nicePoints = reachedPoints.toSet() + game.mines
+
+        val niceRivers = nicePoints
+                .flatMap { game.riversForSite[it]!! }
+                .filter { it in game.unownedRivers }
+
+        val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
+
+        val costlyRivers = niceRivers
+                .map {
+                    val newReachability = updateSitesReachability(game.sitesReachedForMine, it, game.myRivers, game.riversForSite)
+                    val newScore = calculateScoreForReachable(newReachability, game.siteScores)
+
+                    val mineBonus = if (it.target in game.mines || it.source in game.mines) 10 else 0
+                    it to newScore - currentScore + mineBonus
+                }
+                .takeMaxBy { it.second }
+
+        return costlyRivers
+    }
+
+    override fun serverMove(moves: Array<Move>, oldState: Game): Pair<Move, Game> {
+        val game = applyMoves(moves, oldState)
+
+        val topRivers = topRivers(game)
+        val top2rivers = topRivers.takeMaxBy { (river, score) ->
+            val localGame = applyMoves(arrayOf(game.claim(river)), game)
+
+            topRivers(localGame).map { it.second }.max() ?: 0
+        }
+
+        return Pair(game.claim(top2rivers.firstOrNull()?.first), game)
+    }
+}
+
 object SmartAndGreedy: Strategy<Game> {
     override fun prepare(game: Game) = game
 
@@ -85,12 +125,12 @@ object SmartAndGreedy: Strategy<Game> {
                 val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
 
                 // Prefer points with many connections
-                val rivers = (game.unownedRivers - game.riversForSite[it]!!).size
+                val rivers = (game.riversForSite[it]!!.intersect(game.unownedRivers)).size
 
                 // distance to other mines
                 val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()
 
-                val totalScore = deltaScore + mineBoues + rivers - score
+                val totalScore = deltaScore + rivers - score
                 totalScore
             }
 

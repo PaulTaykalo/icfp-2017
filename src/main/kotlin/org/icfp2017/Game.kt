@@ -7,10 +7,10 @@ import com.google.gson.annotations.SerializedName
 import org.icfp2017.server.SettingsResponse
 
 private typealias MineID = Int
-private typealias Reachability = Map<MineID, Set<SiteID>>
+typealias Reachability = Map<MineID, Set<SiteID>>
 private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
-private typealias RiversForSite = Map<SiteID, Set<River>>
-private typealias  SitesForSite = Map<SiteID, Set<SiteID>>
+typealias RiversForSite = Map<SiteID, Set<River>>
+typealias SitesForSite = Map<SiteID, Set<SiteID>>
 
 fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {
 
@@ -125,7 +125,7 @@ data class Game(
     val punter: PunterID,
     val punters: Int,
     @SerializedName("map") val mapModel: MapModel,
-    val settings: SettingsResponse?,
+    val settings: SettingsResponse? = null,
     val sites : Array<SiteModel> = mapModel.sites,
     val mines:Set<SiteID> = mapModel.mines.toSet(),
     val ownedRivers:Set<River> = setOf<River>(),

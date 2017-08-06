@@ -6,7 +6,7 @@ import org.icfp2017.nameWithStrategy
 import org.icfp2017.server.OfflineServer
 
 object OfflineSolver {
-    inline fun <reified T>play(server: OfflineServer, name: String = Arguments.nameWithStrategy, strategy: Strategy<T>) {
+    inline fun <reified T>play(server: OfflineServer, strategy: Strategy<T>, name: String = Arguments.nameWithStrategy) {
         server.me(name) {
 
             server.setup(

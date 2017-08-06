@@ -7,14 +7,14 @@ import org.icfp2017.Game
 import org.icfp2017.Logger
 import org.icfp2017.River
 import org.icfp2017.*
-import org.icfp2017.MapModel
+import org.icfp2017.solver.AllYourBaseAreBelongToUsExpansionState
 
-class GraphUtils(game: Game) {
+class GraphUtils {
 
-    var graph: UWGraph? = null;
-    var mst: MST? = null;
-    var mstEdges: List<Edge>? = null;
-    var mostAjustedMst: List<Edge>? = null;
+    var graph: UWGraph? = null
+    var mst: MST? = null
+    var mstEdges: List<Edge>? = null
+    var mostAjustedMst: List<Edge>? = null
 
 
     val riverToEdge:HashMap<River, Edge> = hashMapOf()
@@ -39,29 +39,48 @@ class GraphUtils(game: Game) {
 
     val mostAjustedMstFree: MutableSet<Edge> = mutableSetOf();
 
+    constructor(game: Game): this(
+            game.sitesForSite,
+            game.unownedRivers,
+            game.ownedRivers
+    )
 
-    init {
-       initState(game)
+    constructor(allBasesExpansionState: AllYourBaseAreBelongToUsExpansionState): this(
+            allBasesExpansionState.sitesForSite,
+            allBasesExpansionState.unownedRivers,
+            allBasesExpansionState.ownedRivers
+    )
+
+    constructor(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {
+        initState(sitesForSite, unownedRivers, ownedRivers)
     }
 
-    fun toGraph(game: Game): UWGraph {
+    fun initState(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {
+        graph = toGraph(sitesForSite, unownedRivers + ownedRivers)
+        mst = BoruvkaMST(graph!!)
+        mstEdges = mst!!.edges().toList()
+        mostAjustedMst = mstEdges!!.sortedWith(compareBy({ graph!!.adjacentVertices(it.v).size }, { graph!!.adjacentVertices(it.w).size }))
+        mostAjustedMstFree.addAll(mst!!.edges())
+    }
+
+    fun toGraph(sitesForSite: SitesForSite, allRivers: Set<River>): UWGraph {
 
         //Logger.log("transforming to graph")
         //Logger.log("map is " + map)
         //Logger.log("sites  " + map.sites)
         //Logger.log("size  " + map.sites.size)
 
-        val vertexNumber = game.sitesForSite.keys.size
+        val vertexNumber = sitesForSite.keys.size
         val graph = UWGraph(vertexNumber);
 
         var graphVertexId = 0
-        for (site in game.sitesForSite.keys) {
+        for (site in sitesForSite.keys) {
             vertexToSite.put(graphVertexId, site)
             siteToVertex.put(site, graphVertexId)
             graphVertexId++
         }
 
-        for (river in game.unownedRivers + game.ownedRivers) {
+        for (river in allRivers) {
             val source = siteToVertex[river.source]
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
@@ -78,30 +97,20 @@ class GraphUtils(game: Game) {
             }
         }
 
-        return graph;
+        return graph
     }
 
-    fun initState(game:Game){
-        graph = toGraph(game)
-        mst = BoruvkaMST(graph!!)
-        mstEdges = mst!!.edges().toList()
-        mostAjustedMst = mstEdges!!.sortedWith(compareBy({ graph!!.adjacentVertices(it.v).size }, { graph!!.adjacentVertices(it.w).size }))
-        mostAjustedMstFree.addAll(mst!!.edges());
-    }
+    fun updateState(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>, myRivers: Set<River>) {
+        initState(sitesForSite, unownedRivers, ownedRivers)
 
-    fun updateState(game:Game){
-
-        // should not happen, should do delta
-        initState(game)
-
-        for (river in game.unownedRivers + game.ownedRivers)
+        for (river in unownedRivers + ownedRivers)
         {
             allRivers.add(river)
             allEdges.add(riverToEdge[river] as Edge)
-            if(river !in game.unownedRivers){
+            if(river !in unownedRivers){
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
-                if(river in game.myRivers){
+                if(river in myRivers){
                     ourRivers.add(river)
                     ourEdges.add(riverToEdge[river] as Edge)
                 }else
@@ -115,11 +124,9 @@ class GraphUtils(game: Game) {
                 freeEdges.add(riverToEdge[river] as Edge)
 
             }
-
-
-
         }
     }
+
     fun mostConnectedRivers(rivers: Iterable<River>): List<River> {
         val edge = findMostAdjacentEdgeInSpanningTree()
         if(edge == null) {
@@ -138,8 +145,8 @@ class GraphUtils(game: Game) {
         return res
     }
 
-    fun riversCloseToBases(rivers: List<River>, game: Game): List<River> {
-        val baseRivers = game.mines.flatMap { game.riversForSite[it]!! }
+    fun riversCloseToBases(rivers: List<River>, mines: Set<SiteID>, riversForSite: RiversForSite): List<River> {
+        val baseRivers = mines.flatMap { riversForSite[it]!! }
 
         val priorityBaseRivers = baseRivers.sortedWith(compareBy({ graph!!.adjacentEdges(vertexFromSite(it.target)).size }, { graph!!.adjacentEdges(vertexFromSite(it.source)).size }))
         return priorityBaseRivers.intersect(rivers).toList()

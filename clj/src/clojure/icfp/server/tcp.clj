@@ -3,14 +3,15 @@
             [cheshire.core :as json])
   (:import [java.net InetSocketAddress Socket SocketTimeoutException ServerSocket InetAddress]))
 
-(defn- send! [sock msg history]
+(defn- send! [sock msg out-file]
   (let [msg (dissoc (json/parse-string msg true) :state)
         msg (if (:move msg)
               (update-in msg [:move :moves]
                          (fn [move] (map #(dissoc % :state) move)))
               msg)
         msg (json/encode msg)]
-    (swap! history conj msg))
+    (binding [*out* out-file]
+      (println msg)))
   (doto (io/writer sock)
     (.write (str (count msg) ":"))
     (.write msg)
@@ -23,7 +24,7 @@
         (Integer/parseInt res)
         (recur (str res c))))))
 
-(defn- recv! [sock history]
+(defn- recv! [sock out-file]
   (let [buff (byte-array 1000)
         rdr (.getInputStream sock)
         sz (read-size rdr)]
@@ -35,7 +36,8 @@
                                    (fn [move] (map #(dissoc % :state) move)))
                         msg)
                   msg (json/encode msg)]
-              (swap! history conj msg))
+              (binding [*out* out-file]
+                (println msg)))
             result)
         (let [bytes-read (.read rdr buff)]
           (recur (- left-bytes bytes-read)
@@ -44,30 +46,27 @@
 (def punter-names (atom {}))
 
 (defn start-tcp-server [port max-players game-loop-fn history-out-file]
-  (let [punters (atom {})
-        history (atom [])]
-    (with-open [server-sock (ServerSocket. port 50 (InetAddress/getByName "0.0.0.0"))]
+  (let [punters (atom {})]
+    (with-open [server-sock (ServerSocket. port 50 (InetAddress/getByName "0.0.0.0"))
+                out-file (io/writer history-out-file)]
       (println "[INFO] Starting SimServerFutures on port" port)
       (while (< (count @punters) max-players)
         (println "[INFO] Waiting for" (- max-players (count @punters)) "more clients...")
         (let [sock (.accept server-sock)
               _ (println "[INFO] Connected:" sock)
-              handshake (json/parse-string (recv! sock history) true)]
+              handshake (json/parse-string (recv! sock out-file) true)]
           (when (:me handshake)
             (swap! punter-names assoc (count @punters) (:me handshake))
-            (send! sock (json/encode {:you (:me handshake)}) history)
+            (send! sock (json/encode {:you (:me handshake)}) out-file)
             (swap! punters #(assoc % (count %) sock)))))
       (println "[INFO] All clients connected, starting game loop")
       (game-loop-fn
        (map (fn [[id punter-sock]]
               (fn [in & [dont-recv?]]
-                (send! punter-sock in history)
+                (send! punter-sock in out-file)
                 (when-not dont-recv?
-                  (recv! punter-sock history))))
-            @punters))
-      (with-open [f (io/writer history-out-file)]
-        (binding [*out* f]
-          (run! println @history))))))
+                  (recv! punter-sock out-file))))
+            @punters)))))
 
 (defn make-tcp-client [name client host port]
   (let [history (atom [])]

@@ -4,6 +4,10 @@ text {
   pointer-events: none;
 }
 
+input {
+  width: 1024px;
+}
+
 text.shadow {
   stroke: #fff;
   stroke-width: 3px;
@@ -41,7 +45,7 @@ svg {
 #cy {
   position: relative;
   width: 1000px;
-  height: 700px;
+  height: 500px;
   display: block;
   background: #000;
 }

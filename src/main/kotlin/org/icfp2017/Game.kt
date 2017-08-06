@@ -52,6 +52,8 @@ fun calculateScores(sites: Array<SiteModel>, mines:Array<SiteID>, sitesForSite: 
     return scores
 }
 
+val Game.currentScore: Long get() = calculateScoreForReachable(sitesReachedForMine, siteScores)
+
 fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: ScoreFromMine): Long {
     var sum = 0L
     sitesReachableFromMine.forEach { (mine, sites) ->

@@ -136,3 +136,16 @@ object AlphaBeta: Strategy<StrategyStateWithGame> {
         return Pair(move, StrategyStateWithGame(newGame))
     }
 }
+
+class MinMax(val heuristic: (Game)-> Double): Strategy<Game> {
+    override fun prepare(game: Game) = game
+
+    override fun serverMove(moves: Array<Move>, state: Game): Pair<Move, Game> {
+        val newGame = applyMoves(moves, state)
+        val move = getBestMove(newGame,2).move
+        return move to newGame
+    }
+}
+
+
+val MinMaxScore = MinMax { it.currentScore.toDouble() }

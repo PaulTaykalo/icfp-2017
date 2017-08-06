@@ -148,6 +148,7 @@ data class MapModel(val sites: Array<SiteModel>, val rivers: Array<River>, val m
 sealed class Move
 data class Claim(val punter: PunterID, val source: SiteID, val target: SiteID) : Move()
 data class Pass(val punter: PunterID) : Move()
+data class Splurge(val punter: PunterID, val route: Array<SiteID>) : Move()
 
 typealias SiteID = Int
 typealias PunterID = Int

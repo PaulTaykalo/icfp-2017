@@ -61,7 +61,7 @@ class OfflineServer {
                 }
 
                 val typedMoves: Array<Move> = movesResponse.move.moves.map {
-                    it.claim ?: it.pass ?: Pass(-1)
+                    it.claim ?: it.pass ?: it.splurge ?: Pass(-1)
                 }.toTypedArray()
 
                 val ss = Logger.measure("server: parsing state from json") {
@@ -74,6 +74,7 @@ class OfflineServer {
                 val moveResponse = MoveRequest(
                         claim = move as? Claim,
                         pass = move as? Pass,
+                        splurge = move as? Splurge,
                         state = rr)
 
                 val json = Logger.measure("server: move response serialization") {
@@ -90,7 +91,7 @@ class OfflineServer {
                     gson.fromJson(json, StopGeneralResponse::class.java)
                 }
                 val typedMoves: Array<Move> = stopResponse.stop.moves.map {
-                    it.claim ?: it.pass ?: Pass(-1)
+                    it.claim ?: it.pass ?: it.splurge ?: Pass(-1)
                 }.toTypedArray()
 
                 onEnd(StopCommand(typedMoves, stopResponse.stop.scores))

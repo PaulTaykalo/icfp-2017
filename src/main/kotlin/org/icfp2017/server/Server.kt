@@ -24,20 +24,21 @@ data class ReadyRequest(
         val state: JSONString
 )
 
-typealias SiteId = Int
 data class FutureRequest(
-        val source: SiteId,
-        val target: SiteId
+        val source: SiteID,
+        val target: SiteID
 )
 
 data class MoveResponse(
         val claim: Claim?,
-        val pass: Pass?
+        val pass: Pass?,
+        val splurge: Splurge?
 )
 
 data class MoveRequest(
         val claim: Claim?,
         val pass: Pass?,
+        val splurge: Splurge?,
         val state: JSONString
 )
 
@@ -73,7 +74,8 @@ data class StopGeneralResponse(
 data class OnlineReadyRequest(val ready: PunterID)
 data class OnlineMoveRequest(
         val claim: Claim?,
-        val pass: Pass?
+        val pass: Pass?,
+        val splurge: Splurge?
 )
 
 
@@ -134,7 +136,7 @@ class OnlineServer(
 
             val moveRequest = gson.fromJson(json, MoveRequest::class.java)
             if (moveRequest != null) {
-                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass))
+                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass, moveRequest.splurge))
                 state = moveRequest.state
                 serverBehaviour.send(outJson)
                 return

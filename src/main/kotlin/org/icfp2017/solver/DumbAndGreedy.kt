@@ -27,7 +27,7 @@ object DumbAndGreedy : Strategy<Game> {
         state.apply(moves)
 
         val reachedPoints = state.sitesReachedForMine.flatMap { it.value }
-        val nicePoints = reachedPoints.toSet() + state.mines.toSet()
+        val nicePoints = reachedPoints.toSet() + state.mines
 
         val niceRivers = nicePoints
                 .flatMap { state.riversForSite[it]!! }
@@ -35,19 +35,14 @@ object DumbAndGreedy : Strategy<Game> {
 
         val currentScore = state.calculateScoreForReachable(state.sitesReachedForMine)
 
-
         val costlyRivers = niceRivers.takeMaxBy {
             val newReachability = state.updateSitesReachability(state.sitesReachedForMine, it)
             val newScore = state.calculateScoreForReachable(newReachability)
 
-            newScore - currentScore
+            val mineBonus = if (it.target in state.mines || it.source in state.mines) 10 else 0
+            newScore - currentScore + mineBonus
         }
 
-        val minesFriendlyRivers = costlyRivers.takeMaxBy {
-            val newPoint = if(it.source in nicePoints) it.target else it.source
-            0 - state.siteScores[newPoint]!!.values.sum()
-        }
-
-        return Pair(state.claim(minesFriendlyRivers.firstOrNull()), state)
+        return Pair(state.claim(costlyRivers.firstOrNull()), state)
     }
 }

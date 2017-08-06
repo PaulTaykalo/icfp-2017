@@ -4,7 +4,9 @@ package org.icfp2017
 
 import com.google.gson.Gson
 
-private typealias Reachability = Map<SiteID, Set<SiteID>>
+private typealias MineID = Int
+private typealias Reachability = Map<MineID, Set<SiteID>>
+private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
 
 class Game(
         val punter: PunterID,
@@ -14,7 +16,7 @@ class Game(
     var ownedRivers = setOf<River>()
     var unownedRivers = map.rivers.toSet()
     var myRivers = setOf<River>()
-    var mines = map.mines.toSet()
+    val mines = map.mines.toSet()
 
     var sitesReachedForMine = mines.map { it to setOf<SiteID>()}.toMap()
 
@@ -42,20 +44,20 @@ class Game(
     }
 
 
-    private fun calculateScores(map:MapModel): Map<SiteID, Map<SiteID, Long>> {
-        var scores = map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
+    // TODO :
+    fun calculateScores(map:MapModel): ScoreFromMine {
+        val scores = map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
 
         mines.forEach { mine ->
             var step = 1L
             scores[mine]!![mine] = 0
-            var front = mutableSetOf(mine)
+            var front = setOf(mine)
             while (front.isNotEmpty()) {
-                val site = front.elementAt(0)
-                val sites = sitesForSite[site]!!.filter { scores[it]!![mine] == null }
-                sites.forEach { scores[it]!![mine] = step * step }
-
-                front.addAll(sites)
-                front.remove(site)
+                front = front.flatMap { site ->
+                    val sites = sitesForSite[site]!!.filter { scores[it]!![mine] == null }
+                    sites.forEach { scores[it]!![mine] = step * step }
+                    sites
+                }.toSet()
                 step += 1
             }
         }
@@ -106,11 +108,12 @@ class Game(
         return sites.plus(newSites)
     }
 
-    fun calculateScoreForReachable(sitesReachableFromMine: Reachability): Long {
+    // TODO :
+    fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: ScoreFromMine = siteScores): Long {
         var sum = 0L
         sitesReachableFromMine.forEach { (mine, sites) ->
             sites.forEach { site ->
-                sum += siteScores[site]!![mine]!!
+                sum += scores[site]!![mine]!!
             }
         }
 

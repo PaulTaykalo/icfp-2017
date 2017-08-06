@@ -6,9 +6,7 @@ import org.amshove.kluent.`should not equal`
 import org.icfp2017.Game
 import org.icfp2017.MapModel
 import org.icfp2017.River
-import org.icfp2017.Site
 import org.icfp2017.SiteModel
-import org.junit.Assert.*
 import org.junit.Test
 
 class StrategyStateWithGameTest {

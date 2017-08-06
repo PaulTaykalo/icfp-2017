@@ -34,8 +34,7 @@
        (sort-by (comp :punter #(or (:claim %) (:pass %))))))
 
 (defn prompt-punter-for-move [punter punter-id state]
-  (let [msg ((if state #(assoc % :state state) identity)
-             {:move {:moves (prepare-moves @world)}})
+  (let [msg {:move {:moves (prepare-moves @world)}}
         resp (json/decode (punter (json/encode msg)) true)
         resp (cond (:claim resp) (assoc-in resp [:claim :punter] punter-id)
                    (:pass resp) (assoc-in resp [:pass :punter] punter-id)
@@ -64,6 +63,7 @@
                                  id
                                  (send-initial-state-to-punter punter id (count punters))))
                         punters))
+    (println "[INFO] Initial state sent, let the game begin!")
     (while (> (:remaining-moves @world) 0)
       (dorun (map-indexed
               (fn [id punter]
@@ -72,6 +72,7 @@
                           (assoc % id
                                  (prompt-punter-for-move punter id state)))))
                           punters)))
+    (println "[INFO] Game complete, calculating scores...")
     (let [score (scorer/score @world)]
       (dorun (map-indexed (fn [id punter]
                             (send-stop-message-to-punter punter score id))

@@ -10,7 +10,7 @@ import org.icfp2017.solver.*
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9117
+    var port: Int = 9016
     var strategy: String = DumbAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
                 Arguments.port = value.toInt()
                 Arguments.offline = false
             }
-            "--strategy" -> value
+            "--strategy" -> Arguments.strategy = value
             "--logging" -> Arguments.logType = value
             "--offline" -> Arguments.offline = value.toBoolean()
         }

@@ -31,6 +31,7 @@
     <script src="js-core/bluebird.min.js"></script>
     <script src="js-core/js-core.js"></script>
     <script src="viewer.js"></script>
+    <object id="the-history" data="history.json" type="text/plain"></object>
     <script>
 
   addEventListener('load', function(){
@@ -57,16 +58,14 @@
 
     document.getElementById('myFile').addEventListener('change', onChange);
 
+
     var data = document.getElementById('data');
     if (data) {
       parse(data.innerText);
     } else {
-      fetch("history.json", {mode: "no-cors"})
-      .then(function(res) {
-        return res.text() })
-      .then(function(json) {
-        return parse(json)
-      })
+      json = document.getElementById("the-history").contentDocument.body.textContent
+      console.log(json)
+      return parse(json)
     }
 }); // load
 

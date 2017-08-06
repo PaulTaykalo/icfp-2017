@@ -55,7 +55,7 @@
             @punters))
       (with-open [f (io/writer history-out-file)]
         (binding [*out* f]
-          (run! println @history))))))
+          (run! (comp println #(dissoc % :state)) @history))))))
 
 (defn make-tcp-client [name client host port]
   (let [history (atom [])]

@@ -1,7 +1,11 @@
 package org.icfp2017
 
 import com.google.gson.Gson
+import org.amshove.kluent.`should contain`
 import org.amshove.kluent.`should equal`
+import org.amshove.kluent.`should not contain`
+import org.icfp2017.server.MoveResponse
+import org.icfp2017.server.MovesResponse
 import org.junit.Test
 
 class GameTest {
@@ -25,6 +29,22 @@ class GameTest {
         game.siteScores[6]!![1]!! `should equal` 4L
         game.siteScores[4]!![1]!! `should equal` 4L
         game.siteScores[5]!![1]!! `should equal` 4L
+    }
+
+    @Test
+    fun testApplySplurges() {
+        val modelString = """{"punter":0,"punters":2,"map":{"sites":[{"id":4,"x":2.0,"y":-2.0},{"id":1,"x":1.0,"y":0.0},{"id":3,"x":2.0,"y":-1.0},{"id":6,"x":0.0,"y":-2.0},{"id":5,"x":1.0,"y":-2.0},{"id":0,"x":0.0,"y":0.0},{"id":7,"x":0.0,"y":-1.0},{"id":2,"x":2.0,"y":0.0}],"rivers":[{"source":3,"target":4},{"source":0,"target":1},{"source":2,"target":3},{"source":1,"target":3},{"source":5,"target":6},{"source":4,"target":5},{"source":3,"target":5},{"source":6,"target":7},{"source":5,"target":7},{"source":1,"target":7},{"source":0,"target":7},{"source":1,"target":2}],"mines":[1,5]}}"""
+        var game = Gson().fromJson(modelString, Game::class.java)
+        game = Game(punter = game.punter, punters = game.punters, mapModel = game.mapModel, settings = null)
+
+        val moves: Array<Move> = arrayOf(
+            Splurge(0, arrayOf(0, 1, 2))
+        )
+        val updatedGame = applyMoves(moves, game)
+        updatedGame.ownedRivers `should contain` River(0,1)
+        updatedGame.ownedRivers `should contain` River(1,2)
+        updatedGame.ownedRivers `should not contain` River(0,2)
+
     }
 
 }

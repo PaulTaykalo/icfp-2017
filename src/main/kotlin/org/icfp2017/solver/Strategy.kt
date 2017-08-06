@@ -30,9 +30,6 @@ enum class Strategies {
     AllYourBaseAreBelongToUsRandom_ {
         override fun play(server: OfflineServer) = OfflineSolver.play(server, AllYourBaseAreBelongToUsRandom)
     },
-    AllYourBaseAreBelongToUsExpansion_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, AllYourBaseAreBelongToUsExpansion)
-    },
     DumbAndGreedy_ {
         override fun play(server: OfflineServer) = OfflineSolver.play(server, DumbAndGreedy)
     },

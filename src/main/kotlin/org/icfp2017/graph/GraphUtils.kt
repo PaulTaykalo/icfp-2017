@@ -7,7 +7,6 @@ import org.icfp2017.Game
 import org.icfp2017.Logger
 import org.icfp2017.River
 import org.icfp2017.*
-import org.icfp2017.solver.AllYourBaseAreBelongToUsExpansionState
 
 class GraphUtils {
 
@@ -43,12 +42,6 @@ class GraphUtils {
             game.sitesForSite,
             game.unownedRivers,
             game.ownedRivers
-    )
-
-    constructor(allBasesExpansionState: AllYourBaseAreBelongToUsExpansionState): this(
-            allBasesExpansionState.sitesForSite,
-            allBasesExpansionState.unownedRivers,
-            allBasesExpansionState.ownedRivers
     )
 
     constructor(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {

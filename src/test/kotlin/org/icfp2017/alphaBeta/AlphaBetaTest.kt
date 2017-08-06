@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import org.amshove.kluent.`should equal`
 import org.icfp2017.Game
 import org.icfp2017.MapModel
-import org.icfp2017.solver.alphaBeta.getBestMove
+//import org.icfp2017.solver.alphaBeta.getBestMove
 import org.junit.Test
 
 class AlphaBetaTest{
@@ -19,9 +19,9 @@ class AlphaBetaTest{
         val fullGame = Game(0, 2,mapModel,null)
 
 
-        val node = getBestMove(fullGame,4)
+//        val node = getBestMove(fullGame,4)
 
-        node.toString()
+//        node.toString()
 //        |-/\-|
 //        |_\/_|
     }

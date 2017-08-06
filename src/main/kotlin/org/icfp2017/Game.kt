@@ -98,6 +98,12 @@ fun updateSitesReachability(current: Reachability, river: River,myRivers:Set<Riv
     return current.mapValues { expandReachableSitesForMineAndRiver(it.key, it.value, river,  riversForSite ,myRivers) }
 }
 
+val Splurge.claims: List<Claim> get() = route
+        .zip(route.drop(1))
+        .map { (source, target) ->
+            Claim(punter, source, target)
+        }
+
 // TODO :
 fun applyMoves(moves: Array<Move>, game:Game):Game {
 
@@ -107,17 +113,26 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
     var newMyRivers = game.myRivers
     var newSiteReachebleForMine = game.sitesReachedForMine
 
-    moves.forEach { move ->
-        if (move !is Claim) return@forEach
-        val river = River(move.source, move.target)
+
+    val claims = moves.flatMap {
+        when(it) {
+            is Pass -> listOf()
+            is Splurge -> it.claims
+            is Claim -> listOf(it)
+        }
+    }
+
+    claims.forEach {
+        val river = River(it.source, it.target)
         newUnownedRivers -= river
         newOwnedRivers += river
 
-        if (move.punter == game.punter) {
+        if (it.punter == game.punter) {
             newMyRivers += river
-            newSiteReachebleForMine = updateSitesReachability(newSiteReachebleForMine, river,newMyRivers, game.riversForSite)
+            newSiteReachebleForMine = updateSitesReachability(newSiteReachebleForMine, river, newMyRivers, game.riversForSite)
         }
     }
+
     return Game(game.punter, game.punters, game.mapModel, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
             game.riversForSite, game.sitesForSite, game.siteScores)
 
@@ -139,7 +154,11 @@ data class Game(
     val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
 )
 data class SiteModel(val id: SiteID)
-data class River(val source: SiteID, val target:SiteID)
+data class River(val source: SiteID, val target:SiteID) {
+    override fun hashCode(): Int {
+        return source.hashCode() xor target.hashCode()
+    }
+}
 
 //typealias River = Array<SiteID>
 //

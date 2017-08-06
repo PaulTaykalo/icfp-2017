@@ -25,6 +25,7 @@ interface Strategy<State> {
             "AllYourBaseAreBelongToUs" -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUs)
             "AllYourBaseAreBelongToUsRandom" -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom)
             "DumbAndGreedy" -> OfflineSolver.play(server, strategy = DumbAndGreedy)
+            "SmartAndGreedy" -> OfflineSolver.play(server, strategy = SmartAndGreedy)
             "EagerBaseCatcher" -> OfflineSolver.play(server, strategy = EagerBaseCatcher)
             else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
         }

@@ -15,7 +15,13 @@ object Logger {
         file?.flush()
     }
 
-    fun log(command: String) = logFile(command)
+    fun log(command: String) = when (Arguments.logType) {
+        "error" -> logError(command)
+        "print" -> logPrint(command)
+        "file" -> logFile(command)
+        else -> {
+        }
+    }
 
     inline fun <T> measure(action: String, block: () -> T): T {
         val start = System.currentTimeMillis()

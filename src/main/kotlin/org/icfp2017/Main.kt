@@ -13,7 +13,8 @@ object Arguments {
     var port: Int = 9078
     var strategy: String = DumbAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
-    var offline = false
+    var offline = true
+    var logType = "error"
 }
 
 val Arguments.nameWithStrategy: String get() = "$name [$strategy]"
@@ -38,9 +39,11 @@ fun main(args: Array<String>) {
                 Arguments.offline = false
             }
             "--strategy" -> value
+            "--logging" -> Arguments.logType = value
             "--offline" -> Arguments.offline = value.toBoolean()
         }
     }
+
 
     Logger.log(Gson().toJson(mapOf("arguments" to mapOf(
             "name" to Arguments.name,

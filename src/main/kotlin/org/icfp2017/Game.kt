@@ -7,124 +7,132 @@ import com.google.gson.Gson
 private typealias MineID = Int
 private typealias Reachability = Map<MineID, Set<SiteID>>
 private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
+private  typealias RiversForSite = Map<SiteID, Set<River>>
+private typealias  SitesForSite = Map<SiteID, Set<SiteID>>
 
-class Game(
-        val punter: PunterID,
-        val punters: Int,
-        map: MapModel
-) {
-    var ownedRivers = setOf<River>()
-    var unownedRivers = map.rivers.toSet()
-    var myRivers = setOf<River>()
-    val mines = map.mines.toSet()
+fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {
 
-    var sitesReachedForMine = mines.map { it to setOf<SiteID>()}.toMap()
-
-    val riversForSite = calculateRiversForSites(map)
-    val sitesForSite = calculateSitesForSite(map)
-    val siteScores = calculateScores(map)
-
-    private fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {
-        val results = map.sites.map { it.id to mutableSetOf<River>() }.toMap()
-        map.rivers.forEach {
-            results[it.source]!!.add(it)
-            results[it.target]!!.add(it)
-        }
-
-        return results
+    val results = map.sites.map { it.id to mutableSetOf<River>() }.toMap()
+    map.rivers.forEach {
+        results[it.source]!!.add(it)
+        results[it.target]!!.add(it)
     }
 
-    private fun calculateSitesForSite(map: MapModel): Map<SiteID, Set<SiteID>> {
-        fun sitesForSite(site: SiteID): Set<SiteID> {
-            val rivers = riversForSite[site]!!
-            return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
-        }
-
-        return map.sites.map { it.id to sitesForSite(it.id) }.toMap()
-    }
-
-
-    // TODO :
-    fun calculateScores(map:MapModel): ScoreFromMine {
-        val scores = map.sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
-
-        mines.forEach { mine ->
-            var step = 1L
-            scores[mine]!![mine] = 0
-            var front = setOf(mine)
-            while (front.isNotEmpty()) {
-                front = front.flatMap { site ->
-                    val sites = sitesForSite[site]!!.filter { scores[it]!![mine] == null }
-                    sites.forEach { scores[it]!![mine] = step * step }
-                    sites
-                }.toSet()
-                step += 1
-            }
-        }
-
-        return scores
-    }
-
-    fun apply(moves: Array<Move>) {
-        // Apply moves to map.
-        moves.forEach { move ->
-            if (move !is Claim) return@forEach
-            val river = River(move.source, move.target)
-            unownedRivers -= river
-            ownedRivers += river
-
-            if (move.punter == punter) {
-                myRivers += river
-                sitesReachedForMine = updateSitesReachability(sitesReachedForMine, river)
-            }
-        }
-    }
-
-    fun updateSitesReachability(current: Reachability, river: River): Reachability {
-        return current.mapValues { updateSitesReachability(it.key, it.value, river) }
-    }
-
-    private fun updateSitesReachability(mine: SiteID, sites: Set<SiteID>, river: River): Set<SiteID> {
-        // Sites that we will reach with this river
-        val newSites = mutableSetOf<SiteID>()
-
-        // If river is not reachable from current graph - return unchanged
-        if (river.target !in (sites + mine) && river.source !in (sites + mine)) return sites
-
-        val front = mutableSetOf(river.target, river.source)
-        front.removeAll(sites)
-
-        while (front.isNotEmpty()) {
-            val site = front.first()
-            newSites.add(site)
-            front.remove(site)
-
-            // All rivers that we can reach from this site
-            val possibleRivers = riversForSite[site]!!
-            val connectedRivers = possibleRivers.intersect(myRivers)
-
-            val connectedSites = connectedRivers.map { it.source }.toSet() +
-                    connectedRivers.map { it.target }.toSet() - sites - newSites
-
-            front.addAll(connectedSites)
-        }
-
-        return sites.plus(newSites)
-    }
-
-    // TODO :
-    fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: ScoreFromMine = siteScores): Long {
-        var sum = 0L
-        sitesReachableFromMine.forEach { (mine, sites) ->
-            sites.forEach { site ->
-                sum += scores[site]!![mine]!!
-            }
-        }
-
-        return sum
-    }
+    return results
 }
 
+fun calculateSitesForSite(sites: Array<SiteModel>, riversForSite : RiversForSite): Map<SiteID, Set<SiteID>> {
+    fun sitesForSite(site: SiteID): Set<SiteID> {
+        val rivers = riversForSite[site]!!
+        return setOf<SiteID>() + rivers.map { it.source } + rivers.map { it.target } - site
+    }
+
+    return sites.map { it.id to sitesForSite(it.id) }.toMap()
+}
+
+fun calculateScores(sites: Array<SiteModel>, mines:Array<SiteID>, sitesForSite: SitesForSite): ScoreFromMine {
+    val scores =sites.map { it.id to mutableMapOf<SiteID, Long>() }.toMap()
+
+    mines.forEach { mine ->
+        var step = 1L
+        scores[mine]!![mine] = 0
+        var front = setOf(mine)
+        while (front.isNotEmpty()) {
+            front = front.flatMap { site ->
+                val siteResults = sitesForSite[site]!!.filter { scores[it]!![mine] == null }
+                siteResults.forEach { scores[it]!![mine] = step * step }
+                siteResults
+            }.toSet()
+            step += 1
+        }
+    }
+
+    return scores
+}
+
+fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: ScoreFromMine): Long {
+    var sum = 0L
+    sitesReachableFromMine.forEach { (mine, sites) ->
+        sites.forEach { site ->
+            sum += scores[site]!![mine]!!
+        }
+    }
+
+    return sum
+}
+
+fun expandReachableSitesForMineAndRiver(mine: SiteID, sites: Set<SiteID>, river: River, riversForSite: RiversForSite, myRivers: Set<River>): Set<SiteID> {
+    // Sites that we will reach with this river
+    val newSites = mutableSetOf<SiteID>()
+
+    // If river is not reachable from current graph - return unchanged
+    if (river.target !in (sites + mine) && river.source !in (sites + mine)) return sites
+
+    val front = mutableSetOf(river.target, river.source)
+    front.removeAll(sites)
+
+    while (front.isNotEmpty()) {
+        val site = front.first()
+        newSites.add(site)
+        front.remove(site)
+
+        // All rivers that we can reach from this site
+        val possibleRivers = riversForSite[site]!!
+        val connectedRivers = possibleRivers.intersect(myRivers)
+
+        val connectedSites = connectedRivers.map { it.source }.toSet() +
+                connectedRivers.map { it.target }.toSet() - sites - newSites
+
+        front.addAll(connectedSites)
+    }
+
+    return sites.plus(newSites)
+}
+
+
+fun updateSitesReachability(current: Reachability, river: River,myRivers:Set<River>, riversForSite:RiversForSite): Reachability {
+    return current.mapValues { expandReachableSitesForMineAndRiver(it.key, it.value, river,  riversForSite ,myRivers) }
+}
+
+// TODO :
+fun applyMoves(moves: Array<Move>, game:Game):Game {
+
+    // Apply moves to map.
+    var newUnownedRivers = game.unownedRivers
+    var newOwnedRivers = game.ownedRivers
+    var newMyRivers = game.myRivers
+    var newSiteReachebleForMine = game.sitesReachedForMine
+
+    moves.forEach { move ->
+        if (move !is Claim) return@forEach
+        val river = River(move.source, move.target)
+        newUnownedRivers -= river
+        newOwnedRivers += river
+
+        if (move.punter == game.punter) {
+            newMyRivers += river
+            newSiteReachebleForMine = updateSitesReachability(newSiteReachebleForMine, river,newMyRivers, game.riversForSite)
+        }
+    }
+    return Game(game.punter, game.punters, game.mapModel, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
+            game.riversForSite, game.sitesForSite, game.siteScores)
+
+}
+
+data class Game(
+        val punter: PunterID,
+        val punters: Int,
+        val mapModel: MapModel,
+        val sites : Array<SiteModel> = mapModel.sites,
+        val mines:Set<SiteID> = mapModel.mines.toSet(),
+        val ownedRivers:Set<River> = setOf<River>(),
+        val unownedRivers:Set<River> = mapModel.rivers.toSet(),
+        val myRivers:Set<River> = setOf<River>(),
+        val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
+        val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
+        val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
+        val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
+)
 data class SiteModel(val id: SiteID)
 data class River(val source: SiteID, val target:SiteID)
 

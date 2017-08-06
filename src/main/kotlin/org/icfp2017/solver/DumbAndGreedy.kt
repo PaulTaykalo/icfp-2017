@@ -5,29 +5,29 @@ import org.icfp2017.*
 object DumbAndGreedy : Strategy<Game> {
     override fun prepare(game: Game) = game
 
-    override fun serverMove(moves: Array<Move>, state: Game): Pair<Move, Game> {
-        state.apply(moves)
+    override fun serverMove(moves: Array<Move>, game: Game): Pair<Move, Game> {
+        val newGame = applyMoves(moves, game)
 
-        val reachedPoints = state.sitesReachedForMine.flatMap { it.value }
-        val nicePoints = reachedPoints.toSet() + state.mines.toSet()
+        val reachedPoints = newGame.sitesReachedForMine.flatMap { it.value }
+        val nicePoints = reachedPoints.toSet() + newGame.mines.toSet()
 
         val niceRivers = nicePoints
-                .flatMap { state.riversForSite[it]!! }
-                .filter { it in state.unownedRivers }
+                .flatMap { newGame.riversForSite[it]!! }
+                .filter { it in newGame.unownedRivers }
 
-        val currentScore = state.calculateScoreForReachable(state.sitesReachedForMine)
+        val currentScore = calculateScoreForReachable(newGame.sitesReachedForMine,newGame.siteScores)
 
         val river = niceRivers.maxBy {
-            val newReachability = state.updateSitesReachability(state.sitesReachedForMine, it)
-            val newScore = state.calculateScoreForReachable(newReachability)
+            val newReachability = updateSitesReachability(newGame.sitesReachedForMine, it,newGame.myRivers,newGame.riversForSite)
+            val newScore = calculateScoreForReachable(newReachability,newGame.siteScores)
 
             val delta = newScore - currentScore
 
-            if (it.target in state.mines || it.source in state.mines) delta + 10
+            if (it.target in newGame.mines || it.source in newGame.mines) delta + 10
 
             delta
         }
 
-        return Pair(state.claim(river), state)
+        return Pair(newGame.claim(river), newGame)
     }
 }

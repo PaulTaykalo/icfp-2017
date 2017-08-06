@@ -55,12 +55,12 @@ object SmartAndGreedy: Strategy<Game> {
         val game = applyMoves(moves, state)
 
         // Selects less developed graph
-        val (mine, sites) = state.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return state.pass() to state
-        val nicePoints = sites + state.mines
+        val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return game.pass() to game
+        val nicePoints = sites + mine
 
         val niceRivers = nicePoints
-                .flatMap { state.riversForSite[it]!! }
-                .filter { it in state.unownedRivers }
+                .flatMap { game.riversForSite[it]!! }
+                .filter { it in game.unownedRivers }
 
         val pointsToRivers = niceRivers.map {
             if (it.target in sites) it.source to it
@@ -80,18 +80,18 @@ object SmartAndGreedy: Strategy<Game> {
             val deltaScore = newScore - newScore
 
             // Prefer mines
-            val mineBoues = if (river.target in state.mines || river.source in state.mines) 5 else 0
+            val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
 
             // Prefer points with many connections
-            val rivers = (state.unownedRivers - state.riversForSite[it]!!).size
+            val rivers = (game.unownedRivers - game.riversForSite[it]!!).size
 
             // distance to other mines
-            val score = state.siteScores[it]!!.filter { it.key != mine }.values.sum()
+            val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()
 
 
             deltaScore + mineBoues + rivers - score
         }
 
-        return Pair(state.claim(pointsToRivers[targetPoints.firstOrNull()]), state)
+        return Pair(game.claim(pointsToRivers[targetPoints.firstOrNull()]), game)
     }
 }

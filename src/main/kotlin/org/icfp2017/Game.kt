@@ -125,7 +125,7 @@ data class Game(
     val punter: PunterID,
     val punters: Int,
     @SerializedName("map") val mapModel: MapModel,
-    val settings: SettingsResponse?,
+    val settings: SettingsResponse? = null,
     val sites : Array<SiteModel> = mapModel.sites,
     val mines:Set<SiteID> = mapModel.mines.toSet(),
     val ownedRivers:Set<River> = setOf<River>(),

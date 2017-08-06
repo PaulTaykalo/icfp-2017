@@ -17,7 +17,8 @@ class StrategyStateWithGameTest {
                 MapModel(
                     arrayOf(SiteModel(1), SiteModel(2)),
                     arrayOf(River(1, 2)),
-                    arrayOf(1))
+                    arrayOf(1)),
+                null
             )
         )
         Gson().toJson(strategyStateWithGame) `should not equal` ""
@@ -30,7 +31,8 @@ class StrategyStateWithGameTest {
                 MapModel(
                     arrayOf(SiteModel(1),SiteModel(2)),
                     arrayOf(River(1, 2)),
-                    arrayOf(1))
+                    arrayOf(1)),
+                   null
             )
         )
         val serialized = Gson().toJson(strategyStateWithGame)

@@ -3,6 +3,7 @@
 package org.icfp2017
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import org.icfp2017.server.SettingsResponse
 
 private typealias MineID = Int
@@ -121,19 +122,19 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
 }
 
 data class Game(
-        val punter: PunterID,
-        val punters: Int,
-        val mapModel: MapModel,
-        val settings: SettingsResponse?,
-        val sites : Array<SiteModel> = mapModel.sites,
-        val mines:Set<SiteID> = mapModel.mines.toSet(),
-        val ownedRivers:Set<River> = setOf<River>(),
-        val unownedRivers:Set<River> = mapModel.rivers.toSet(),
-        val myRivers:Set<River> = setOf<River>(),
-        val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
-        val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
-        val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
-        val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
+    val punter: PunterID,
+    val punters: Int,
+    @SerializedName("map") val mapModel: MapModel,
+    val settings: SettingsResponse?,
+    val sites : Array<SiteModel> = mapModel.sites,
+    val mines:Set<SiteID> = mapModel.mines.toSet(),
+    val ownedRivers:Set<River> = setOf<River>(),
+    val unownedRivers:Set<River> = mapModel.rivers.toSet(),
+    val myRivers:Set<River> = setOf<River>(),
+    val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
+    val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
+    val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
+    val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
 )
 data class SiteModel(val id: SiteID)
 data class River(val source: SiteID, val target:SiteID)

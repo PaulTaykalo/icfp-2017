@@ -55,43 +55,50 @@ object SmartAndGreedy: Strategy<Game> {
         val game = applyMoves(moves, state)
 
         // Selects less developed graph
-        val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return game.pass() to game
-        val nicePoints = sites + mine
 
-        val niceRivers = nicePoints
-                .flatMap { game.riversForSite[it]!! }
-                .filter { it in game.unownedRivers }
+        val graphs = game.sitesReachedForMine.toList().sortedBy { 0 - it.second.size  }
+        val rivers = graphs.asSequence().map { (mine, sites) ->
+            val nicePoints = sites + mine
 
-        val pointsToRivers = niceRivers.map {
-            if (it.target in sites) it.source to it
-            else it.target to it
-        }.toMap()
+            val niceRivers = nicePoints
+                    .flatMap { game.riversForSite[it]!! }
+                    .filter { it in game.unownedRivers }
 
-        val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
+            val pointsToRivers = niceRivers.map {
+                if (it.target in sites) it.source to it
+                else it.target to it
+            }.toMap()
 
-        val newPoints = pointsToRivers.keys
-        val targetPoints = newPoints.sortedBy {
+            val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
 
-            val river = pointsToRivers[it]!!
+            val newPoints = pointsToRivers.keys
+            val targetPoints = newPoints.sortedBy {
 
-            // Expected new score
-            val newReachability = updateSitesReachability(game.sitesReachedForMine, river,game.myRivers, game.riversForSite)
-            val newScore = calculateScoreForReachable(newReachability,game.siteScores)
-            val deltaScore = newScore - newScore
+                val river = pointsToRivers[it]!!
 
-            // Prefer mines
-            val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
+                // Expected new score
+                val newReachability = updateSitesReachability(game.sitesReachedForMine, river,game.myRivers, game.riversForSite)
+                val newScore = calculateScoreForReachable(newReachability,game.siteScores)
+                val deltaScore = newScore - currentScore
 
-            // Prefer points with many connections
-            val rivers = (game.unownedRivers - game.riversForSite[it]!!).size
+                // Prefer mines
+                val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
 
-            // distance to other mines
-            val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()
+                // Prefer points with many connections
+                val rivers = (game.unownedRivers - game.riversForSite[it]!!).size
 
+                // distance to other mines
+                val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()
 
-            deltaScore + mineBoues + rivers - score
+                val totalScore = deltaScore + mineBoues + rivers - score
+                totalScore
+            }
+
+            pointsToRivers[targetPoints.firstOrNull()]
         }
 
-        return Pair(game.claim(pointsToRivers[targetPoints.firstOrNull()]), game)
+        val river = rivers.firstOrNull() ?: game.unownedRivers.firstOrNull()
+
+        return Pair(game.claim(river), game)
     }
 }

@@ -47,3 +47,51 @@ object DumbAndGreedy : Strategy<Game> {
         return Pair(game.claim(costlyRivers.firstOrNull()), game)
     }
 }
+
+object SmartAndGreedy: Strategy<Game> {
+    override fun prepare(game: Game) = game
+
+    override fun serverMove(moves: Array<Move>, state: Game): Pair<Move, Game> {
+        state.apply(moves)
+
+        // Selects less developed graph
+        val (mine, sites) = state.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return state.pass() to state
+        val nicePoints = sites + state.mines
+
+        val niceRivers = nicePoints
+                .flatMap { state.riversForSite[it]!! }
+                .filter { it in state.unownedRivers }
+
+        val pointsToRivers = niceRivers.map {
+            if (it.target in sites) it.source to it
+            else it.target to it
+        }.toMap()
+
+        val currentScore = state.calculateScoreForReachable(state.sitesReachedForMine)
+
+        val newPoints = pointsToRivers.keys
+        val targetPoints = newPoints.sortedBy {
+
+            val river = pointsToRivers[it]!!
+
+            // Expected new score
+            val newReachability = state.updateSitesReachability(state.sitesReachedForMine, river)
+            val newScore = state.calculateScoreForReachable(newReachability)
+            val deltaScore = newScore - newScore
+
+            // Prefer mines
+            val mineBoues = if (river.target in state.mines || river.source in state.mines) 5 else 0
+
+            // Prefer points with many connections
+            val rivers = (state.unownedRivers - state.riversForSite[it]!!).size
+
+            // distance to other mines
+            val score = state.siteScores[it]!!.filter { it.key != mine }.values.sum()
+
+
+            deltaScore + mineBoues + rivers - score
+        }
+
+        return Pair(state.claim(pointsToRivers[targetPoints.firstOrNull()]), state)
+    }
+}

@@ -16,7 +16,9 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
     }
 
     override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
+
         val newGame = applyMoves(moves, state.game)
+        prepare(newGame)
         graphUtils.updateState(newGame)
         val rivers = newGame.unownedRivers.toList()
         if (rivers.isEmpty()) return Pair(newGame.pass(), state)
@@ -37,6 +39,6 @@ object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
 
 
         // if minimal spanning tree is captured, do whatever is left
-        return  Pair(newGame.claim(rivers[random.nextInt(rivers.size)]), state)
+        return  Pair(newGame.claim(rivers.first()), state)
     }
 }

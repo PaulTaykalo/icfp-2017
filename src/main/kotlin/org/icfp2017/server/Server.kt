@@ -3,7 +3,6 @@
 package org.icfp2017.server
 
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import org.icfp2017.*
 import org.icfp2017.base.Score
@@ -13,54 +12,49 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 
+
 typealias JSONString = String
 
-data class MeRequest(@SerializedName("me") val me: String)
-data class MeResponse(@SerializedName("you") val you: String)
+data class MeRequest(val me: String)
+data class MeResponse(val you: String)
 
 data class ReadyRequest(
-    @SerializedName("ready") val ready: PunterID,
-    @SerializedName("state") val state: String?
+    val ready: PunterID,
+    val state: JSONString
 )
 
 data class MoveResponse(
-    @SerializedName("claim") val claim: Claim?,
-    @SerializedName("pass") val pass: Pass?
+    val claim: Claim?,
+    val pass: Pass?
 )
 
 data class MoveRequest(
-    @SerializedName("claim") val claim: Claim?,
-    @SerializedName("pass") val pass: Pass?,
-    @SerializedName("state") val state: String?
+    val claim: Claim?,
+    val pass: Pass?,
+    val state: JSONString
 )
 
-
-data class MovesArrayResponse(
-    @SerializedName("moves") val move: Array<MoveResponse>
-)
-
-data class TimeoutResponse(val state: Any)
+data class MovesArrayResponse(val moves: Array<MoveResponse>)
 
 data class StopResponse(
-    @SerializedName("moves") val moves: Array<MoveResponse>,
-    @SerializedName("scores") val scores: Array<Score>
+    val moves: Array<MoveResponse>,
+    val scores: Array<Score>
 )
 
-data class GeneralResponse(
-    // setup
-    @SerializedName("punter") val punter: PunterID?,
-    @SerializedName("punters") val punters: Int?,
-    @SerializedName("map") val map: MapModel?,
-    // move
-    @SerializedName("move") val moves: MovesArrayResponse?,
-    // stop
-    @SerializedName("stop") val stop: StopResponse?,
-    // offline
-    @SerializedName("timeout") val timeout: TimeoutResponse?,
-    @SerializedName("state") val state: String?,
+data class SetupResponse(
+    val punter: PunterID,
+    val punters: Int,
+    val map: MapModel
+)
 
-    //
-    @SerializedName("you") val you: String?
+data class MovesResponse(
+    val move: MovesArrayResponse,
+    val state: JSONString
+)
+
+data class StopGeneralResponse(
+    val stop: StopResponse,
+    val state: JSONString?
 )
 
 
@@ -76,8 +70,9 @@ class OnlineServer(
     private val outputStream: OutputStream
     private val inputStream: InputStream
     private val offlineServer: OfflineServer
+    private val gson = Gson()
 
-    private var state: String? = null
+    private var state: JSONString = "{}"
 
     init {
         val inteAddress = InetAddress.getByName(serverName)
@@ -101,7 +96,7 @@ class OnlineServer(
         Logger.log("[Proxiying] ---> $json")
 
         val generalType = object : TypeToken<Map<String, Any>>() {}.type
-        val generalRequest = Gson().fromJson<Map<String, Any>>(json, generalType)
+        val generalRequest = gson.fromJson<Map<String, Any>>(json, generalType)
 
         if (generalRequest.get("me") != null) {
             serverBehaviour.send(json)
@@ -111,17 +106,17 @@ class OnlineServer(
         val potentialState = generalRequest.get("state")
         if (potentialState != null) {
 
-            val readyRequest: ReadyRequest? = Gson().fromJson(json, ReadyRequest::class.java)
+            val readyRequest: ReadyRequest? = gson.fromJson(json, ReadyRequest::class.java)
             if (readyRequest != null && generalRequest.get("ready") != null) {
-                val outJson = Gson().toJson(ReadyRequest(readyRequest.ready, null))
+                val outJson = gson.toJson(ReadyRequest(readyRequest.ready, "{}"))
                 state = readyRequest.state
                 serverBehaviour.send(outJson)
                 return
             }
 
-            val moveRequest = Gson().fromJson(json, MoveRequest::class.java)
+            val moveRequest = gson.fromJson(json, MoveRequest::class.java)
             if (moveRequest != null) {
-                val outJson = Gson().toJson(MoveRequest(moveRequest.claim, moveRequest.pass, null))
+                val outJson = gson.toJson(MoveRequest(moveRequest.claim, moveRequest.pass, "{}"))
                 state = moveRequest.state
                 serverBehaviour.send(outJson)
                 return
@@ -129,7 +124,6 @@ class OnlineServer(
         }
 
         Logger.log("Aaaaaaaaa!")
-
     }
 
     private fun sendJsonToClient(): JSONString {
@@ -138,7 +132,7 @@ class OnlineServer(
         Logger.log("[Proxiying] <--- $json")
 
         val generalType = object : TypeToken<Map<String, Any>>() {}.type
-        val response = Gson().fromJson<Map<String, Any>>(json, generalType)
+        val response = gson.fromJson<Map<String, Any>>(json, generalType)
 
         //
         if (response.get("you") != null) {
@@ -159,25 +153,9 @@ class OnlineServer(
         }
 
         if (response.get("move") != null) {
-            val turnsType = object : TypeToken<GeneralResponse>() {}.type
-            val response = Gson().fromJson<GeneralResponse>(json, turnsType)
-
-            val moves = response.moves
-            if (moves != null) {
-                val updatedResponse = GeneralResponse(
-                    punter = response.punter,
-                    punters = response.punters,
-                    moves = response.moves,
-                    map = response.map,
-                    stop = response.stop,
-                    timeout = response.timeout,
-                    you = response.you,
-                    state = state
-                )
-                val outJson = Gson().toJson(updatedResponse)
-                Logger.log("[Actual Sent] <--- $outJson")
-                return outJson
-            }
+            val jsonWithState = json.substring(json.indices.first, json.indices.last-1) + ",\"state\":$state}"
+            Logger.log("[Actual Sent] <--- $jsonWithState")
+            return jsonWithState
         }
 
         return "{}"
@@ -229,14 +207,13 @@ class OnlineServer(
 }
 class ServerBehaviour(val send: (JSONString) -> Unit, val readString: () -> JSONString)  {
 
+    private val gson = Gson()
 
     fun me(me: PunterName, callback: (PunterName) -> Unit) {
-        val me = Gson().toJson(MeRequest(me))
+        val me = gson.toJson(MeRequest(me))
         Logger.log(me)
         send(me)
-        val response: MeResponse = Gson().fromJson(readString(), MeResponse::class.java)
+        val response: MeResponse = gson.fromJson(readString(), MeResponse::class.java)
         callback(response.you)
     }
-
-
 }

@@ -10,8 +10,8 @@ import org.icfp2017.solver.*
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9007
-    var strategy: String = SmartAndGreedy.javaClass.simpleName
+    var port: Int = 9051
+    var strategy: String = Strategies.DumbAndGreedy2_.name
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
     var logging = "error"
@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     }
 
     if (args.contains("--dump")) {
-        println(Strategy.strategyFactory.keys.joinToString(","))
+        println(Strategies.values().joinToString())
         return
     }
 
@@ -59,12 +59,7 @@ fun main(args: Array<String>) {
             "log" to Arguments.log,
             "offline" to Arguments.offline))))
 
-    if (Arguments.offline) {
-        val server = OfflineServer()
-        Strategy.play(server)
-    } else {
-        val offlineServer = OfflineServer()
-        val onlineServer = OnlineServer(offlineServer = offlineServer)
-        Strategy.play(offlineServer)
-    }
+    val server = OfflineServer()
+    if (!Arguments.offline) OnlineServer(offlineServer = server)
+    Strategies.play(server)
 }

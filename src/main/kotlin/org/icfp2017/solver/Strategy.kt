@@ -1,12 +1,14 @@
 package org.icfp2017.solver
 
 import com.google.gson.annotations.SerializedName
+import com.sun.org.apache.xpath.internal.Arg
 import org.icfp2017.Arguments
 import org.icfp2017.Game
 import org.icfp2017.Move
 import org.icfp2017.server.FutureRequest
 import org.icfp2017.server.OfflineServer
 import org.icfp2017.solver.alphaBeta.AlphaBeta
+import org.icfp2017.solver.alphaBeta.MinMaxScore
 
 data class StrategyStateWithGame(
         @SerializedName("game") val game: Game
@@ -19,20 +21,37 @@ interface Strategy<State> {
     fun futures(): Array<FutureRequest>? {
         return null
     }
+}
+
+enum class Strategies {
+    SpanningTree_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, SpanningTree)
+    },
+    AllYourBaseAreBelongToUsRandom_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, AllYourBaseAreBelongToUsRandom)
+    },
+    AllYourBaseAreBelongToUsExpansion_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, AllYourBaseAreBelongToUsExpansion)
+    },
+    DumbAndGreedy_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, DumbAndGreedy)
+    },
+    DumbAndGreedy2_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, DumbAndGreedy2)
+    },
+    MinMaxRivers_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, AlphaBeta)
+    },
+    MinMaxScore_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, MinMaxScore)
+    },
+    SmartAndGreedy_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, SmartAndGreedy)
+    };
+
+    abstract fun play(server: OfflineServer)
 
     companion object {
-
-        val strategyFactory: Map<String, (OfflineServer) -> Unit> = mapOf(
-                "SpanningTree" to { server -> OfflineSolver.play(server, strategy = SpanningTree) },
-                "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
-                "AllYourBaseAreBelongToUsExpansion" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsExpansion) },
-                "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
-                "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
-                "MinMax" to { server -> OfflineSolver.play(server, strategy = AlphaBeta) },
-                "EagerBaseCatcher" to { server -> OfflineSolver.play(server, strategy = EagerBaseCatcher) },
-                "DumbAndGreedy2" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy2) }
-        )
-
-        fun play(server: OfflineServer, name: String = Arguments.strategy) = strategyFactory[name]!!(server)
+        fun play(server: OfflineServer, name :String = Arguments.strategy) = valueOf(name).play(server)
     }
 }

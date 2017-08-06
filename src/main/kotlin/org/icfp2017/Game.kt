@@ -8,7 +8,7 @@ import org.icfp2017.server.SettingsResponse
 private typealias MineID = Int
 private typealias Reachability = Map<MineID, Set<SiteID>>
 private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
-private  typealias RiversForSite = Map<SiteID, Set<River>>
+private typealias RiversForSite = Map<SiteID, Set<River>>
 private typealias  SitesForSite = Map<SiteID, Set<SiteID>>
 
 fun calculateRiversForSites(map: MapModel): Map<SiteID, Set<River>> {

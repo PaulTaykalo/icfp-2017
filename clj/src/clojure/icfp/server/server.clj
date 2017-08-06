@@ -65,6 +65,8 @@
                         punters))
     (println "[INFO] Initial state sent, let the game begin!")
     (while (> (:remaining-moves @world) 0)
+      (when (zero? (rem (:remaining-moves @world) 100))
+        (println "[INFO] Remaining moves:" (:remaining-moves @world)))
       (dorun (map-indexed
               (fn [id punter]
                 (swap! punters-state

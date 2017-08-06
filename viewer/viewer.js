@@ -3,7 +3,7 @@ const colors = ["magenta", "green", "yellow", "orange", "brown", "cyan", "gray",
 
 function runClaim(claim) {
   if (claim == undefined) return
-  cy.elements('edge[source = "' + claim.source +'"][target = "' + claim.target +'"]')
+    cy.elements('edge[source = "' + claim.source +'"][target = "' + claim.target +'"]')
   .style({
     "line-color": colors[claim.punter]
   })
@@ -12,15 +12,37 @@ function runClaim(claim) {
 
 function runMove(move) {
   if (move == undefined) return
-  move.moves.forEach( m => runClaim(m.claim))  
+    move.moves.forEach( m => runClaim(m.claim))  
 
 }
 
+var _cachedMoveCommands = []
+var _cachedMapCommand = undefined
+function moveCommands() {
+  return _cachedMoveCommands
+}
+
+function reloadMoveCommands(count) {
+  part = _cachedMoveCommands.slice(0, count)
+  reloadMap()
+  console.log("Reloading " + part.length + " commands " + " of " + _cachedMoveCommands.length)
+  part.forEach( command => {
+    runClaim(command.claim)
+    runMove(command.move)
+  })
+}
+
+function reloadMap() {
+  cy.destroy();
+  initCy(_cachedMapCommand.map, function () {
+    cy.autolock(true)
+    cy.edges().on("select", function(evt) { cy.edges().unselect() } );
+  }); 
+}
 
 function loadCommands(commands) {
   _currentCommands = commands
 
-  // REload map
   commands.forEach( command => {
     if (command.map != undefined) {
       if (cy.elements !== undefined) {
@@ -30,13 +52,20 @@ function loadCommands(commands) {
         cy.autolock(true)
         cy.edges().on("select", function(evt) { cy.edges().unselect() } );
       } ); 
+      _cachedMapCommand = command
     }
+
+    if (command.move != undefined || command.claim != undefined) {
+      _cachedMoveCommands.push(command)
+     }
   })
 
   commands.forEach( command => {
     runClaim(command.claim)
     runMove(command.move)
   })
+
+  console.log("Cached " + _cachedMoveCommands.length)
 
 
 }

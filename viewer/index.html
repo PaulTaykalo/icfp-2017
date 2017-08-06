@@ -8,6 +8,7 @@
   </head>
 
   <body>
+    <input type="range"  min="0" max="10000" name="discount_credits" id="discount_credits" />
     <div class="container-fluid">
       <h1>&#955; Map Viewer</h1>
       <fieldset>
@@ -31,7 +32,7 @@
     <script src="js-core/bluebird.min.js"></script>
     <script src="js-core/js-core.js"></script>
     <script src="viewer.js"></script>
-    <object id="the-history" data="history.json" type="text/plain"></object>
+    <object id="the-history" data="history.json" type="text/plain" visibiliy="hidden" width="100%"></object>
     <script>
 
   addEventListener('load', function(){
@@ -52,21 +53,25 @@
             try { commands.push(JSON.parse(line)); } catch(e) {}
           }
         });
-
         loadCommands(commands)
+        $('input[type=range]').attr("max",  moveCommands().length)
     }
 
     document.getElementById('myFile').addEventListener('change', onChange);
 
+    $('input[type=range]').on("input", function () {
+       totalCount = moveCommands().length * this.value / this.max
+       reloadMoveCommands(totalCount)
+    });
 
     var data = document.getElementById('data');
     if (data) {
       parse(data.innerText);
     } else {
       json = document.getElementById("the-history").contentDocument.body.textContent
-      console.log(json)
       return parse(json)
     }
+
 }); // load
 
     </script>

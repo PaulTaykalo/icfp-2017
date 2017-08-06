@@ -34,8 +34,7 @@
        (sort-by (comp :punter #(or (:claim %) (:pass %))))))
 
 (defn prompt-punter-for-move [punter punter-id state]
-  (let [msg ((if state #(assoc % :state state) identity)
-             {:move {:moves (prepare-moves @world)}})
+  (let [msg {:move {:moves (prepare-moves @world)}}
         resp (json/decode (punter (json/encode msg)) true)
         resp (cond (:claim resp) (assoc-in resp [:claim :punter] punter-id)
                    (:pass resp) (assoc-in resp [:pass :punter] punter-id)

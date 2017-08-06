@@ -8,17 +8,15 @@ import java.util.*
 object AllYourBaseAreBelongToUsRandom : Strategy<StrategyStateWithGame>{
 
     val random = Random()
-    lateinit var graphUtils: GraphUtils
+
 
     override fun prepare(game: Game): StrategyStateWithGame {
-        graphUtils = GraphUtils(game)
         return StrategyStateWithGame(game)
     }
 
     override fun serverMove (moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
-
+        val graphUtils = GraphUtils(state.game)
         val newGame = applyMoves(moves, state.game)
-        prepare(newGame)
         graphUtils.updateState(newGame)
         val rivers = newGame.unownedRivers.toList()
         if (rivers.isEmpty()) return Pair(newGame.pass(), state)

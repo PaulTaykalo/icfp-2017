@@ -57,6 +57,12 @@ data class StopGeneralResponse(
     val state: JSONString?
 )
 
+data class OnlineReadyRequest(val ready: PunterID)
+data class OnlineMoveRequest(
+    val claim: Claim?,
+    val pass: Pass?
+)
+
 
 class OnlineServer(
     serverName: String = Arguments.server,
@@ -108,7 +114,7 @@ class OnlineServer(
 
             val readyRequest: ReadyRequest? = gson.fromJson(json, ReadyRequest::class.java)
             if (readyRequest != null && generalRequest.get("ready") != null) {
-                val outJson = gson.toJson(ReadyRequest(readyRequest.ready, "{}"))
+                val outJson = gson.toJson(OnlineReadyRequest(readyRequest.ready))
                 state = readyRequest.state
                 serverBehaviour.send(outJson)
                 return
@@ -116,7 +122,7 @@ class OnlineServer(
 
             val moveRequest = gson.fromJson(json, MoveRequest::class.java)
             if (moveRequest != null) {
-                val outJson = gson.toJson(MoveRequest(moveRequest.claim, moveRequest.pass, "{}"))
+                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass))
                 state = moveRequest.state
                 serverBehaviour.send(outJson)
                 return

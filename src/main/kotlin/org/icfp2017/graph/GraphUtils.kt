@@ -9,12 +9,12 @@ import org.icfp2017.River
 import org.icfp2017.*
 import org.icfp2017.MapModel
 
-class GraphUtils(game: Game) {
+class GraphUtils {
 
-    var graph: UWGraph? = null;
-    var mst: MST? = null;
-    var mstEdges: List<Edge>? = null;
-    var mostAjustedMst: List<Edge>? = null;
+    var graph: UWGraph? = null
+    var mst: MST? = null
+    var mstEdges: List<Edge>? = null
+    var mostAjustedMst: List<Edge>? = null
 
 
     val riverToEdge:HashMap<River, Edge> = hashMapOf()
@@ -39,29 +39,38 @@ class GraphUtils(game: Game) {
 
     val mostAjustedMstFree: MutableSet<Edge> = mutableSetOf();
 
+    constructor(game: Game): this(game.sitesForSite, game.unownedRivers, game.ownedRivers)
 
-    init {
-       initState(game)
+    constructor(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {
+        initState(sitesForSite, unownedRivers, ownedRivers)
     }
 
-    fun toGraph(game: Game): UWGraph {
+    fun initState(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>) {
+        graph = toGraph(sitesForSite, unownedRivers + ownedRivers)
+        mst = BoruvkaMST(graph!!)
+        mstEdges = mst!!.edges().toList()
+        mostAjustedMst = mstEdges!!.sortedWith(compareBy({ graph!!.adjacentVertices(it.v).size }, { graph!!.adjacentVertices(it.w).size }))
+        mostAjustedMstFree.addAll(mst!!.edges())
+    }
+
+    fun toGraph(sitesForSite: SitesForSite, allRivers: Set<River>): UWGraph {
 
         //Logger.log("transforming to graph")
         //Logger.log("map is " + map)
         //Logger.log("sites  " + map.sites)
         //Logger.log("size  " + map.sites.size)
 
-        val vertexNumber = game.sitesForSite.keys.size
+        val vertexNumber = sitesForSite.keys.size
         val graph = UWGraph(vertexNumber);
 
         var graphVertexId = 0
-        for (site in game.sitesForSite.keys) {
+        for (site in sitesForSite.keys) {
             vertexToSite.put(graphVertexId, site)
             siteToVertex.put(site, graphVertexId)
             graphVertexId++
         }
 
-        for (river in game.unownedRivers + game.ownedRivers) {
+        for (river in allRivers) {
             val source = siteToVertex[river.source]
             val target = siteToVertex[river.target]
             if (source != null && target != null) {
@@ -81,27 +90,21 @@ class GraphUtils(game: Game) {
         return graph;
     }
 
-    fun initState(game:Game){
-        graph = toGraph(game)
-        mst = BoruvkaMST(graph!!)
-        mstEdges = mst!!.edges().toList()
-        mostAjustedMst = mstEdges!!.sortedWith(compareBy({ graph!!.adjacentVertices(it.v).size }, { graph!!.adjacentVertices(it.w).size }))
-        mostAjustedMstFree.addAll(mst!!.edges());
+    fun updateState(game:Game){
+        updateState(game.sitesForSite, game.unownedRivers, game.ownedRivers, game.myRivers)
     }
 
-    fun updateState(game:Game){
+    fun updateState(sitesForSite: SitesForSite, unownedRivers: Set<River>, ownedRivers: Set<River>, myRivers: Set<River>) {
+        initState(sitesForSite, unownedRivers, ownedRivers)
 
-        // should not happen, should do delta
-        initState(game)
-
-        for (river in game.unownedRivers + game.ownedRivers)
+        for (river in unownedRivers + ownedRivers)
         {
             allRivers.add(river)
             allEdges.add(riverToEdge[river] as Edge)
-            if(river !in game.unownedRivers){
+            if(river !in unownedRivers){
                 takenRivers.add(river)
                 takenEdges.add(riverToEdge[river] as Edge)
-                if(river in game.myRivers){
+                if(river in myRivers){
                     ourRivers.add(river)
                     ourEdges.add(riverToEdge[river] as Edge)
                 }else
@@ -115,11 +118,9 @@ class GraphUtils(game: Game) {
                 freeEdges.add(riverToEdge[river] as Edge)
 
             }
-
-
-
         }
     }
+
     fun mostConnectedRivers(rivers: Iterable<River>): List<River> {
         val edge = findMostAdjacentEdgeInSpanningTree()
         if(edge == null) {

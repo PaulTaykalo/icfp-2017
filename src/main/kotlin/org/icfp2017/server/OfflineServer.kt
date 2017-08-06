@@ -20,19 +20,27 @@ class OfflineServer {
         serverBehaviour.me(me, callback)
     }
 
-    inline fun <reified State> setup(onSetup: (Game) -> Unit, onMove: (Array<Move>, State) -> Pair<Move, State>, onInterruption: (String) -> Unit, onEnd: (StopCommand) -> Unit) {
+    inline fun <reified State> setup(
+            onSetup: (Game) -> Unit,
+            onMove: (Array<Move>, State) -> Pair<Move, State>,
+            onInterruption: (String) -> Unit,
+            onEnd: (StopCommand) -> Unit)
+    {
         Logger.log("On offline set up!")
         // Read potential command
         var timeoutsLeft = 10
         while (true) {
-            val response: GeneralResponse = Logger.measure("parsing reposnse") {
-                Gson().fromJson(serverBehaviour.readString(), GeneralResponse::class.java)
+            val json = serverBehaviour.readString()
+            val response: GeneralResponse = Logger.measure("server: parsing general resposnse") {
+                Gson().fromJson(json, GeneralResponse::class.java)
             }
-            Logger.log("responce: ${response}")
+            Logger.log("response: $response")
 
             if (response.punter != null && response.punters != null && response.map != null) {
-                val game = Game(response.punter, response.punters, response.map)
-                onSetup(game)
+                Logger.measure("server: perform setup") {
+                    val game = Game(response.punter, response.punters, response.map)
+                    onSetup(game)
+                }
                 continue
             }
 
@@ -42,16 +50,24 @@ class OfflineServer {
                     it.claim ?: it.pass ?: Pass(-1)
                 }.toTypedArray()
                 val state = response.state!!
-                val ss = Gson().fromJson(state, State::class.java)
 
-                val (move,s) = onMove(typedMoves, ss)
-                val rr = Gson().toJson(s)
+                val ss = Logger.measure("server: parsing state from json") {
+                    Gson().fromJson(state, State::class.java)
+                }
+
+
+                val (move,s) = Logger.measure("server: perform move") { onMove(typedMoves, ss) }
+                val rr = Logger.measure("server: state serialization") { Gson().toJson(s) }
 
                 val moveResponse = MoveRequest(
                         claim = move as? Claim,
                         pass = move as? Pass,
                         state = rr)
-                serverBehaviour.send(Gson().toJson(moveResponse))
+
+                val json = Logger.measure("server: move response serialization") {
+                    Gson().toJson(moveResponse)
+                }
+                serverBehaviour.send(json)
                 continue
             }
 
@@ -80,8 +96,12 @@ class OfflineServer {
 
     inline fun <reified State> ready(punterID: PunterID, state: State) {
         Logger.log("On offline ready")
-        val ss = Gson().toJson(state)
-        serverBehaviour.send(Gson().toJson(ReadyRequest(punterID, ss)))
+        val json = Logger.measure("server: ready json serialization") {
+            val ss = Gson().toJson(state)
+            Gson().toJson(ReadyRequest(punterID, ss))
+        }
+
+        serverBehaviour.send(json)
     }
 
     private fun send(json: JSONString) {
@@ -122,8 +142,4 @@ class OfflineServer {
         Logger.log("Is about to read $string")
         return string.toInt()
     }
-}
-
-class OfflineServerForOnline {
-
 }

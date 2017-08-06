@@ -5,13 +5,12 @@ package org.icfp2017
 import com.google.gson.Gson
 import org.icfp2017.server.OfflineServer
 import org.icfp2017.server.OnlineServer
-//import org.icfp2017.server.OnlineServer
 import org.icfp2017.solver.*
 
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9188
+    var port: Int = 9078
     var strategy: String = DumbAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = false

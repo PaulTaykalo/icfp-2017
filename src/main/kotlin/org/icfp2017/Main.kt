@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     }
 
     if (args.contains("--dump")) {
-        println(Strategy.strategyFactory.keys.joinToString(" ,"))
+        println(Strategy.strategyFactory.keys.joinToString(","))
         return
     }
 

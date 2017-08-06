@@ -18,12 +18,8 @@ object DumbAndGreedy : Strategy<Game> {
         val currentScore = state.calculateScoreForReachable(state.sitesReachedForMine)
 
         val river = niceRivers.maxBy {
-            val newReachability = Logger.measurePart("dump: update reachable") {
-                state.updateSitesReachability(state.sitesReachedForMine, it)
-            }
-            val newScore = Logger.measurePart("dump: scores") {
-                state.calculateScoreForReachable(newReachability)
-            }
+            val newReachability = state.updateSitesReachability(state.sitesReachedForMine, it)
+            val newScore = state.calculateScoreForReachable(newReachability)
 
             val delta = newScore - currentScore
 
@@ -31,9 +27,6 @@ object DumbAndGreedy : Strategy<Game> {
 
             delta
         }
-
-        Logger.measureDone("dump: update reachable")
-        Logger.measureDone("dump: scores")
 
         return Pair(state.claim(river), state)
     }

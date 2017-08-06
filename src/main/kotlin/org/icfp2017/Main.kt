@@ -38,7 +38,7 @@ fun main(args: Array<String>) {
                 Arguments.port = value.toInt()
                 Arguments.offline = false
             }
-            "--strategy" -> value
+            "--strategy" -> Arguments.strategy = value
             "--logging" -> Arguments.logType = value
             "--offline" -> Arguments.offline = value.toBoolean()
         }

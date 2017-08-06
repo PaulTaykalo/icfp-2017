@@ -83,7 +83,12 @@ fun buildTree(parentNode: MinMaxNode, currentLevel:Int, maxLevel:Int) : MinMaxNo
 fun getBestMove(game:Game, howDeep:Int) : MinMaxNode {
     val initialNode = MinMaxNode(game)
     val tree = buildTree(initialNode, 0, howDeep)
-    return tree.children.maxBy { it->it.score }!!
+    if(tree.children.isEmpty()){
+        return initialNode.copy(move = game.pass())
+    }else {
+        return tree.children.maxBy { it -> it.score }!!
+    }
+
 }
 
 object AlphaBeta: Strategy<StrategyStateWithGame> {

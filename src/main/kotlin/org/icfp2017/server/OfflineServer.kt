@@ -10,6 +10,7 @@ import java.io.InputStreamReader
 
 class OfflineServer {
 
+    var exitAfterMove: Boolean = true
     var serverBehaviour = ServerBehaviour({ json -> send(json) }, { readString() })
 
     private var inputStream = BufferedReader(InputStreamReader(System.`in`))
@@ -81,6 +82,12 @@ class OfflineServer {
                     gson.toJson(moveResponse)
                 }
                 serverBehaviour.send(json)
+
+                //
+                if (exitAfterMove) {
+                    break
+                }
+
                 continue
             }
 

@@ -104,6 +104,7 @@ class OnlineServer(
         inputStream = client.inputStream
         this.offlineServer = offlineServer
 
+        offlineServer.exitAfterMove = false
         offlineServer.serverBehaviour = ServerBehaviour(
                 { json -> handleOfflineRequest(json) },
                 { sendJsonToClient() }

@@ -1,8 +1,6 @@
 package org.icfp2017.solver
 
 import com.google.gson.annotations.SerializedName
-import com.sun.javaws.exceptions.InvalidArgumentException
-import com.sun.org.apache.xpath.internal.Arg
 import org.icfp2017.Arguments
 import org.icfp2017.Game
 import org.icfp2017.Move
@@ -22,15 +20,17 @@ interface Strategy<State> {
     }
 
     companion object {
-        fun play(server: OfflineServer, name: String = Arguments.strategy) = when (name) {
-            "SpanningTree" -> OfflineSolver.play(server, strategy = SpanningTree)
-            "First" -> OfflineSolver.play(server, strategy = FirstFree)
-            "Random" -> OfflineSolver.play(server, strategy = RandomFree)
-            "AllYourBaseAreBelongToUsRandom" -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom)
-            "DumbAndGreedy" -> OfflineSolver.play(server, strategy = DumbAndGreedy)
-            "SmartAndGreedy" -> OfflineSolver.play(server, strategy = SmartAndGreedy)
-            "EagerBaseCatcher" -> OfflineSolver.play(server, strategy = EagerBaseCatcher)
-            else -> throw InvalidArgumentException(arrayOf("Unknown strategy name"))
-        }
+
+        val strategyFactory: Map<String, (OfflineServer) -> Unit> = mapOf(
+            "SpanningTree" to { server -> OfflineSolver.play(server, strategy = SpanningTree) },
+//            "First" to { server -> OfflineSolver.play(server, strategy = FirstFree) },
+//            "Random" to { server -> OfflineSolver.play(server, strategy = RandomFree) },
+            "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
+            "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
+            "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
+            "EagerBaseCatcher" to { server -> OfflineSolver.play(server, strategy = EagerBaseCatcher) }
+        )
+
+        fun play(server: OfflineServer, name: String = Arguments.strategy) = strategyFactory[name]!!(server)
     }
 }

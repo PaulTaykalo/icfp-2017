@@ -2,6 +2,24 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 
+inline fun <T, R: Comparable<R>> Collection<T>.takeMaxBy(comparator: (T) -> R): Collection<T> {
+    var maxValue: R? = null
+    var maxItems = listOf<T>()
+
+    forEach {
+        val itValue = comparator(it)
+        val currentValue = maxValue
+        if (currentValue == null || itValue > currentValue)  {
+            maxValue = itValue
+            maxItems = listOf(it)
+        } else {
+            maxItems += it
+        }
+    }
+
+    return maxItems
+}
+
 object DumbAndGreedy : Strategy<Game> {
     override fun prepare(game: Game) = game
 
@@ -17,17 +35,19 @@ object DumbAndGreedy : Strategy<Game> {
 
         val currentScore = state.calculateScoreForReachable(state.sitesReachedForMine)
 
-        val river = niceRivers.maxBy {
+
+        val costlyRivers = niceRivers.takeMaxBy {
             val newReachability = state.updateSitesReachability(state.sitesReachedForMine, it)
             val newScore = state.calculateScoreForReachable(newReachability)
 
-            val delta = newScore - currentScore
-
-            if (it.target in state.mines || it.source in state.mines) delta + 10
-
-            delta
+            newScore - currentScore
         }
 
-        return Pair(state.claim(river), state)
+        val minesFriendlyRivers = costlyRivers.takeMaxBy {
+            val newPoint = if(it.source in nicePoints) it.target else it.source
+            0 - state.siteScores[newPoint]!!.values.sum()
+        }
+
+        return Pair(state.claim(minesFriendlyRivers.firstOrNull()), state)
     }
 }

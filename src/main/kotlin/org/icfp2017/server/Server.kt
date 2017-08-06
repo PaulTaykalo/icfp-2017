@@ -161,7 +161,7 @@ class OnlineServer(
         if (response.get("move") != null) {
             val stateAsString = gson.toJson(state)
             val trimmedJSON = json.trim()
-            val jsonWithState = trimmedJSON.substring(trimmedJSON.indices.first, trimmedJSON.indices.last-1) + ",\"state\":$stateAsString}"
+            val jsonWithState = trimmedJSON.substring(trimmedJSON.indices.first, trimmedJSON.indices.last) + ",\"state\":$stateAsString}"
             Logger.log("[Actual Sent] <--- $jsonWithState")
             return jsonWithState
         }

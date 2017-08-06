@@ -12,20 +12,11 @@ import java.io.OutputStream
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
-import com.google.gson.GsonBuilder
-
-
-
 
 typealias JSONString = String
 
 data class MeRequest(@SerializedName("me") val me: String)
 data class MeResponse(@SerializedName("you") val you: String)
-
-data class ServerMove(
-    @SerializedName("move") val move: Move,
-    @SerializedName("state") val state: String
-)
 
 data class ReadyRequest(
     @SerializedName("ready") val ready: PunterID,
@@ -72,10 +63,6 @@ data class GeneralResponse(
     @SerializedName("you") val you: String?
 )
 
-data class GeneralRequest (
-    @SerializedName("me") val me: String?
-)
-
 
 class OnlineServer(
     serverName: String = Arguments.server,
@@ -120,8 +107,6 @@ class OnlineServer(
             serverBehaviour.send(json)
             return
         }
-
-
 
         val potentialState = generalRequest.get("state")
         if (potentialState != null) {

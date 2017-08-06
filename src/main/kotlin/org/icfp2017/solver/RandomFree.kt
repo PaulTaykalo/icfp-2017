@@ -1,7 +1,6 @@
 package org.icfp2017.solver
 
 import org.icfp2017.*
-import org.icfp2017.server.ServerMove
 import java.util.*
 
 

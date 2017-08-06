@@ -1,11 +1,8 @@
 package org.icfp2017.server
 
 import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import org.icfp2017.*
 import org.icfp2017.base.StopCommand
-import org.icfp2017.solver.StrategyStateWithGame
-import sun.rmi.runtime.Log
 import java.io.BufferedReader
 import java.io.InputStreamReader
 

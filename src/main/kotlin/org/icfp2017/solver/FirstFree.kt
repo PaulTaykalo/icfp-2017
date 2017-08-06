@@ -3,7 +3,6 @@ package org.icfp2017.solver
 import org.icfp2017.Game
 import org.icfp2017.Move
 import org.icfp2017.claim
-import org.icfp2017.server.ServerMove
 
 object FirstFree: Strategy<StrategyStateWithGame> {
 

@@ -2,7 +2,6 @@ package org.icfp2017.solver
 
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
-import org.icfp2017.server.ServerMove
 
 object AllYourBaseAreBelongToUs : Strategy <StrategyStateWithGame> {
     lateinit var graphUtils: GraphUtils

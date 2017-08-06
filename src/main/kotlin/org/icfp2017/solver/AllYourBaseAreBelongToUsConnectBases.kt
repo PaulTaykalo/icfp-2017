@@ -1,8 +1,9 @@
 package org.icfp2017.solver
-
-import org.icfp2017.*
+import org.icfp2017.Game
+import org.icfp2017.Move
+import org.icfp2017.claim
 import org.icfp2017.graph.GraphUtils
-import org.icfp2017.server.ServerMove
+import org.icfp2017.pass
 import java.util.*
 
 // captures rivers close to bases first and then does spanning tree

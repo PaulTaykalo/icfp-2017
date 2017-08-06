@@ -12,6 +12,7 @@ object Arguments {
     var server: String = "punter.inf.ed.ac.uk"
     var port: Int = 9016
     var strategy: String = DumbAndGreedy.javaClass.simpleName
+    var strategy: String = AllYourBaseAreBelongToUs.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
     var logType = "error"

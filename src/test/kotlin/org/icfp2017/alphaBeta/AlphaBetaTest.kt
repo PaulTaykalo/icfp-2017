@@ -16,10 +16,10 @@ class AlphaBetaTest{
         //val game = Gson().fromJson(modelString, Game::class.java)
 
 
-        val fullGame = Game(0, 2,mapModel)
+        val fullGame = Game(0, 2,mapModel,null)
 
 
-        val node = getBestMove(fullGame,2)
+        val node = getBestMove(fullGame,4)
 
         node.toString()
 //        |-/\-|

@@ -7,14 +7,16 @@ data class MinMaxNode(
         val game: Game,
         val move: Move= game.pass(),
         val isMin:Boolean=false,
-        val score:Double = Double.NEGATIVE_INFINITY,
+        val score:Int = Int.MIN_VALUE,
+        val alpha:Int = Int.MIN_VALUE,
+        val beta:Int = Int.MAX_VALUE,
         val children:List<MinMaxNode> = listOf(),
         val leaf : Boolean  = children.isEmpty()
 )
 
-fun worstScore(isMin:Boolean):Double{
-    if(isMin) return Double.POSITIVE_INFINITY
-    return Double.NEGATIVE_INFINITY
+fun worstScore(isMin:Boolean):Int{
+    if(isMin) return Int.MAX_VALUE
+    return Int.MIN_VALUE
 }
 
 fun expandNode(game:Game, isMin:Boolean) : List<MinMaxNode>{
@@ -37,52 +39,80 @@ fun expandNode(game:Game, isMin:Boolean) : List<MinMaxNode>{
     return  newGames.map { MinMaxNode(it.first, it.second, isMin, nextNodeScore) }
 }
 
-fun heuristic(game:Game):Double{
-    val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return 0.0
+fun heuristic(game:Game):Int{
+    val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return 0
     val nicePoints = sites + mine
 
     val niceRivers = nicePoints
             .flatMap { game.riversForSite[it]!! }
             .filter { it in game.unownedRivers }
 
-    return niceRivers.size.toDouble()
+    return niceRivers.size
 }
 
-fun buildTree(parentNode: MinMaxNode, currentLevel:Int, maxLevel:Int) : MinMaxNode {
+fun buildTree(parentNode: MinMaxNode, levels:Int, alpha: Int, beta: Int) : MinMaxNode {
 
-    val isMin = currentLevel %2 == 0
+    val isMin = levels % parentNode.game.punters != 0
     // for non leaf nodes we do recursion
-    if(currentLevel != maxLevel) {
-
-        val nodes = expandNode(parentNode.game, isMin)
-        if(nodes.isEmpty())
-            return parentNode
-        val children = nodes.map { buildTree(it, currentLevel + 1, maxLevel) }
-        if (isMin)
-        {
-            val minimalChild = children.minBy { it-> it.score}
-
-            val minScore = minimalChild!!.score
-
-            return MinMaxNode(parentNode.game, parentNode.move, isMin, minScore, children)
-        }
-        else{
-
-            val maxChild = children.minBy { it-> it.score}
-
-            val maxScore = maxChild!!.score
-            return MinMaxNode(parentNode.game, parentNode.move, isMin, maxScore, children)
+    if(levels == 0) {
+        // for leaf nodes we return result
+        val leafScore = heuristic(parentNode.game)
+        if (isMin) {
+            return parentNode.copy(score = leafScore, beta = leafScore)
+        } else {
+            return parentNode.copy(score = leafScore, alpha = leafScore)
         }
     }
+    val nodes = expandNode(parentNode.game, isMin)
 
-    // for leaf nodes we return result
+    if (nodes.isEmpty())
+        return parentNode
 
-    return MinMaxNode(parentNode.game, parentNode.move, parentNode.isMin, heuristic(parentNode.game))
+
+    var currentAlpha = alpha
+    var currentBeta = beta
+
+    var minimalChildScore = Int.MAX_VALUE
+    var maximalChildScore = Int.MIN_VALUE
+
+    var children: List<MinMaxNode> = listOf()
+
+
+    for (node in nodes) {
+        if (currentAlpha >= currentBeta)
+            break
+
+        val child = buildTree(node, levels - 1, currentAlpha, currentBeta)
+
+        children += child
+        if (isMin) {
+            if (child.score < minimalChildScore) {
+                minimalChildScore = child.score
+                currentBeta = minOf(currentBeta, minimalChildScore)
+            }
+        } else {
+            if (child.score > maximalChildScore) {
+                maximalChildScore = child.score
+                currentAlpha = maxOf(currentAlpha, maximalChildScore)
+            }
+        }
+
+    }
+
+    if(isMin)
+    {
+        return parentNode.copy(score=minimalChildScore, alpha = alpha, beta = currentBeta,  children = children)
+    }else
+    {
+        return parentNode.copy(score=maximalChildScore, alpha = currentAlpha, beta = beta, children = children)
+    }
+
+
 }
 
-fun getBestMove(game:Game, howDeep:Int) : MinMaxNode {
+fun getBestMove(game:Game, levels:Int) : MinMaxNode {
     val initialNode = MinMaxNode(game)
-    val tree = buildTree(initialNode, 0, howDeep)
+    val tree = buildTree(initialNode, levels, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE)
     if(tree.children.isEmpty()){
         return initialNode.copy(move = game.pass())
     }else {
@@ -99,7 +129,10 @@ object AlphaBeta: Strategy<StrategyStateWithGame> {
 
     override fun serverMove(moves: Array<Move>, state: StrategyStateWithGame): Pair<Move, StrategyStateWithGame> {
         val newGame = applyMoves(moves, state.game)
-        val move = getBestMove(newGame,2).move
+        // deep = 2 "scores":[{"punter":0,"score":24295},{"punter":1,"score":88628}}}
+        // deep = 3 "scores":[{"punter":0,"score":711},  {"punter":1,"score":82262}
+
+        val move = getBestMove(newGame,4).move
         return Pair(move, StrategyStateWithGame(newGame))
     }
 }

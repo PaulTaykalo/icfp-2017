@@ -114,7 +114,7 @@ class OnlineServer(
 
     private fun handleOfflineRequest(json: JSONString) {
 
-        Logger.log("[Proxiying] ---> $json")
+        Logger.debug("[Proxiying] ---> $json")
 
         val generalType = object : TypeToken<Map<String, Any>>() {}.type
         val generalRequest = gson.fromJson<Map<String, Any>>(json, generalType)
@@ -150,7 +150,7 @@ class OnlineServer(
     private fun sendJsonToClient(): JSONString {
 
         val json = serverBehaviour.readString()
-        Logger.log("[Proxiying] <--- $json")
+        Logger.debug("[Proxiying] <--- $json")
 
         val generalType = object : TypeToken<Map<String, Any>>() {}.type
         val response = gson.fromJson<Map<String, Any>>(json, generalType)
@@ -177,7 +177,7 @@ class OnlineServer(
             val stateAsString = gson.toJson(state)
             val trimmedJSON = json.trim()
             val jsonWithState = trimmedJSON.substring(trimmedJSON.indices.first, trimmedJSON.indices.last) + ",\"state\":$stateAsString}"
-            Logger.log("[Actual Sent] <--- $jsonWithState")
+            Logger.debug("[Actual Sent] <--- $jsonWithState")
             return jsonWithState
         }
 
@@ -185,7 +185,7 @@ class OnlineServer(
     }
 
     private fun send(json: String) {
-        Logger.log("[TCP] --> $json")
+        Logger.debug("[TCP] --> $json")
         val byteArray = json.toByteArray()
         val prefix = "${byteArray.size}:".toByteArray()
         outputStream.write(prefix)
@@ -197,7 +197,7 @@ class OnlineServer(
     private fun readString(): String {
         val size = readSize()
         val result = readBytes(size)
-        Logger.log("[TCP] <-- $result")
+        Logger.debug("[TCP] <-- $result")
         return result
     }
 

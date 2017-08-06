@@ -22,6 +22,14 @@ object Logger {
         else -> {
         }
     }
+    fun debug(command: String) = when (Arguments.logging) {
+        "error" -> {}
+        "print" -> {}
+        "file" -> {}
+        else -> {
+        }
+    }
+
 
     inline fun <T> measure(action: String, block: () -> T): T {
         val start = System.currentTimeMillis()

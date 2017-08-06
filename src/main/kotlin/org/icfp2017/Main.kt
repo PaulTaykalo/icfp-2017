@@ -14,7 +14,7 @@ object Arguments {
     var strategy: String = SmartAndGreedy.javaClass.simpleName
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
-    var logType = "error"
+    var logging = "error"
 }
 
 val Arguments.nameWithStrategy: String get() = "$name [$strategy]"
@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
                 Arguments.offline = false
             }
             "--strategy" -> Arguments.strategy = value
-            "--logging" -> Arguments.logType = value
+            "--logging" -> Arguments.logging = value
             "--offline" -> Arguments.offline = value.toBoolean()
         }
     }

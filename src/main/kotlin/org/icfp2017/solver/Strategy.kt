@@ -6,6 +6,7 @@ import org.icfp2017.Game
 import org.icfp2017.Move
 import org.icfp2017.server.FutureRequest
 import org.icfp2017.server.OfflineServer
+import org.icfp2017.solver.alphaBeta.AlphaBeta
 
 data class StrategyStateWithGame(
     @SerializedName("game") val game: Game
@@ -28,6 +29,7 @@ interface Strategy<State> {
             "AllYourBaseAreBelongToUsRandom" to { server -> OfflineSolver.play(server, strategy = AllYourBaseAreBelongToUsRandom) },
             "DumbAndGreedy" to { server -> OfflineSolver.play(server, strategy = DumbAndGreedy) },
             "SmartAndGreedy" to { server -> OfflineSolver.play(server, strategy = SmartAndGreedy) },
+                "MinMax" to { server -> OfflineSolver.play(server, strategy = AlphaBeta) },
             "EagerBaseCatcher" to { server -> OfflineSolver.play(server, strategy = EagerBaseCatcher) }
         )
 

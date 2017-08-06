@@ -15,7 +15,7 @@ object Logger {
         file?.flush()
     }
 
-    fun log(command: String) = when (Arguments.logType) {
+    fun log(command: String) = when (Arguments.logging) {
         "error" -> logError(command)
         "print" -> logPrint(command)
         "file" -> logFile(command)

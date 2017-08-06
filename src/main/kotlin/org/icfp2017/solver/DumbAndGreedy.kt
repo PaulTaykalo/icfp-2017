@@ -85,12 +85,12 @@ object SmartAndGreedy: Strategy<Game> {
                 val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
 
                 // Prefer points with many connections
-                val rivers = (game.unownedRivers - game.riversForSite[it]!!).size
+                val rivers = (game.riversForSite[it]!!.intersect(game.unownedRivers)).size
 
                 // distance to other mines
                 val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()
 
-                val totalScore = deltaScore + mineBoues + rivers - score
+                val totalScore = deltaScore + rivers - score
                 totalScore
             }
 

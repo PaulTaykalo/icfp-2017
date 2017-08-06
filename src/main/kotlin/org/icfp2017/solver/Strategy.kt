@@ -6,6 +6,7 @@ import com.sun.org.apache.xpath.internal.Arg
 import org.icfp2017.Arguments
 import org.icfp2017.Game
 import org.icfp2017.Move
+import org.icfp2017.server.FutureRequest
 import org.icfp2017.server.OfflineServer
 
 data class StrategyStateWithGame(
@@ -16,6 +17,9 @@ interface Strategy<State> {
 
     fun serverMove(moves: Array<Move>, state: State): Pair<Move, State>
     fun prepare(game: Game): State
+    fun futures(): Array<FutureRequest>? {
+        return null
+    }
 
     companion object {
         fun play(server: OfflineServer, name: String = Arguments.strategy) = when (name) {

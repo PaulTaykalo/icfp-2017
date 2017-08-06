@@ -3,6 +3,7 @@
 package org.icfp2017
 
 import com.google.gson.Gson
+import org.icfp2017.server.SettingsResponse
 
 private typealias MineID = Int
 private typealias Reachability = Map<MineID, Set<SiteID>>
@@ -114,7 +115,7 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
             newSiteReachebleForMine = updateSitesReachability(newSiteReachebleForMine, river,newMyRivers, game.riversForSite)
         }
     }
-    return Game(game.punter, game.punters, game.mapModel, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
+    return Game(game.punter, game.punters, game.mapModel, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
             game.riversForSite, game.sitesForSite, game.siteScores)
 
 }
@@ -123,6 +124,7 @@ data class Game(
         val punter: PunterID,
         val punters: Int,
         val mapModel: MapModel,
+        val settings: SettingsResponse?,
         val sites : Array<SiteModel> = mapModel.sites,
         val mines:Set<SiteID> = mapModel.mines.toSet(),
         val ownedRivers:Set<River> = setOf<River>(),

@@ -12,7 +12,7 @@ object OfflineSolver {
             server.setup(
                 onSetup = { game ->
                     val state = strategy.prepare(game)
-                    server.ready(game.punter, state)
+                    server.ready(game.punter, strategy.futures(), state)
                 },
                 onMove = { moves, state: T ->
                     Logger.measure("strategy") {

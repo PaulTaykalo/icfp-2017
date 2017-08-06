@@ -48,7 +48,7 @@ class OfflineServer {
                 Logger.log("it is setup!")
                 Logger.measure("server: perform setup") {
                     val setupResponse: SetupResponse = gson.fromJson(json, SetupResponse::class.java)
-                    val game = Game(setupResponse.punter, setupResponse.punters, setupResponse.map)
+                    val game = Game(setupResponse.punter, setupResponse.punters, setupResponse.map, setupResponse.settings)
                     onSetup(game)
                 }
                 continue
@@ -109,11 +109,11 @@ class OfflineServer {
         }
     }
 
-    inline fun <reified State> ready(punterID: PunterID, state: State) {
+    inline fun <reified State> ready(punterID: PunterID, futures: Array<FutureRequest>? = null, state: State) {
         Logger.log("On offline ready")
         val json = Logger.measure("server: ready json serialization") {
             val ss = gson.toJson(state)
-            gson.toJson(ReadyRequest(punterID, ss))
+            gson.toJson(ReadyRequest(punterID, futures, ss))
         }
 
         serverBehaviour.send(json)

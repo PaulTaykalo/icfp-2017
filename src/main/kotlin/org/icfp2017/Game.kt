@@ -62,7 +62,6 @@ class Game(
             }
         }
 
-        Logger.log(Gson().toJson(scores))
         return scores
     }
 
@@ -86,23 +85,28 @@ class Game(
     }
 
     private fun updateSitesReachability(mine: SiteID, sites: Set<SiteID>, river: River): Set<SiteID> {
+        // Sites that we will reach with this river
         val newSites = mutableSetOf<SiteID>()
 
-        if (river.target in (sites + mine) || river.source in (sites + mine)) {
-            val front = mutableSetOf(river.target, river.source)
-            front.removeAll(sites)
+        // If river is not reachable from current graph - return unchanged
+        if (river.target !in (sites + mine) && river.source !in (sites + mine)) return sites
 
-            while (front.isNotEmpty()) {
-                val site = front.first()
-                newSites.add(site)
-                front.remove(site)
+        val front = mutableSetOf(river.target, river.source)
+        front.removeAll(sites)
 
-                val rivers = riversForSite[site]!! - myRivers
-                val connectedSites = rivers.map { it.source }.toSet() +
-                        rivers.map { it.target }.toSet() - sites - newSites
+        while (front.isNotEmpty()) {
+            val site = front.first()
+            newSites.add(site)
+            front.remove(site)
 
-                front.addAll(connectedSites)
-            }
+            // All rivers that we can reach from this site
+            val possibleRivers = riversForSite[site]!!
+            val connectedRivers = possibleRivers.intersect(myRivers)
+
+            val connectedSites = connectedRivers.map { it.source }.toSet() +
+                    connectedRivers.map { it.target }.toSet() - sites - newSites
+
+            front.addAll(connectedSites)
         }
 
         return sites.plus(newSites)

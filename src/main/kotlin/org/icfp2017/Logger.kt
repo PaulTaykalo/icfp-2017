@@ -33,14 +33,14 @@ object Logger {
         return result
     }
 
-    var _measures = mutableMapOf<String, Pair<Long, Set<Long>>>()
+    var _measures = mutableMapOf<String, Pair<Long, List<Long>>>()
 
     inline fun <T> measurePart(action: String, block: () -> T): T {
         val start = System.currentTimeMillis()
         val result = block()
         val time = System.currentTimeMillis() - start
 
-        var part = _measures.getOrDefault(action, Pair(0L, setOf<Long>()))
+        var part = _measures.getOrDefault(action, Pair(0L, emptyList()))
         part = Pair(part.first + time, part.second + time)
         _measures[action] = part
         return  result
@@ -50,7 +50,7 @@ object Logger {
         log(Gson().toJson(mapOf(
                 "measure" to action,
                 "duration" to _measures[action]?.first,
-                "samples" to _measures[action]?.second)))
+                "number" to _measures[action]?.second?.size)))
         _measures.remove(action)
     }
 }

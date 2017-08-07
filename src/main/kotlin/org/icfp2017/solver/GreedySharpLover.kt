@@ -23,10 +23,10 @@ object GreedySharpLover : Strategy<Game> {
             // Claim new point
             if (minesForSource.isEmpty() || minesForTarget.isEmpty()) {
                 val targetScore = game.siteScores[currentRiver.target]!!
-                        .filterNot { it.key in minesForSource }
+                        .filterNot { it.key in minesForSource + currentRiver.source + currentRiver.target }
                         .values.min()?.toInt()
                 val sourceScore = game.siteScores[currentRiver.source]!!
-                        .filterNot { it.key in minesForTarget }
+                        .filterNot { it.key in minesForTarget + currentRiver.source + currentRiver.target }
                         .values.min()?.toInt()
 
                 if (targetScore != null && sourceScore != null) {

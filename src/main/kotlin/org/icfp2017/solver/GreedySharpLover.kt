@@ -24,16 +24,21 @@ object GreedySharpLover : Strategy<Game> {
             if (minesForSource.isEmpty() || minesForTarget.isEmpty()) {
                 val targetScore = game.siteScores[currentRiver.target]!!
                         .filterNot { it.key in minesForSource }
-                        .values.min()
+                        .values.min()?.toInt()
                 val sourceScore = game.siteScores[currentRiver.source]!!
                         .filterNot { it.key in minesForTarget }
-                        .values.min()
+                        .values.min()?.toInt()
 
                 if (targetScore != null && sourceScore != null) {
-                    return@takeMinBy arrayOf(targetScore, sourceScore).max()!!.toInt()
+                    if (targetScore == 0) {
+                        return@takeMinBy sourceScore!!
+                    } else if (sourceScore == 0) {
+                        return@takeMinBy targetScore!!
+                    }
+                    return@takeMinBy arrayOf(targetScore, sourceScore).min()!!
                 }
 
-                return@takeMinBy sourceScore?.toInt() ?: targetScore?.toInt() ?: Int.MAX_VALUE
+                return@takeMinBy sourceScore ?: targetScore ?: Int.MAX_VALUE
             }
 
             // Join graphs

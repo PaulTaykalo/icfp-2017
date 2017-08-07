@@ -12,12 +12,30 @@ inline fun <T, R: Comparable<R>> Collection<T>.takeMaxBy(comparator: (T) -> R): 
         if (currentValue == null || itValue > currentValue)  {
             maxValue = itValue
             maxItems = listOf(it)
-        } else {
+        } else if (itValue == currentValue) {
             maxItems += it
         }
     }
 
     return maxItems
+}
+
+inline fun <T, R: Comparable<R>> Collection<T>.takeMinBy(comparator: (T) -> R): Collection<T> {
+    var minValue: R? = null
+    var minItems = listOf<T>()
+
+    forEach {
+        val itValue = comparator(it)
+        val currentValue = minValue
+        if (currentValue == null || itValue < currentValue)  {
+            minValue = itValue
+            minItems = listOf(it)
+        } else if (itValue == currentValue) {
+            minItems += it
+        }
+    }
+
+    return minItems
 }
 
 class BestMove: Strategy<Game> {

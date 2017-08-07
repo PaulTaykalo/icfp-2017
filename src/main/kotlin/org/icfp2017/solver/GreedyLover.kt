@@ -18,24 +18,27 @@ object GreedyLover : Strategy<Game> {
 
         val currentScore = calculateScoreForReachable(game.sitesReachedForMine, game.siteScores)
 
-        val costlyRivers = niceRivers.takeMaxBy { currentRiver ->
+        val costlyRivers = niceRivers.takeMinBy { currentRiver ->
             val minesForSource = game.sitesReachedForMine.filter { currentRiver.source in it.value }.keys
             val minesForTarget = game.sitesReachedForMine.filter { currentRiver.target in it.value }.keys
 
-            if (minesForSource.intersect(minesForTarget).count() == 0) {
-                return@takeMaxBy Int.MAX_VALUE
+            if (minesForSource.isEmpty()) {
+                val sourceScore = game.siteScores[currentRiver.source]!!.filterNot { it.key in minesForTarget }.values.min()
+                return@takeMinBy sourceScore?.toInt() ?: Int.MAX_VALUE
             }
 
+            if (minesForTarget.isEmpty()) {
+                val targetScore = game.siteScores[currentRiver.target]!!
+                        .filterNot { it.key in minesForSource }
+                        .values.min()
+                return@takeMinBy targetScore?.toInt() ?: Int.MAX_VALUE
+            }
 
+            if (minesForSource.intersect(minesForTarget).count() == 0) {
+                return@takeMinBy Int.MIN_VALUE
+            }
 
-
-
-            // standard greedy
-            val newReachability = updateSitesReachability(game.sitesReachedForMine, currentRiver, game.myRivers, game.riversForSite)
-            val newScore = calculateScoreForReachable(newReachability, game.siteScores)
-
-            val mineBonus = if (currentRiver.target in game.mines || currentRiver.source in game.mines) 10 else 0
-            (newScore - currentScore + mineBonus).toInt()
+            Int.MAX_VALUE
         }
 
         return Pair(game.claim(costlyRivers.firstOrNull()), game)

@@ -41,6 +41,17 @@ object Logger {
         return result
     }
 
+    inline fun <T> measure(action: String, format:(T) -> String, block: () -> T): T {
+        val start = System.currentTimeMillis()
+        val result = block()
+        val time = System.currentTimeMillis() - start
+
+        log(Gson().toJson(mapOf("measure" to action, "duration" to time, "value" to format(result))))
+
+        return result
+    }
+
+
     inline fun <T> measureNano(block: () -> T): Pair<T,Long> {
         val start = System.nanoTime()
         val result = block()

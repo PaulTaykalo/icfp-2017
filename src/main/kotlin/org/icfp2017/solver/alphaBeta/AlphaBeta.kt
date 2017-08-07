@@ -164,7 +164,7 @@ class MinMax(
         //val isMin = levels % parentNode.game.punters != 0
         // for non leaf nodes we do recursion
 
-        val nodes = Logger.measure("expand") {
+        val nodes = Logger.measure("expand", { it.size.toString() }) {
             expandNode(parentNode.game, levels - 1, isMin)
         }
 

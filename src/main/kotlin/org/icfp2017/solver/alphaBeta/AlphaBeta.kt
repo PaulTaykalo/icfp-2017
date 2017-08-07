@@ -6,16 +6,17 @@ import org.icfp2017.solver.StrategyStateWithGame
 data class MinMaxNode(
         val game: Game,
         val move: Move= game.pass(),
+        val level:Int = 0,
         val isMin:Boolean=false,
         val score:Int = Int.MIN_VALUE,
         val alpha:Int = Int.MIN_VALUE,
         val beta:Int = Int.MAX_VALUE,
-        val children:List<MinMaxNode> = listOf(),
-        val leaf : Boolean  = children.isEmpty()
+        val children:List<MinMaxNode> = listOf()
+
 )
 
 class MinMax(
-        val levels: Int = 2,
+        val levels: Int = 3,
         val heuristic: (Game)-> Int): Strategy<Game> {
 
     override fun prepare(game: Game) = game
@@ -34,7 +35,7 @@ class MinMax(
         return move to newGame
     }
 
-    fun expandNode(game:Game, isMin:Boolean) : List<MinMaxNode>{
+    fun expandNode(game:Game, level:Int, isMin:Boolean) : List<MinMaxNode>{
 
 
         // Selects less developed graph
@@ -51,64 +52,81 @@ class MinMax(
                 .map { applyMoves(arrayOf(it), game) }
                 .zip(niceRiverClaims)
         val nextNodeScore = worstScore(isMin)
-        return  newGames.map { MinMaxNode(it.first, it.second, isMin, nextNodeScore) }
+        return  newGames.map { MinMaxNode(it.first, it.second, level, isMin, nextNodeScore) }
     }
 
-    fun buildTree(parentNode: MinMaxNode, levels:Int, alpha: Int, beta: Int) : MinMaxNode {
+    fun buildTree(parentNode: MinMaxNode, levels:Int, maxLevels:Int, alpha: Int, beta: Int) : MinMaxNode {
 
-        val isMin = levels % parentNode.game.punters != 0
+        val maxFlag = Math.abs(maxLevels - parentNode.game.punters) % parentNode.game.punters
+
+         val isMin =levels % parentNode.game.punters == maxFlag
+        //val isMin = levels % parentNode.game.punters != 0
         // for non leaf nodes we do recursion
         if(levels == 0) {
             // for leaf nodes we return result
             val leafScore = heuristic(parentNode.game)
-            if (isMin) {
-                return parentNode.copy(score = leafScore, beta = leafScore)
-            } else {
-                return parentNode.copy(score = leafScore, alpha = leafScore)
-            }
+            return parentNode.copy(score = leafScore)
         }
-        val nodes = expandNode(parentNode.game, isMin)
+        val nodes = expandNode(parentNode.game, levels-1, isMin)
 
-        if (nodes.isEmpty())
+        if (nodes.isEmpty()){
+           // Logger.log("nohting is found")
             return parentNode
+
+        }
+
 
 
         var currentAlpha = alpha
         var currentBeta = beta
-
-        var minimalChildScore = Int.MAX_VALUE
-        var maximalChildScore = Int.MIN_VALUE
+        var currentScore= Int.MIN_VALUE
+        if(isMin)
+            currentScore=Int.MAX_VALUE
 
         var children: List<MinMaxNode> = listOf()
 
 
         for (node in nodes) {
-            if (currentAlpha >= currentBeta)
-                break
-
-            val child = buildTree(node, levels - 1, currentAlpha, currentBeta)
+            val child = buildTree(node, levels - 1, maxLevels, currentAlpha, currentBeta)
 
             children += child
             if (isMin) {
-                if (child.score < minimalChildScore) {
-                    minimalChildScore = child.score
-                    currentBeta = minOf(currentBeta, minimalChildScore)
+                if (child.score < currentScore) {
+                   currentScore = child.score
+
                 }
-            } else {
-                if (child.score > maximalChildScore) {
-                    maximalChildScore = child.score
-                    currentAlpha = maxOf(currentAlpha, maximalChildScore)
+                if (child.score < currentBeta) {
+                    currentBeta = child.score
                 }
             }
+            else {
+
+                if (child.score > currentScore) {
+                    currentScore = child.score
+                }
+                if (child.score > currentAlpha) {
+                    currentAlpha = child.score
+                }
+
+            }
+            if (currentAlpha >= currentBeta)
+                break
 
         }
 
+        val childrenCount = children.size
         if(isMin)
         {
-            return parentNode.copy(score=minimalChildScore, alpha = alpha, beta = currentBeta,  children = children)
+          // Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $alpha, beta:$beta, childrens: $childrenCount")
+            // currentScore = children.minBy { it.score }!!.score
+            return parentNode.copy(score=currentScore, alpha = alpha, beta = currentBeta,  children = children)
+
         }else
         {
-            return parentNode.copy(score=maximalChildScore, alpha = currentAlpha, beta = beta, children = children)
+           // Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $currentAlpha,  beta: $beta, childrens: $childrenCount")
+            //currentScore = children.maxBy { it.score }!!.score
+            return parentNode.copy(score=currentScore, alpha = currentAlpha, beta = beta, children = children)
+
         }
 
 
@@ -116,7 +134,7 @@ class MinMax(
 
     fun getBestMove(game:Game, levels:Int) : MinMaxNode {
         val initialNode = MinMaxNode(game)
-        val tree = buildTree(initialNode, levels, alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE)
+        val tree = buildTree(initialNode, levels, maxLevels = levels,alpha = Int.MIN_VALUE, beta = Int.MAX_VALUE)
         if (tree.children.isEmpty()) {
             return initialNode.copy(move = game.pass())
         } else {

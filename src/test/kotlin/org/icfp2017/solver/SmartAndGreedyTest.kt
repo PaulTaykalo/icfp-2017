@@ -1,41 +1,25 @@
 package org.icfp2017.solver
 
+import com.google.gson.Gson
 import org.amshove.kluent.`should be in`
 import org.amshove.kluent.`should be`
 import org.icfp2017.*
 import org.junit.Assert.*
 import org.junit.Test
+import java.io.File
 
-val lambdaMap = MapModel(
-        sites = arrayOf(
-                SiteModel(0),
-                SiteModel(1),
-                SiteModel(2),
-                SiteModel(3),
-                SiteModel(4),
-                SiteModel(5),
-                SiteModel(6),
-                SiteModel(7)),
-        rivers = arrayOf(
-                River(0, 1),
-                River(0, 7),
-                River(1, 7),
-                River(1, 2),
-                River(1, 3),
-                River(2, 3),
-                River(3, 4),
-                River(3, 5),
-                River(4, 5),
-                River(5, 6),
-                River(5, 7),
-                River(6, 7)),
-        mines = arrayOf(1, 5)
-)
+val lambdaMap: MapModel = Gson().fromJson(
+        File(SmartAndGreedyTest::class.java.getResource("lambda.json").path).readText(),
+        MapModel::class.java)
+
+val sampleMap: MapModel = Gson().fromJson(
+        File(SmartAndGreedyTest::class.java.getResource("sample.json").path).readText(),
+        MapModel::class.java)
 
 class SmartAndGreedyTest {
-    @Test
-    internal fun firstMoveTest() {
-        var game = Game(1, 2, mapModel = lambdaMap)
+
+    @Test internal fun firstMoveTest() {
+        var game = Game(1, 2, mapModel = sampleMap)
 
         fun move(moves: Array<Move> = arrayOf()): Move {
             val result = SmartAndGreedy.serverMove(
@@ -46,6 +30,32 @@ class SmartAndGreedyTest {
             game = result.second
             return result.first
         }
+
+        move() `should be in` setOf(
+                Claim(1, 1,3),
+                Claim(1, 1,7),
+                Claim(1,3,5),
+                Claim(1,5,7))
+    }
+}
+
+class DumbAndGreedy2Test {
+    @Test internal fun firstMoveTest() {
+        var game = Game(0, 2, mapModel = lambdaMap)
+
+        fun move(moves: Array<Move> = arrayOf()): Move {
+            val result = SmartAndGreedy.serverMove(moves, game)
+
+            game = result.second
+            return result.first
+        }
+
+        move(arrayOf(
+                Claim(0, 23,27),
+                Claim(1, 26,27),
+                Claim(0 , 26,29),
+                Claim(1, 23,35)
+        ))
 
         move() `should be in` setOf(
                 Claim(1, 1,3),

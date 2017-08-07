@@ -12,7 +12,7 @@ data class CollectionComparator<T: Comparable<T>>(val values: Collection<T>): Co
     }
 }
 
-object GrredyDeepLover: Strategy<Game> {
+object GreedyDeepLover: Strategy<Game> {
     override fun prepare(game: Game) = game
 
     override fun serverMove(moves: Array<Move>, oldState: Game): Pair<Move, Game> {

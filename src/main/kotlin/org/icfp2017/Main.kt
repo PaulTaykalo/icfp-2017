@@ -16,10 +16,10 @@ object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
     var port: Int = 9003
-    var strategy: String = Strategies.GreedyLover2_.name
+    var strategy: String = Strategies.GreedyLover_.name
     var log: String = "./log-${System.currentTimeMillis()}.txt"
     var offline = true
-    var logging = "error"
+    var logging = "none"
 }
 
 val Arguments.nameWithStrategy: String get() = "$name [$strategy]"

@@ -134,7 +134,7 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
         }
     }
 
-    return Game(game.punter, game.punters, game.mapModel, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
+    return Game(game.punter, game.punters, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
             game.riversForSite, game.sitesForSite, game.siteScores)
 
 }
@@ -142,24 +142,52 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
 data class Game(
     val punter: PunterID,
     val punters: Int,
-    @SerializedName("map") val mapModel: MapModel,
     val settings: SettingsResponse? = null,
-    val sites : Array<SiteModel> = mapModel.sites,
-    val mines:Set<SiteID> = mapModel.mines.toSet(),
+    val sites : Array<SiteModel>,
+    val mines:Set<SiteID>,
     val ownedRivers:Set<River> = setOf<River>(),
-    val unownedRivers:Set<River> = mapModel.rivers.toSet(),
+    val unownedRivers:Set<River>,
     val myRivers:Set<River> = setOf<River>(),
     val sitesReachedForMine:Reachability = mines.map { it to setOf<SiteID>()}.toMap(),
-    val riversForSite:RiversForSite = calculateRiversForSites(mapModel),
-    val sitesForSite:SitesForSite = calculateSitesForSite(sites,riversForSite),
-    val siteScores:ScoreFromMine = calculateScores(sites, mapModel.mines, sitesForSite)
-)
+    val riversForSite:RiversForSite,
+    val sitesForSite:SitesForSite,
+    val siteScores:ScoreFromMine
+
+) {
+    companion object {
+        fun create(
+            punter: PunterID,
+            punters: Int,
+            mapModel: MapModel,
+            settings: SettingsResponse?
+        ): Game {
+            val riversForSite = calculateRiversForSites(mapModel)
+            val sites = mapModel.sites
+            val sitesForSite = calculateSitesForSite(sites, riversForSite)
+            return Game(punter, punters, settings,
+                sites = sites,
+                mines = mapModel.mines.toSet(),
+                unownedRivers = mapModel.rivers.toSet(),
+                riversForSite = riversForSite,
+                sitesForSite = sitesForSite,
+                siteScores = calculateScores(sites, mapModel.mines, sitesForSite)
+            )
+        }
+
+    }
+}
 data class SiteModel(val id: SiteID)
 data class River(val source: SiteID, val target:SiteID) {
     override fun hashCode(): Int {
         return source.hashCode() xor target.hashCode()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is River) { return false }
+        return other.hashCode() == hashCode()
+    }
 }
+
 
 //typealias River = Array<SiteID>
 //

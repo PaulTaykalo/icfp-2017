@@ -49,7 +49,7 @@ class OfflineServer {
                 Logger.log("it is setup!")
                 Logger.measure("server: perform setup") {
                     val setupResponse: SetupResponse = gson.fromJson(json, SetupResponse::class.java)
-                    val game = Game(setupResponse.punter, setupResponse.punters, setupResponse.map, setupResponse.settings)
+                    val game = Game.create(setupResponse.punter, setupResponse.punters, setupResponse.map, setupResponse.settings)
                     onSetup(game)
                 }
                 continue

@@ -3,6 +3,9 @@ package org.icfp2017.solver.alphaBeta
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 import org.icfp2017.solver.Strategy
+import java.util.Random
+
+
 
 data class MinMaxNode(
         val game: Game,
@@ -24,6 +27,9 @@ class MinMax(
 
     override fun prepare(game: Game) = game
     var timeLimitLowestLevel: Long = 10//milliseconds
+    var expansionLimitOnLever:Int =10 // max children to expand on node, so we don't fail wiht 173 childred on first level
+
+    var random = Random()
     fun worstScore(isMin: Boolean): Int {
         if (isMin) return Int.MAX_VALUE
         return Int.MIN_VALUE
@@ -51,7 +57,14 @@ class MinMax(
                 .filter { it in game.availableRivers }
                 .map { game.claim(it) }
 
-        val newGames = niceRiverClaims
+        var limitedRivers : List<Move> = listOf()
+        if(niceRiverClaims.size > expansionLimitOnLever){
+            limitedRivers += niceRiverClaims.get( random.nextInt(expansionLimitOnLever))
+        }else{
+            limitedRivers = niceRiverClaims
+        }
+
+        val newGames = limitedRivers
                 .map { applyMoves(arrayOf(it), game) }
                 .zip(niceRiverClaims)
         val nextNodeScore = worstScore(isMin)

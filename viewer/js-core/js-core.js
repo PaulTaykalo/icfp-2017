@@ -52,7 +52,7 @@ const graphStyle = [
       "font-size": 64,
       "color": "#FFF",
       "line-color": "#009",
-      "width": 35,
+      "width": 10,
       "z-index" : 1,
       "curve-style": "haystack",
       "haystack-radius": 0
@@ -65,7 +65,7 @@ const graphStyle = [
       "font-size": 4,
       "color": "#fff",
       "line-color": "yellow",
-      "width": 35
+      "width": 10
       }
   },
 
@@ -75,7 +75,7 @@ const graphStyle = [
       "font-size": 4,
       "color": "#fff",
       "line-color": "red",
-      "width": 35
+      "width": 10
       }
   },
    { "selector": ".punter1",
@@ -84,7 +84,7 @@ const graphStyle = [
       "font-size": 4,
       "color": "#fff",
       "line-color": "green",
-      "width": 35
+      "width": 10
       }
   },
 
@@ -94,7 +94,7 @@ const graphStyle = [
       "font-size": 4,
       "color": "#fff",
       "line-color": "yellow",
-      "width": 35
+      "width": 10
       }
   },
  

@@ -1,4 +1,5 @@
 package org.icfp2017.solver.alphaBeta
+import io.uuddlrlrba.ktalgs.datastructures.Queue
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 import org.icfp2017.solver.Strategy
@@ -23,6 +24,7 @@ class MinMax(
 
     override fun prepare(game: Game) = game
     var timeLimitLowestLevel: Long = 1//milliseconds
+    val timingQueue: Queue<Long> = Queue() // queue for calculating average
     fun worstScore(isMin:Boolean):Int{
         if(isMin) return Int.MAX_VALUE
         return Int.MIN_VALUE
@@ -143,11 +145,23 @@ class MinMax(
             val res = parentNode.copy(score = leafScore)
             val endLeaf =  System.currentTimeMillis()
             val elapsed = endLeaf - startLeaf
-            if(elapsed > timeLimitLowestLevel)
+            timingQueue.add(elapsed)
+            val average = timingQueue.sum()/timingQueue.size
+
+            if(elapsed > average && average > 1)
             {
                 timeLimitLowestLevel = elapsed
-                Logger.log("adjusted timeLimit, now $elapsed")
+
+                //Logger.log("inceased timeLimit, now $elapsed")
             }
+            if(elapsed < average)
+            {
+                timeLimitLowestLevel = average
+                //Logger.log("decreased timeLimit, now $elapsed")
+            }
+            if(timingQueue.size >10)
+                timingQueue.peek()
+
             return res
         }
 

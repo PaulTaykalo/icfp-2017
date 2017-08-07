@@ -108,7 +108,12 @@ class OnlineServer(
         offlineServer.exitAfterMove = false
         offlineServer.serverBehaviour = ServerBehaviour(
                 { json -> handleOfflineRequest(json) },
-                { sendJsonToClient() }
+                {
+                    // Fake timer creation
+                    Timing.startTime = System.currentTimeMillis()
+                    val json = sendJsonToClient()
+                    json
+                }
         )
 
     }

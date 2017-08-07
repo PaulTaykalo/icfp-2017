@@ -4,7 +4,6 @@ import io.uuddlrlrba.ktalgs.datastructures.Queue
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 import org.icfp2017.solver.Strategy
-import kotlin.system.measureNanoTime
 
 data class MinMaxNode(
         val game: Game,

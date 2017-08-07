@@ -7,6 +7,11 @@ import org.icfp2017.server.OfflineServer
 import org.icfp2017.server.OnlineServer
 import org.icfp2017.solver.*
 
+
+object Timing {
+    var startTime = System.currentTimeMillis()
+}
+
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"

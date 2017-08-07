@@ -16,14 +16,16 @@ object GreedyLover : Strategy<Game> {
                 .flatMap { game.riversForSite[it]!! }
                 .filter { it in game.unownedRivers }
 
-        val currentScore = calculateScoreForReachable(game.sitesReachedForMine, game.siteScores)
-
         val costlyRivers = niceRivers.takeMinBy { currentRiver ->
             val minesForSource = game.sitesReachedForMine.filter { currentRiver.source in it.value }.keys
             val minesForTarget = game.sitesReachedForMine.filter { currentRiver.target in it.value }.keys
 
+
+            // Claim new point
             if (minesForSource.isEmpty()) {
-                val sourceScore = game.siteScores[currentRiver.source]!!.filterNot { it.key in minesForTarget }.values.min()
+                val sourceScore = game.siteScores[currentRiver.source]!!
+                        .filterNot { it.key in minesForTarget }
+                        .values.min()
                 return@takeMinBy sourceScore?.toInt() ?: Int.MAX_VALUE
             }
 
@@ -34,6 +36,7 @@ object GreedyLover : Strategy<Game> {
                 return@takeMinBy targetScore?.toInt() ?: Int.MAX_VALUE
             }
 
+            // Join graphs
             if (minesForSource.intersect(minesForTarget).count() == 0) {
                 return@takeMinBy Int.MIN_VALUE
             }

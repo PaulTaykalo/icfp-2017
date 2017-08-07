@@ -9,6 +9,7 @@ import org.icfp2017.currentScore
 import org.icfp2017.solver.AllYourBaseAreBelongToUsRandom
 import org.icfp2017.solver.alphaBeta.AlphaBeta
 import org.icfp2017.solver.alphaBeta.MinMax
+import org.icfp2017.solver.alphaBeta.MinMaxScore
 //import org.icfp2017.solver.alphaBeta.getBestMove
 import org.junit.Test
 
@@ -26,7 +27,7 @@ class AlphaBetaTest{
 
 
        //val node =  AlphaBeta.getBestMove(fullGame,5)
-        val node = MinMax{ it.currentScore.toInt()}.getBestMove(fullGame,5)
+        val node = MinMaxScore.getBestMoveTimed(fullGame,5,700)
 //        val state = AllYourBaseAreBelongToUsRandom.prepare(node.game)
 //        val move =
         //applyMoves(arrayOf())

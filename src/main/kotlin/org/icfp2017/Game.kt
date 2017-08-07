@@ -68,7 +68,7 @@ fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: Sco
 val Game.availableRivers: Set<River> get() {
     if (settings?.options == false) return unownedRivers
     if (availableOptions <= 0) return  unownedRivers
-    return ownedRivers + unownedRivers - myRivers
+    return ownedRivers + unownedRivers - myRivers - optionalRivers
 }
 
 fun expandReachableSitesForMineAndRiver(mine: SiteID, sites: Set<SiteID>, river: River, riversForSite: RiversForSite, myRivers: Set<River>): Set<SiteID> {

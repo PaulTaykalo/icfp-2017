@@ -78,7 +78,8 @@ data class OnlineReadyRequest(val ready: PunterID)
 data class OnlineMoveRequest(
         val claim: Claim?,
         val pass: Pass?,
-        val splurge: Splurge?
+        val splurge: Splurge?,
+        val option: Option?
 )
 
 
@@ -145,7 +146,7 @@ class OnlineServer(
 
             val moveRequest = gson.fromJson(json, MoveRequest::class.java)
             if (moveRequest != null) {
-                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass, moveRequest.splurge))
+                val outJson = gson.toJson(OnlineMoveRequest(moveRequest.claim, moveRequest.pass, moveRequest.splurge, moveRequest.option))
                 state = moveRequest.state
                 serverBehaviour.send(outJson)
                 return

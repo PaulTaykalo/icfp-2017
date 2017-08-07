@@ -62,7 +62,7 @@ class OfflineServer {
                     }
 
                     val typedMoves: Array<Move> = movesResponse.move.moves.map {
-                        it.claim ?: it.pass ?: it.splurge ?: Pass(-1)
+                        it.claim ?: it.pass ?: it.splurge ?: it.option ?: Pass(-1)
                     }.toTypedArray()
 
                     val ss = Logger.measure("server: parsing state from json") {

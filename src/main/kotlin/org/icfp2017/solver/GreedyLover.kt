@@ -20,8 +20,21 @@ object GreedyLover : Strategy<Game> {
             val minesForSource = game.sitesReachedForMine.filter { currentRiver.source in it.value }.keys
             val minesForTarget = game.sitesReachedForMine.filter { currentRiver.target in it.value }.keys
 
+            fun scoresForSite(site: SiteID): Int {
+                val siteScore =
+                        game.siteScores[site]!!
+                                .filterNot { it.key in minesForTarget }
+                                .values.min()?.toInt()
 
-            // Claim new point
+                return siteScore ?: Int.MAX_VALUE
+            }
+
+            // Claim first point
+            if (minesForSource.isEmpty() && minesForTarget.isEmpty()) {
+                if (currentRiver.source in game.mines) return@takeMinBy scoresForSite(currentRiver.target)
+                else return@takeMinBy scoresForSite(currentRiver.source)
+            }
+
             if (minesForSource.isEmpty()) {
                 val sourceScore = game.siteScores[currentRiver.source]!!
                         .filterNot { it.key in minesForTarget }

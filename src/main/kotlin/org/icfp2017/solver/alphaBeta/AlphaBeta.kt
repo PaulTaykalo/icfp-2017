@@ -25,7 +25,6 @@ class MinMax(
 
     override fun prepare(game: Game) = game
     var timeLimitLowestLevel: Long = 10//milliseconds
-    val timingQueue: Queue<Long> = Queue() // queue for calculating average
     fun worstScore(isMin: Boolean): Int {
         if (isMin) return Int.MAX_VALUE
         return Int.MIN_VALUE
@@ -165,7 +164,9 @@ class MinMax(
         //val isMin = levels % parentNode.game.punters != 0
         // for non leaf nodes we do recursion
 
-        val nodes = expandNode(parentNode.game, levels - 1, isMin)
+        val nodes = Logger.measure("expand") {
+            expandNode(parentNode.game, levels - 1, isMin)
+        }
 
         if (nodes.isEmpty()) {
             //Logger.log("nohting is found")
@@ -202,7 +203,6 @@ class MinMax(
                 if (child.score > currentAlpha) {
                     currentAlpha = child.score
                 }
-
             }
 
             if (System.currentTimeMillis() - start > levelTimeLimit)

@@ -36,7 +36,7 @@ class OfflineServer {
                 val generalType = object : TypeToken<LinkedTreeMap<String, Any>>() {}.type
                 gson.fromJson<LinkedTreeMap<String, Any>>(json, generalType)
             }
-            Logger.log("response: $response")
+            Logger.debug("response: $response")
 
 
             val moves = response.get("move")
@@ -130,14 +130,14 @@ class OfflineServer {
 
     private fun send(json: JSONString) {
         val message = "${json.length}:"+json
-        Logger.log("--> ${message}")
+        Logger.debug("--> ${message}")
         outputStream.print(message)
     }
 
     private fun readString(): JSONString {
         val size = readSize()
         val result = readBytes(size)
-        Logger.log("<-- $result")
+        Logger.debug("<-- $result")
         return result
     }
 
@@ -163,7 +163,7 @@ class OfflineServer {
                 append(ch)
             }
         }
-        Logger.log("Is about to read $string")
+        Logger.debug("Is about to read $string")
         return string.toInt()
     }
 }

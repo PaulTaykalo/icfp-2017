@@ -3,6 +3,7 @@ import io.uuddlrlrba.ktalgs.datastructures.Queue
 import org.icfp2017.*
 import org.icfp2017.graph.GraphUtils
 import org.icfp2017.solver.Strategy
+import kotlin.system.measureNanoTime
 
 data class MinMaxNode(
         val game: Game,
@@ -139,30 +140,37 @@ class MinMax(
 
         if(levelTimeLimit < timeLimitLowestLevel) {
             // for leaf nodes we return result
-            val startLeaf = System.currentTimeMillis()
-            val leafScore = heuristic(parentNode.game, parentNode.game.pass())
-            //Logger.log("level 0 , score = $leafScore")
-            val res = parentNode.copy(score = leafScore)
-            val endLeaf =  System.currentTimeMillis()
-            val elapsed = endLeaf - startLeaf
-            timingQueue.add(elapsed)
-            val average = timingQueue.sum()/timingQueue.size
-
-            if(elapsed > average && average > 1)
-            {
-                timeLimitLowestLevel = elapsed
-
-                //Logger.log("inceased timeLimit, now $elapsed")
+            val elapsed = Logger.measureNano {
+                //val startLeaf = System.currentTimeMillis()
+                val leafScore = heuristic(parentNode.game, parentNode.game.pass())
+                //Logger.log("level 0 , score = $leafScore")
+                val res = parentNode.copy(score = leafScore)
+                //val endLeaf = System.currentTimeMillis()
+                return res
             }
-            if(elapsed < average)
+
+            timingQueue.add(elapsed.second)
+
+            val average = timingQueue.average()
+            val ela = elapsed.second
+            val avg = average.toLong()
+            Logger.log("elapsed : $ela, avg : $avg")
+
+            if(elapsed.second > average && average > 1)
             {
-                timeLimitLowestLevel = average
-                //Logger.log("decreased timeLimit, now $elapsed")
+                timeLimitLowestLevel = elapsed.second
+
+                Logger.log("inceased timeLimit, now $elapsed, average $average")
+            }
+            if(elapsed.second < average)
+            {
+                timeLimitLowestLevel = average.toLong()
+                Logger.log("decreased timeLimit, now $elapsed, average $average")
             }
             if(timingQueue.size >10)
                 timingQueue.peek()
 
-            return res
+            return elapsed.first
         }
 
         val start = System.currentTimeMillis()

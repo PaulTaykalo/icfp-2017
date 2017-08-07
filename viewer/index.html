@@ -10,14 +10,9 @@
   <body>
     <input type="range"  min="0" max="10000" name="discount_credits" id="discount_credits" width="1440"/>
     <div class="container-fluid">
-      <h1>&#955; Map Viewer</h1>
       <fieldset>
-        <input type="file" id="myFile" multiple size="50"/>
-      </fieldset>
-    </div>
-    <div class="container-fluid">
-      <fieldset>
-        <legend>Canvas</legend>
+      <button id="prevCommand" >Prev<</button>
+      <button id="nextCommand" >Next></button>
         <div class="container-fluid" id="cy"></div>
         <div id="loading">
           <span class="fa fa-refresh fa-spin"></span>
@@ -57,11 +52,18 @@
         $('input[type=range]').attr("max",  moveCommands().length)
     }
 
-    document.getElementById('myFile').addEventListener('change', onChange);
+    // document.getElementById('myFile').addEventListener('change', onChange);
 
     $('input[type=range]').on("input", function () {
        totalCount = moveCommands().length * this.value / this.max
        reloadMoveCommands(totalCount)
+    });
+
+    $('#prevCommand').click(function () {
+      prevCommand()
+    });
+    $('#nextCommand').click(function () {
+      nextCommand()
     });
 
     var data = document.getElementById('data');

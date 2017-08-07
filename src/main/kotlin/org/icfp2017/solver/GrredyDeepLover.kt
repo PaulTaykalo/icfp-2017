@@ -41,6 +41,12 @@ object GreedyDeepLover: Strategy<Game> {
                 return CollectionComparator(sourceNewMines)
             }
 
+            // Claim first point
+            if (minesForSource.isEmpty() && minesForTarget.isEmpty()) {
+                if (currentRiver.source in game.mines) return@takeMinBy scoresForSite(currentRiver.target)
+                else return@takeMinBy scoresForSite(currentRiver.source)
+            }
+
             // Claim new point
             if (minesForSource.isEmpty()) return@takeMinBy scoresForSite(currentRiver.source)
             if (minesForTarget.isEmpty()) return@takeMinBy scoresForSite(currentRiver.target)

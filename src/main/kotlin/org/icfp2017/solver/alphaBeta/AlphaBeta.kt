@@ -20,7 +20,7 @@ data class MinMaxNode(
 
 class MinMax(
         val levels: Int = 6,
-        val timeLimitTotal: Int = 500, //milliseconds
+        val timeLimitTotal: Int = 300, //milliseconds
 
         val heuristic: (Game, Move) -> Int) : Strategy<Game> {
 

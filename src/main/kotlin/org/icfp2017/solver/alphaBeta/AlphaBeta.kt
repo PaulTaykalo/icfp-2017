@@ -18,11 +18,11 @@ data class MinMaxNode(
 class MinMax(
         val levels: Int =6,
         val timeLimitTotal: Int = 900, //milliseconds
-        val timeLimitLowestLevel: Int = 5, //milliseconds
+
         val heuristic: (Game, Move)-> Int): Strategy<Game> {
 
     override fun prepare(game: Game) = game
-
+    var timeLimitLowestLevel: Long = 1//milliseconds
     fun worstScore(isMin:Boolean):Int{
         if(isMin) return Int.MAX_VALUE
         return Int.MIN_VALUE
@@ -137,9 +137,18 @@ class MinMax(
 
         if(levelTimeLimit < timeLimitLowestLevel) {
             // for leaf nodes we return result
+            val startLeaf = System.currentTimeMillis()
             val leafScore = heuristic(parentNode.game, parentNode.game.pass())
             //Logger.log("level 0 , score = $leafScore")
-            return parentNode.copy(score = leafScore)
+            val res = parentNode.copy(score = leafScore)
+            val endLeaf =  System.currentTimeMillis()
+            val elapsed = endLeaf - startLeaf
+            if(elapsed > timeLimitLowestLevel)
+            {
+                timeLimitLowestLevel = elapsed
+                Logger.log("adjusted timeLimit, now $elapsed")
+            }
+            return res
         }
 
         val start = System.currentTimeMillis()

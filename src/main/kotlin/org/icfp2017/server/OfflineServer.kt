@@ -56,35 +56,36 @@ class OfflineServer {
             }
 
             if (moves != null) {
-                Logger.log("it is move!")
-                val movesResponse: MovesResponse = Logger.measure("server: parsing state from json") {
-                    gson.fromJson(json, MovesResponse::class.java)
-                }
+                Logger.measure("full move") {
+                    val movesResponse: MovesResponse = Logger.measure("server: parsing state from json") {
+                        gson.fromJson(json, MovesResponse::class.java)
+                    }
 
-                val typedMoves: Array<Move> = movesResponse.move.moves.map {
-                    it.claim ?: it.pass ?: it.splurge ?: Pass(-1)
-                }.toTypedArray()
+                    val typedMoves: Array<Move> = movesResponse.move.moves.map {
+                        it.claim ?: it.pass ?: it.splurge ?: Pass(-1)
+                    }.toTypedArray()
 
-                val ss = Logger.measure("server: parsing state from json") {
-                    gson.fromJson(movesResponse.state, State::class.java)
-                }
+                    val ss = Logger.measure("server: parsing state from json") {
+                        gson.fromJson(movesResponse.state, State::class.java)
+                    }
 
-                val (move, s) = Logger.measure("server: perform move") { onMove(typedMoves, ss) }
-                val rr = Logger.measure("server: state serialization") { gson.toJson(s) }
+                    val (move, s) = Logger.measure("server: perform move") { onMove(typedMoves, ss) }
+                    val rr = Logger.measure("server: state serialization") { gson.toJson(s) }
 
-                val moveResponse = MoveRequest(
+                    val moveResponse = MoveRequest(
                         claim = move as? Claim,
                         pass = move as? Pass,
                         splurge = move as? Splurge,
                         option = move as? Option,
                         state = rr)
 
-                val json = Logger.measure("server: move response serialization") {
-                    gson.toJson(moveResponse)
-                }
-                serverBehaviour.send(json)
+                    val json = Logger.measure("server: move response serialization") {
+                        gson.toJson(moveResponse)
+                    }
+                    serverBehaviour.send(json)
 
-                //
+                    //
+                }
                 if (exitAfterMove) {
                     break
                 }

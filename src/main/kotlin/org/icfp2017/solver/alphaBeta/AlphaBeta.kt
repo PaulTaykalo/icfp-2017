@@ -27,9 +27,6 @@ class MinMax(
 
     override fun prepare(game: Game) = game
     var timeLimitLowestLevel: Long = 10//milliseconds
-    var expansionLimitOnLever:Int =10 // max children to expand on node, so we don't fail wiht 173 childred on first level
-
-    var random = Random()
     fun worstScore(isMin: Boolean): Int {
         if (isMin) return Int.MAX_VALUE
         return Int.MIN_VALUE
@@ -57,14 +54,7 @@ class MinMax(
                 .filter { it in game.availableRivers }
                 .map { game.claim(it) }
 
-        var limitedRivers : List<Move> = listOf()
-        if(niceRiverClaims.size > expansionLimitOnLever){
-            limitedRivers += niceRiverClaims.get( random.nextInt(expansionLimitOnLever))
-        }else{
-            limitedRivers = niceRiverClaims
-        }
-
-        val newGames = limitedRivers
+        val newGames = niceRiverClaims
                 .map { applyMoves(arrayOf(it), game) }
                 .zip(niceRiverClaims)
         val nextNodeScore = worstScore(isMin)

@@ -25,7 +25,7 @@ class MinMax(
         val heuristic: (Game, Move) -> Int) : Strategy<Game> {
 
     override fun prepare(game: Game) = game
-    var timeLimitLowestLevel: Long = 1//milliseconds
+    var timeLimitLowestLevel: Long = 10//milliseconds
     val timingQueue: Queue<Long> = Queue() // queue for calculating average
     fun worstScore(isMin: Boolean): Int {
         if (isMin) return Int.MAX_VALUE
@@ -184,7 +184,7 @@ class MinMax(
 
 
         for (node in nodes) {
-            val child = timeLimitedBuildTree(node, levels - 1, maxLevels, currentAlpha, currentBeta, levelTimeLimit / nodes.size)
+            val child = timeLimitedBuildTree(node, levels - 1, maxLevels, currentAlpha, currentBeta, levelTimeLimit / nodes.size )
 
             children += child
             if (isMin) {

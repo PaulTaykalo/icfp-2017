@@ -6,9 +6,9 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import org.icfp2017.server.SettingsResponse
 
-private typealias MineID = Int
+typealias MineID = Int
 typealias Reachability = Map<MineID, Set<SiteID>>
-private typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
+typealias ScoreFromMine = Map<SiteID, Map<MineID, Long>>
 typealias RiversForSite = Map<SiteID, Set<River>>
 typealias SitesForSite = Map<SiteID, Set<SiteID>>
 

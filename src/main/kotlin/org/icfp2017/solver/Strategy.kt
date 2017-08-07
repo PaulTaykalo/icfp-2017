@@ -9,6 +9,7 @@ import org.icfp2017.server.FutureRequest
 import org.icfp2017.server.OfflineServer
 import org.icfp2017.solver.alphaBeta.AlphaBeta
 import org.icfp2017.solver.alphaBeta.MinMaxScore
+import org.icfp2017.solver.alphaBeta.MinMaxScoreSpanning
 
 data class StrategyStateWithGame(
         @SerializedName("game") val game: Game
@@ -42,9 +43,14 @@ enum class Strategies {
     MinMaxScore_ {
         override fun play(server: OfflineServer) = OfflineSolver.play(server, MinMaxScore)
     },
+    MinMaxScoreSpanning_ {
+        override fun play(server: OfflineServer) = OfflineSolver.play(server, MinMaxScoreSpanning)
+    },
     SmartAndGreedy_ {
         override fun play(server: OfflineServer) = OfflineSolver.play(server, SmartAndGreedy)
     };
+
+
 
     abstract fun play(server: OfflineServer)
 

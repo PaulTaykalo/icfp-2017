@@ -1,5 +1,7 @@
 package org.icfp2017.solver.alphaBeta
 import org.icfp2017.*
+import org.icfp2017.graph.GraphUtils
+import org.icfp2017.solver.SpanningTree
 import org.icfp2017.solver.Strategy
 import org.icfp2017.solver.StrategyStateWithGame
 
@@ -16,8 +18,8 @@ data class MinMaxNode(
 )
 
 class MinMax(
-        val levels: Int = 3,
-        val heuristic: (Game)-> Int): Strategy<Game> {
+        val levels: Int =1,
+        val heuristic: (Game, Move)-> Int): Strategy<Game> {
 
     override fun prepare(game: Game) = game
 
@@ -40,7 +42,8 @@ class MinMax(
 
         // Selects less developed graph
 
-        val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return listOf()
+        //Logger.log("expansion size : " + game.sitesReachedForMine.size)
+        val (mine, sites) = game.sitesReachedForMine.maxBy {  it.value.size } ?: return listOf()
         val nicePoints = sites + mine
 
         val niceRiverClaims = nicePoints
@@ -64,13 +67,14 @@ class MinMax(
         // for non leaf nodes we do recursion
         if(levels == 0) {
             // for leaf nodes we return result
-            val leafScore = heuristic(parentNode.game)
+            val leafScore = heuristic(parentNode.game, parentNode.game.pass())
+            //Logger.log("level 0 , score = $leafScore")
             return parentNode.copy(score = leafScore)
         }
         val nodes = expandNode(parentNode.game, levels-1, isMin)
 
         if (nodes.isEmpty()){
-           // Logger.log("nohting is found")
+            //Logger.log("nohting is found")
             return parentNode
 
         }
@@ -117,13 +121,13 @@ class MinMax(
         val childrenCount = children.size
         if(isMin)
         {
-          // Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $alpha, beta:$beta, childrens: $childrenCount")
+           //Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $alpha, beta:$beta, childrens: $childrenCount")
             // currentScore = children.minBy { it.score }!!.score
             return parentNode.copy(score=currentScore, alpha = alpha, beta = currentBeta,  children = children)
 
         }else
         {
-           // Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $currentAlpha,  beta: $beta, childrens: $childrenCount")
+            //Logger.log("level: $levels, isMin : $isMin, score: $currentScore, alpha:  $currentAlpha,  beta: $beta, childrens: $childrenCount")
             //currentScore = children.maxBy { it.score }!!.score
             return parentNode.copy(score=currentScore, alpha = currentAlpha, beta = beta, children = children)
 
@@ -144,9 +148,11 @@ class MinMax(
     }
 }
 
-val MinMaxScore = MinMax { it.currentScore.toInt() }
+val MinMaxScore = MinMax {game: Game, move: Move->
+                        game.currentScore.toInt()}
 
-val AlphaBeta = MinMax { game ->
+
+val AlphaBeta = MinMax { game: Game, move: Move ->
     val (mine, sites) = game.sitesReachedForMine.maxBy { 0 - it.value.size } ?: return@MinMax 0
     val nicePoints = sites + mine
 
@@ -155,4 +161,18 @@ val AlphaBeta = MinMax { game ->
             .filter { it in game.unownedRivers }
 
     niceRivers.size
+}
+
+val MinMaxScoreSpanning = MinMax {
+    game: Game, move: Move->
+        val graphUtils = GraphUtils(game)
+        val mostConnected = graphUtils.mostConnectedRivers(game.unownedRivers)
+
+    if(move is Claim) {
+        if (mostConnected.find { (it.target == move.target && it.source == move.source) || (it.source == move.target && it.target == move.source) } != null){
+            game.currentScore.toInt()*2
+        }
+    }
+    game.currentScore.toInt()
+
 }

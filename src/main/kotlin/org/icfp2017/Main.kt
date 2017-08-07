@@ -18,7 +18,7 @@ object Arguments {
     var port: Int = 9003
     var strategy: String = Strategies.GreedyLover2_.name
     var log: String = "./log-${System.currentTimeMillis()}.txt"
-    var offline = false
+    var offline = true
     var logging = "error"
 }
 

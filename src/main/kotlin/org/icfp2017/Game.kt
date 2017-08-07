@@ -214,7 +214,8 @@ data class River(val source: SiteID, val target:SiteID) {
 
     override fun equals(other: Any?): Boolean {
         if (other !is River) { return false }
-        return other.hashCode() == hashCode()
+        return other.source == source && other.target == target ||
+               other.source == target && other.target == source
     }
 }
 

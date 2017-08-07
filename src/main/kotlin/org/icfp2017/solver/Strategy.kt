@@ -33,7 +33,8 @@ enum class Strategies {
     MinMaxScore_ ,
     MinMaxScoreSpanning_,
     GreedyLover_,
-    GreedySharpLover_;
+    GreedySharpLover_,
+    GreedyLover2_;
 
     companion object {
         fun play(server: OfflineServer, name: String) = when(valueOf(name)) {
@@ -46,6 +47,7 @@ enum class Strategies {
             MinMaxScoreSpanning_ -> OfflineSolver.play(server, MinMaxScoreSpanning)
             GreedyLover_ -> OfflineSolver.play(server, GreedyLover)
             GreedySharpLover_ -> OfflineSolver.play(server, GreedySharpLover)
+            GreedyLover2_ -> OfflineSolver.play(server, GreedyLover2)
         }
     }
 }

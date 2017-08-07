@@ -15,11 +15,11 @@ object Timing {
 object Arguments {
     var name: String = "Lambada Punter"
     var server: String = "punter.inf.ed.ac.uk"
-    var port: Int = 9051
-    var strategy: String = Strategies.GreedyLover_.name
+    var port: Int = 9003
+    var strategy: String = Strategies.GreedyLover2_.name
     var log: String = "./log-${System.currentTimeMillis()}.txt"
-    var offline = true
-    var logging = "please, don't"
+    var offline = false
+    var logging = "error"
 }
 
 val Arguments.nameWithStrategy: String get() = "$name [$strategy]"

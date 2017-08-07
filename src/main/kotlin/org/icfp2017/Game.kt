@@ -65,6 +65,12 @@ fun calculateScoreForReachable(sitesReachableFromMine: Reachability, scores: Sco
     return sum
 }
 
+val Game.availableRivers: Set<River> get() {
+    if (settings?.options == false) return unownedRivers
+    if (availableOptions <= 0) return  unownedRivers
+    return ownedRivers + unownedRivers - myRivers
+}
+
 fun expandReachableSitesForMineAndRiver(mine: SiteID, sites: Set<SiteID>, river: River, riversForSite: RiversForSite, myRivers: Set<River>): Set<SiteID> {
     // Sites that we will reach with this river
     val newSites = mutableSetOf<SiteID>()
@@ -113,13 +119,20 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
     var newMyRivers = game.myRivers
     var newSiteReachebleForMine = game.sitesReachedForMine
 
+    var newAvailableOptionals = game.availableOptions
+    var newOptionalRivers = game.optionalRivers
+
 
     val claims = moves.flatMap {
         when(it) {
             is Pass -> listOf()
             is Splurge -> it.claims
             is Claim -> listOf(it)
-            is Option -> listOf(it).map { Claim(it.punter, it.source, it.target) }
+            is Option -> {
+                newOptionalRivers += River(it.source, it.target);
+                if (it.punter == game.punter) newAvailableOptionals -= 1
+                listOf(Claim(it.punter, it.source, it.target))
+            }
         }
     }
 
@@ -134,8 +147,21 @@ fun applyMoves(moves: Array<Move>, game:Game):Game {
         }
     }
 
-    return Game(game.punter, game.punters, game.settings, game.sites, game.mines, newOwnedRivers, newUnownedRivers, newMyRivers, newSiteReachebleForMine,
-            game.riversForSite, game.sitesForSite, game.siteScores)
+    return Game(
+            punter = game.punter,
+            punters = game.punters,
+            settings = game.settings,
+            sites = game.sites,
+            mines = game.mines,
+            ownedRivers = newOwnedRivers,
+            unownedRivers = newUnownedRivers,
+            myRivers = newMyRivers,
+            sitesReachedForMine = newSiteReachebleForMine,
+            riversForSite = game.riversForSite,
+            sitesForSite = game.sitesForSite,
+            siteScores = game.siteScores,
+            availableOptions = newAvailableOptionals,
+            optionalRivers = newOptionalRivers)
 
 }
 
@@ -145,6 +171,8 @@ data class Game(
     val settings: SettingsResponse? = null,
     val sites : Array<SiteModel>,
     val mines:Set<SiteID>,
+    val availableOptions: Int,
+    val optionalRivers: Set<River>,
     val ownedRivers:Set<River> = setOf<River>(),
     val unownedRivers:Set<River>,
     val myRivers:Set<River> = setOf<River>(),
@@ -165,12 +193,14 @@ data class Game(
             val sites = mapModel.sites
             val sitesForSite = calculateSitesForSite(sites, riversForSite)
             return Game(punter, punters, settings,
-                sites = sites,
-                mines = mapModel.mines.toSet(),
-                unownedRivers = mapModel.rivers.toSet(),
-                riversForSite = riversForSite,
-                sitesForSite = sitesForSite,
-                siteScores = calculateScores(sites, mapModel.mines, sitesForSite)
+                    sites = sites,
+                    mines = mapModel.mines.toSet(),
+                    unownedRivers = mapModel.rivers.toSet(),
+                    riversForSite = riversForSite,
+                    sitesForSite = sitesForSite,
+                    siteScores = calculateScores(sites, mapModel.mines, sitesForSite),
+                    availableOptions = mapModel.mines.size,
+                    optionalRivers = setOf()
             )
         }
 
@@ -210,8 +240,8 @@ fun Game.pass(): Pass {
     return Pass(punter)
 }
 
-fun Game.claim(river: River): Claim {
-    return Claim(punter, river.source, river.target)
+fun Game.claim(river: River?): Move {
+    if (river == null) return pass()
+    if (river in unownedRivers) return Claim(punter, river.source, river.target)
+    else return Option(punter, river.source, river.target)
 }
-
-fun Game.claim(river: River?): Move = if (river == null) pass() else claim(river)

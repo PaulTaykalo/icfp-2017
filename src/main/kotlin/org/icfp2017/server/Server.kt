@@ -32,7 +32,8 @@ data class FutureRequest(
 data class MoveResponse(
         val claim: Claim?,
         val pass: Pass?,
-        val splurge: Splurge?
+        val splurge: Splurge?,
+        val option: Option?
 )
 
 data class MoveRequest(
@@ -59,7 +60,8 @@ data class SetupResponse(
 
 data class SettingsResponse(
         val futures: Boolean?,
-        val splurges: Boolean?
+        val splurges: Boolean?,
+        val options: Boolean?
 )
 
 data class MovesResponse(

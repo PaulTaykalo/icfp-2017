@@ -40,7 +40,6 @@ class MinMax(
 
     fun expandNode(game: Game, level: Int, isMin: Boolean): List<MinMaxNode> {
 
-
         // Selects less developed graph
 
         //Logger.log("expansion size : " + game.sitesReachedForMine.size)
@@ -49,8 +48,8 @@ class MinMax(
 
         val niceRiverClaims = nicePoints
                 .flatMap { game.riversForSite[it]!! }
-                .filter { it in game.unownedRivers }
-                .map { Claim(game.punter, it.source, it.target) }
+                .filter { it in game.availableRivers }
+                .map { game.claim(it) }
 
         val newGames = niceRiverClaims
                 .map { applyMoves(arrayOf(it), game) }
@@ -261,7 +260,7 @@ val AlphaBeta = MinMax { game: Game, move: Move ->
 
     val niceRivers = nicePoints
             .flatMap { game.riversForSite[it]!! }
-            .filter { it in game.unownedRivers }
+            .filter { it in game.availableRivers }
 
     niceRivers.size
 }
@@ -269,7 +268,7 @@ val AlphaBeta = MinMax { game: Game, move: Move ->
 val MinMaxScoreSpanning = MinMax {
     game: Game, move: Move ->
     val graphUtils = GraphUtils(game)
-    val mostConnected = graphUtils.mostConnectedRivers(game.unownedRivers)
+    val mostConnected = graphUtils.mostConnectedRivers(game.availableRivers)
 
     if (move is Claim) {
         if (mostConnected.find { (it.target == move.target && it.source == move.source) || (it.source == move.target && it.target == move.source) } != null) {

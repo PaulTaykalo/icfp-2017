@@ -66,5 +66,5 @@ fun main(args: Array<String>) {
 
     val server = OfflineServer()
     if (!Arguments.offline) OnlineServer(offlineServer = server)
-    Strategies.play(server)
+    Strategies.play(server, name = Arguments.strategy)
 }

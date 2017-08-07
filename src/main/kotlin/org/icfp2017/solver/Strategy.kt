@@ -25,36 +25,23 @@ interface Strategy<State> {
 }
 
 enum class Strategies {
-    SpanningTree_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, SpanningTree)
-    },
-    AllYourBaseAreBelongToUsRandom_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, AllYourBaseAreBelongToUsRandom)
-    },
-    DumbAndGreedy_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, DumbAndGreedy)
-    },
-    DumbAndGreedy2_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, DumbAndGreedy2)
-    },
-    MinMaxRivers_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, AlphaBeta)
-    },
-    MinMaxScore_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, MinMaxScore)
-    },
-    MinMaxScoreSpanning_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, MinMaxScoreSpanning)
-    },
-    SmartAndGreedy_ {
-        override fun play(server: OfflineServer) = OfflineSolver.play(server, SmartAndGreedy)
-    };
-
-
-
-    abstract fun play(server: OfflineServer)
+    SpanningTree_,
+    AllYourBaseAreBelongToUsRandom_,
+    DumbAndGreedy_,
+    DumbAndGreedy2_,
+    MinMaxRivers_ ,
+    MinMaxScore_ ,
+    MinMaxScoreSpanning_;
 
     companion object {
-        fun play(server: OfflineServer, name :String = Arguments.strategy) = valueOf(name).play(server)
+        fun play(server: OfflineServer, name: String) = when(valueOf(name)) {
+            SpanningTree_ -> OfflineSolver.play(server, SpanningTree)
+            AllYourBaseAreBelongToUsRandom_ -> OfflineSolver.play(server, AllYourBaseAreBelongToUsRandom)
+            DumbAndGreedy_ -> OfflineSolver.play(server, DumbAndGreedy)
+            DumbAndGreedy2_ -> OfflineSolver.play(server, DumbAndGreedy2)
+            MinMaxRivers_ -> OfflineSolver.play(server, AlphaBeta)
+            MinMaxScore_ -> OfflineSolver.play(server, MinMaxScore)
+            MinMaxScoreSpanning_ -> OfflineSolver.play(server, MinMaxScoreSpanning)
+        }
     }
 }

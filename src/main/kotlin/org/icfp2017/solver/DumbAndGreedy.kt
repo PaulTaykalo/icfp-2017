@@ -20,6 +20,32 @@ inline fun <T, R: Comparable<R>> Collection<T>.takeMaxBy(comparator: (T) -> R): 
     return maxItems
 }
 
+class BestMove: Strategy<Game> {
+    override fun prepare(game: Game) = game
+    override fun serverMove(moves: Array<Move>, oldState: Game): Pair<Move, Game> {
+        val game = applyMoves(moves, oldState)
+
+        val reachedPoints = game.sitesReachedForMine.flatMap { it.value }
+        val nicePoints = reachedPoints.toSet() + game.mines
+
+        val niceRivers = nicePoints
+                .flatMap { game.riversForSite[it]!! }
+                .filter { it in game.availableRivers }.toSet()
+
+        val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
+
+        val costlyRivers = niceRivers.takeMaxBy {
+            val newReachability = updateSitesReachability(game.sitesReachedForMine, it,game.myRivers, game.riversForSite)
+            val newScore = calculateScoreForReachable(newReachability,game.siteScores)
+
+            val mineBonus = if (it.target in game.mines || it.source in game.mines) 10 else 0
+            newScore - currentScore + mineBonus
+        }
+
+        return Pair(game.claim(costlyRivers.firstOrNull()), game)
+    }
+}
+
 object DumbAndGreedy : Strategy<Game> {
     override fun prepare(game: Game) = game
 
@@ -32,7 +58,7 @@ object DumbAndGreedy : Strategy<Game> {
 
         val niceRivers = nicePoints
                 .flatMap { game.riversForSite[it]!! }
-                .filter { it in game.unownedRivers }
+                .filter { it in game.availableRivers }
 
         val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
 
@@ -57,7 +83,7 @@ object DumbAndGreedy2 : Strategy<Game> {
 
         val niceRivers = nicePoints
                 .flatMap { game.riversForSite[it]!! }
-                .filter { it in game.unownedRivers }
+                .filter { it in game.availableRivers }
 
         val currentScore = calculateScoreForReachable(game.sitesReachedForMine,game.siteScores)
 
@@ -102,7 +128,7 @@ object SmartAndGreedy: Strategy<Game> {
 
             val niceRivers = nicePoints
                     .flatMap { game.riversForSite[it]!! }
-                    .filter { it in game.unownedRivers }
+                    .filter { it in game.availableRivers }
 
             val pointsToRivers = niceRivers.map {
                 if (it.target in sites) it.source to it
@@ -125,7 +151,7 @@ object SmartAndGreedy: Strategy<Game> {
                 val mineBoues = if (river.target in game.mines || river.source in game.mines) 5 else 0
 
                 // Prefer points with many connections
-                val rivers = (game.riversForSite[it]!!.intersect(game.unownedRivers)).size
+                val rivers = (game.riversForSite[it]!!.intersect(game.availableRivers)).size
 
                 // distance to other mines
                 val score = game.siteScores[it]!!.filter { it.key != mine }.values.sum()

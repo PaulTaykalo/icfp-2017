@@ -1,4 +1,5 @@
 # ICFP contest 2017 ;)
+![image](https://github.com/PaulTaykalo/icfp-2017/blob/master/images/graph.png)
 
 - *Main language*: [Kotlin](https://try.kotlinlang.org/)
 - *Build system*: [Gradle](https://guides.gradle.org/creating-new-gradle-builds/)
